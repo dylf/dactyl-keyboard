@@ -1646,7 +1646,7 @@ def make_dactyl():
             translate(screw_insert(lastcol, 0, bottom_radius, top_radius, height, side=side),
                       (0, 0, offset)),  # rear right
             translate(screw_insert(lastcol, lastrow - 1, bottom_radius, top_radius, height, side=side),
-                      (-1.5, -10, offset)),  # front right # TODO CONFIGURE IN JSON
+                      (0.5, -10, offset)),  # front right # TODO CONFIGURE IN JSON
             translate(screw_insert_thumb(bottom_radius, top_radius, height, side), (0, 0, offset)),  # thumb cluster
         )
 
