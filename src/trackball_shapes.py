@@ -3,7 +3,7 @@ import os.path as path
 import numpy
 import cadquery as cq
 
-ball_diam = 40  # ball diameter
+ball_diam = 34  # ball diameter
 ball_space = 1  # additional room around ball in socket, 1mm
 
 
@@ -68,8 +68,8 @@ def coords(angle, dist):
 def gen_socket_shape(radius, wall):
     diam = radius * 2
     ball = sphere(radius)
-    socket_base = difference(ball, [translate(box(diam + 1, diam + 1, diam), (0, 0, diam / 2))])
-    top_cylinder = translate(difference(cylinder(radius, 4), [cylinder(radius - wall, 6)]), (0, 0, 2))
+    socket_base = difference(ball, [translate(box(diam + 1, diam + 1, diam), (0, 0, (diam / 2) + 0.001))])
+    top_cylinder = translate(difference(cylinder(radius, 4), [cylinder(radius - wall, 6)]), (0, 0, 2.0001))
     socket_base = union([socket_base, top_cylinder])
 
     return socket_base
@@ -157,13 +157,13 @@ def finalize_trackball(shape, ring_height, r_gap, r_inner, r_outer, height):
 
     return shape, cutout
 
-def bearing_trackball_socket(balldiameter, ring_height, r_gap, t_wall, bear_do=6, bear_di=3, bear_t=2.5, bolt_d=3.0,
+def bearing_trackball_socket(balldiameter, ring_height, r_gap, t_wall, bear_od=6, bear_id=3, bear_t=2.5, bolt_d=3.0,
                              bolt_l=8, bolt_extern=False):
     """Generate a trackball sockets for all diameters."""
 
     # ========== START internal functions ==========
     def trans_bear(shp, rot_r=0, rot_depth=25):
-        shp = translate(shp, (-r_ball - bear_do / 2 - 1, 0, -0.5))
+        shp = translate(shp, (-r_ball - bear_od / 2 - 1, 0, -0.5))
         shp = rotate(shp, (90, -rot_depth, rot_r))
         return shp
 
@@ -192,14 +192,14 @@ def bearing_trackball_socket(balldiameter, ring_height, r_gap, t_wall, bear_do=6
         bolt_orientation = 1
         rot = -30 + 120 * i
         # start with outer object
-        outer_t = bear_do / 2 + t_wall
+        outer_t = bear_od / 2 + t_wall
 
         outer = union([gen_fastening(outer_t, bolt_l + 2 * t_wall),
                        translate(box(3 * outer_t, 2 * outer_t, outer_t), (3 * outer_t / 2, 0, 0))])
         shape = union([shape, trans_bear(outer, rot_r=rot)])
 
         shape = difference(shape,
-                           [trans_bear(gen_fastening(bear_do / 2 + t_bear_gap, bear_t + 2 * t_bear_gap), rot_r=rot),
+                           [trans_bear(gen_fastening(bear_od / 2 + t_bear_gap, bear_t + 2 * t_bear_gap), rot_r=rot),
                             # opening for bearing
                             trans_bear(cylinder(bolt_d / 2, bolt_l), rot_r=rot)])  # bolt
 
@@ -220,7 +220,7 @@ def bearing_trackball_socket(balldiameter, ring_height, r_gap, t_wall, bear_do=6
         for i in range(3):
             rot = -60 + 120 * i
             all_sh.append(
-                trans_bear(difference(cylinder(bear_do / 2, bear_t), [cylinder(bolt_d / 2, bolt_l)]), rot_r=rot))
+                trans_bear(difference(cylinder(bear_od / 2, bear_t), [cylinder(bolt_d / 2, bolt_l)]), rot_r=rot))
         shape = union(all_sh)
 
     cutout_inlets = [cutout]
@@ -228,7 +228,7 @@ def bearing_trackball_socket(balldiameter, ring_height, r_gap, t_wall, bear_do=6
         bolt_orientation = 1
         rot = -30 + 120 * i
         #  rot = 0
-        cutout_inlets.append(trans_bear(gen_fastening(bear_do / 2 + t_bear_gap, bear_t + t_bear_gap), rot_r=rot))
+        cutout_inlets.append(trans_bear(gen_fastening(bear_od / 2 + t_bear_gap, bear_t + t_bear_gap), rot_r=rot))
     cutout = union(cutout_inlets)
 
     return shape, cutout, sensor
@@ -267,22 +267,8 @@ def track_cutter():
     return union([ball, cutter1, cutter2, cutter3])
 
 
-def cq_stuff():
-    return (
-        cq.Sketch()
-            .segment((0., 0), (0., 2.))
-            .segment((2.,0))
-            .close()
-            .arc((.6, .6), 0.4, 0., 360.)
-            .assemble(tag='face')
-            .edges('%LINE', tag='face')
-            .vertices()
-            .chamfer(0.2)
-    )
-
-
 def gen_track_socket():
-    return difference(track_outer(), [translate(track_cutter(), [0.001, 0, 0])])
+    return difference(track_outer(), [translate(track_cutter(), [0.01, 0, 0])])
 
 
 # cutter_fin = socket_bearing_fin(7, 3, 2, 7, -35)
@@ -291,10 +277,11 @@ def gen_track_socket():
 # result = cq_stuff()
 # export_file(shape=result, fname=path.join("..", "things", "cq_play"))
 
-shape, cutout, no = bearing_trackball_socket(ball_diam, 8, 1, 3, bear_do=6, bear_di=3, bear_t=2.5, bolt_d=3, bolt_l=6)
-export_file(shape=difference(shape, [cutout]), fname=path.join("..", "things", "trackball_bearing_cutout"))
-ball = get_ball(False)
-export_file(shape=ball, fname=path.join("..", "things", "ball_40mm"))
+# shape, cutout, no = bearing_trackball_socket(ball_diam, 8, 1, 3, bear_od=6, bear_id=3, bear_t=2.5, bolt_d=3, bolt_l=6)
+# export_file(shape=difference(shape, [cutout]), fname=path.join("..", "things", "trackball_bearing_cutout"))
+export_file(shape=gen_track_socket(), fname=path.join("..", "things", "old_trackball_socket"))
+# ball = get_ball(False)
+# export_file(shape=ball, fname=path.join("..", "things", "ball_40mm"))
 
 # inner_fin = socket_bearing_fin(2.5, 3, 1.5, 6.5, -25, True)
 # outer_fin = socket_bearing_fin(4, 5, 3, 8, -22, False)

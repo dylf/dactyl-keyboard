@@ -208,6 +208,15 @@ def extrude_poly(outer_poly, inner_polys=None, height=1):  # vector=(0,0,1)):
         cq.Solid.extrudeLinear(outerWire=outer_wires, innerWires=inner_wires, vecNormal=cq.Vector(0, 0, height)))
 
 
+def make_socket(ball_diameter):
+    ball_radius = ball_diameter / 2
+    ball = cq.Workplane('XY').add(cq.Solid.makeSphere(ball_radius))
+    ballsy_box = ball.box(ball_diameter + 1, ball_diameter + 1, ball_radius)
+    result = ball.cut(ballsy_box.translate(tuple([0, 0, ball_radius])))
+    return result
+
+
+
 def import_file(fname, convexity=None):
     print("IMPORTING FROM {}".format(fname))
     return cq.Workplane('XY').add(cq.importers.importShape(
