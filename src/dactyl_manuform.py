@@ -1019,7 +1019,7 @@ def make_dactyl():
 
         torow = lastrow - 1
 
-        if (full_last_rows):
+        if (full_last_rows or ncols < 5):
             torow = lastrow
 
         tocol = lastcol
@@ -1042,10 +1042,11 @@ def make_dactyl():
             )])
             # STRANGE PARTIAL OFFSET
 
-        shape = union([
-            shape,
-            key_wall_brace(lastcol, torow, 0, -1, web_post_br(), lastcol, torow, 1, 0, web_post_br())
-        ])
+        if ncols > 4:
+            shape = union([
+                shape,
+                key_wall_brace(lastcol, torow, 0, -1, web_post_br(), lastcol, torow, 1, 0, web_post_br())
+            ])
         return shape
 
 
@@ -1115,16 +1116,20 @@ def make_dactyl():
         shape = union([shape, key_wall_brace(
             3, lastrow, 0.5, -1, web_post_br(), 4, torow, 1, -1, web_post_bl()
         )])
-        for i in range(ncols - 4):
-            x = i + 4
-            shape = union([shape, key_wall_brace(
-                x, torow, 0, -1, web_post_bl(), x, torow, 0, -1, web_post_br()
-            )])
-        for i in range(ncols - 5):
-            x = i + 5
-            shape = union([shape, key_wall_brace(
-                x, torow, 0, -1, web_post_bl(), x - 1, torow, 0, -1, web_post_br()
-            )])
+
+        if ncols >= 4:
+            for i in range(ncols - 4):
+                x = i + 4
+                shape = union([shape, key_wall_brace(
+                    x, torow, 0, -1, web_post_bl(), x, torow, 0, -1, web_post_br()
+                )])
+
+        if ncols >= 5:
+            for i in range(ncols - 5):
+                x = i + 5
+                shape = union([shape, key_wall_brace(
+                    x, torow, 0, -1, web_post_bl(), x - 1, torow, 0, -1, web_post_br()
+                )])
 
         return shape
 
@@ -1768,18 +1773,19 @@ def make_dactyl():
 
     def screw_insert_all_shapes(bottom_radius, top_radius, height, offset=0, side='right'):
         print('screw_insert_all_shapes()')
+        so = screw_offsets
         shape = (
-            translate(screw_insert(0, 0, bottom_radius, top_radius, height, side=side), (0, 0, offset)),  # rear left
+            translate(screw_insert(0, 0, bottom_radius, top_radius, height, side=side), (so[0][0], so[0][1], so[0][2] + offset)),  # rear left
             translate(screw_insert(0, lastrow - 1, bottom_radius, top_radius, height, side=side),
-                      (0, left_wall_lower_y_offset, offset)),  # front left
+                      (so[1][0], so[1][1] + left_wall_lower_y_offset, so[1][2] + offset)),  # front left
             translate(screw_insert(3, lastrow, bottom_radius, top_radius, height, side=side),
-                      (0, 0, offset)),  # front middle
-            translate(screw_insert(3, 0, bottom_radius, top_radius, height, side=side), (0, 0, offset)),  # rear middle
+                      (so[2][0], so[2][1], so[2][2] + offset)),  # front middle
+            translate(screw_insert(3, 0, bottom_radius, top_radius, height, side=side), (so[3][0], so[3][1], so[3][2] + offset)),  # rear middle
             translate(screw_insert(lastcol, 0, bottom_radius, top_radius, height, side=side),
-                      (0, 0, offset)),  # rear right
+                      (so[4][0], so[4][1], so[4][2] + offset)),  # rear right
             translate(screw_insert(lastcol, lastrow - 1, bottom_radius, top_radius, height, side=side),
-                      (-2, -8, offset)),  # front right # TODO CONFIGURE IN JSON
-            translate(screw_insert_thumb(bottom_radius, top_radius, height, side), (0, 0, offset)),  # thumb cluster
+                      (so[5][0], so[5][1], so[5][2] + offset)),  # front right
+            translate(screw_insert_thumb(bottom_radius, top_radius, height, side), (so[6][0], so[6][1], so[6][2] + offset)),  # thumb cluster
         )
 
         return shape
@@ -2058,6 +2064,7 @@ def make_dactyl():
 
 
     def run():
+
         mod_r = model_side(side="right")
         export_file(shape=mod_r, fname=path.join(save_path, config_name + r"_right"))
 
@@ -2073,21 +2080,21 @@ def make_dactyl():
         #
         # export_file(shape=rest, fname=path.join(save_path, config_name + r"_right_wrist_rest"))
 
-        if symmetry == "asymmetric":
+        # if symmetry == "asymmetric":
 
-            mod_l = model_side(side="left")
-            export_file(shape=mod_l, fname=path.join(save_path, config_name + r"_left"))
+        mod_l = model_side(side="left")
+        export_file(shape=mod_l, fname=path.join(save_path, config_name + r"_left"))
 
-            base_l = mirror(baseplate(side='left'), 'YZ')
-            export_file(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
-            export_dxf(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
+        base_l = mirror(baseplate(side='left'), 'YZ')
+        export_file(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
+        export_dxf(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
 
-        else:
-            export_file(shape=mirror(mod_r, 'YZ'), fname=path.join(save_path, config_name + r"_left"))
-
-            lbase = mirror(base, 'YZ')
-            export_file(shape=lbase, fname=path.join(save_path, config_name + r"_left_plate"))
-            export_dxf(shape=lbase, fname=path.join(save_path, config_name + r"_left_plate"))
+        # else:
+        #     export_file(shape=mirror(mod_r, 'YZ'), fname=path.join(save_path, config_name + r"_left"))
+        #
+        #     lbase = mirror(base, 'YZ')
+        #     export_file(shape=lbase, fname=path.join(save_path, config_name + r"_left_plate"))
+        #     export_dxf(shape=lbase, fname=path.join(save_path, config_name + r"_left_plate"))
 
         if ENGINE == 'cadquery':
             import freecad_that as freecad

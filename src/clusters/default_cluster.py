@@ -45,9 +45,6 @@ class DefaultCluster(object):
         for i in range(len(origin)):
             origin[i] = origin[i] + self.thumb_offsets[i]
 
-        if thumb_style == 'MINIDOX':
-            origin[1] = origin[1] - .4 * (trackball_Usize - 1) * sa_length
-
         return origin
 
     def tl_place(self, shape):

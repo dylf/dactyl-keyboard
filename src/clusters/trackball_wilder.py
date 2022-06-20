@@ -227,9 +227,13 @@ class TrackballWild(TrackballOrbyl):
         print('thumb_walls()')
         # thumb, walls
         shape = wall_brace(
-            self.mr_place, .5, 1, web_post_tr(),
+            self.mr_place, .5, 1, web_post_tl(),
             (lambda sh: key_place(sh, 3, lastrow)), 0, -1, web_post_bl(),
         )
+        shape = union([shape, wall_brace(
+            self.mr_place, .5, 1, web_post_tl(),
+            self.mr_place, .5, 1, web_post_tr(),
+        )])
         # BOTTOM FRONT BETWEEN MR AND BR
         shape = union([shape, wall_brace(
             self.mr_place, .5, 1, web_post_tr(),
@@ -285,10 +289,12 @@ class TrackballWild(TrackballOrbyl):
         return shape
 
     def connection(self, side='right'):
+
         print('thumb_connection()')
         # clunky bit on the top left thumb connection  (normal connectors don't work well)
         hulls = []
 
+        # ======= These two account for offset between plate and wall methods
         hulls.append(
             triangle_hulls(
                 [
@@ -310,12 +316,14 @@ class TrackballWild(TrackballOrbyl):
                 ]
             )
         )
+        #  ==========================
 
         hulls.append(
             triangle_hulls(
                 [
                     key_place(web_post_bl(), 0, cornerrow),
-                    left_key_place(web_post(), lastrow - 1, -1, side=side, low_corner=True),                # left_key_place(translate(web_post(), wall_locate1(-1, 0)), cornerrow, -1, low_corner=True),
+                    left_key_place(web_post(), lastrow - 1, -1, side=side, low_corner=True),
+                    # left_key_place(translate(web_post(), wall_locate1(-1, 0)), cornerrow, -1, low_corner=True),
                     self.track_place(self.tb_post_tl()),
                 ]
             )
@@ -409,6 +417,7 @@ class TrackballWild(TrackballOrbyl):
             )
         )
 
+        # Duplicate of above, just offset by x: -0.5 to ensure wall thickness
         hulls.append(
             triangle_hulls(
                 [
