@@ -1,9 +1,9 @@
-from helpers_solid import *
+from helpers_cadquery import *
 import os.path as path
 import numpy
 
 ball_diam = 34  # ball diameter
-ball_space = 1  # additional room around ball in socket, 1mm
+ball_space = 1.9  # additional room around ball in socket, 1mm
 
 
 def get_ball(with_space: False):
@@ -29,11 +29,12 @@ def gen_holder():
     cyl1 = translate(cylinder(w / 2, h, 100), (0, 5, 0))
     cyl2 = translate(cylinder(w / 2, h, 100), (0, -5, 0))
 
+    plate = box(w, 10, h)
     # tape those bits together
-    base_shape = hull_from_shapes([cyl1, cyl2])
+    base_shape = union([plate, cyl1, cyl2])
 
     # Ball with 2mm space extra diameter for socket
-    ball = translate(get_ball(True), (0, 0, 15))
+    ball = translate(rotate(get_ball(True), (180, 0, 0)), (0, 0, 15))
 
     # Screw holes with a bit of extra height to subtract cleanly
     # May need to be offset by one, as per the bottom hole...?
@@ -135,12 +136,10 @@ def track_cutter():
 def gen_track_socket():
     return difference(track_outer(), [track_cutter()])
 
-def rotate_around_point()
-
 
 # cutter_fin = socket_bearing_fin(7, 3, 2, 7, -35)
 # main_fin = socket_bearing_fin(10, 7, 5, 10, -25)
 
 # result = difference(main_fin, [cutter_fin])
-export_file(shape=gen_track_socket(), fname=path.join("..", "things", "play"))
+export_file(shape=gen_holder(), fname=path.join("..", "things", "gen_holder"))
 

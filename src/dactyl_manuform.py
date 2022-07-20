@@ -364,7 +364,8 @@ def make_dactyl():
             tb_file = path.join(parts_path, r"btu_trackball_socket")
             tbcut_file = path.join(parts_path, r"trackball_socket_w_btus_cutter")
 
-        sens_file = path.join(parts_path, r"trackball_sensor_mount")
+        # sens_file = path.join(parts_path, r"trackball_sensor_mount")
+        sens_file = path.join(parts_path, r"gen_holder")
         senscut_file = path.join(parts_path, r"trackball_sensor_cutter")
 
         # shape = import_file(tb_file)
@@ -1186,6 +1187,7 @@ def make_dactyl():
         # Creates small overlap to assist engines in union function later
         sensor = rotate(sensor, tb_r_offset)
         sensor = translate(sensor, tb_t_offset)
+        sensor = translate(sensor, (0, 0, -14.95))
         # sensor = rotate(sensor, tb_sensor_translation_offset)
         # sensor = translate(sensor, tb_sensor_rotation_offset)
         sensor = translate(sensor, (0, 0, .005))
