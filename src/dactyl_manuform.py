@@ -1187,7 +1187,10 @@ def make_dactyl():
         # Creates small overlap to assist engines in union function later
         sensor = rotate(sensor, tb_r_offset)
         sensor = translate(sensor, tb_t_offset)
-        sensor = translate(sensor, (0, 0, -14.95))
+
+        # Hackish?  Oh, yes. But it builds with latest cadquery.
+        if ENGINE == 'cadquery':
+            sensor = translate(sensor, (0, 0, -15))
         # sensor = rotate(sensor, tb_sensor_translation_offset)
         # sensor = translate(sensor, tb_sensor_rotation_offset)
         sensor = translate(sensor, (0, 0, .005))

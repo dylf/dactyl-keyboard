@@ -3,7 +3,7 @@ import os.path as path
 import numpy
 
 ball_diam = 34  # ball diameter
-ball_space = 1.9  # additional room around ball in socket, 1mm
+ball_space = 2.0  # additional room around ball in socket, 1mm
 
 
 def get_ball(with_space: False):
@@ -17,7 +17,7 @@ def gen_holder():
     # PMW3360 dimensions
     # 28mm x 21mm
     l = 28  # not used for now, fudged with base_shape build
-    w = 22
+    w = 24
     h = 5.9
 
     # 24mm between screw centers
@@ -44,7 +44,7 @@ def gen_holder():
     # Attempt at bottom hole, numbers mostly fudged but seems in ballpark
     bottom_hole = union([translate(box(4.5, 4, 6), (0, -2, 0)), translate(cylinder(2.25, 6, 40), (0, 0, 0))])
 
-    final = difference(base_shape, [ball, screw1, screw2, bottom_hole])
+    final = translate(difference(base_shape, [ball, screw1, screw2, bottom_hole]), (0, 0, -15))
 
     return final
 
