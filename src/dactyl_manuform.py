@@ -188,8 +188,9 @@ def make_dactyl():
 
     if default_1U_cluster and thumb_style == 'DEFAULT':
         double_plate_height = (.7 * sa_double_length - mount_height) / 3
+        # double_plate_height = (.95 * sa_double_length - mount_height) / 3
     elif thumb_style == 'DEFAULT':
-        double_plate_height = (.95 * sa_double_length - mount_height) / 3
+        double_plate_height = (.90 * sa_double_length - mount_height) / 3
     else:
         double_plate_height = (sa_double_length - mount_height) / 3
 
@@ -275,10 +276,10 @@ def make_dactyl():
 
             plate = difference(plate, [shape_cut])
 
-        if plate_file is not None:
-            socket = import_file(plate_file)
-            socket = translate(socket, [0, 0, plate_thickness + plate_offset])
-            plate = union([plate, socket])
+        # if plate_file is not None:
+        #     socket = import_file(plate_file)
+        #     socket = translate(socket, [0, 0, plate_thickness + plate_offset])
+        #     plate = union([plate, socket])
 
         if plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH']:
             if plate_style in ['UNDERCUT', 'HS_UNDERCUT']:
@@ -309,10 +310,10 @@ def make_dactyl():
 
             plate = difference(plate, [undercut])
 
-        # if plate_file is not None:
-        #     socket = import_file(plate_file)
-        #     socket = translate(socket, [0, 0, plate_thickness + plate_offset])
-        #     plate = union([plate, socket])
+        if plate_file is not None:
+            socket = import_file(plate_file)
+            socket = translate(socket, [0, 0, plate_thickness + plate_offset])
+            plate = union([plate, socket])
 
         if plate_holes:
             half_width = plate_holes_width / 2.
@@ -1232,6 +1233,21 @@ def make_dactyl():
         )
     )
 
+    def blackpill_mount_hole():
+        print('blackpill_external_mount_hole()')
+        shape = box(blackpill_holder_width, 20.0, external_holder_height + .1)
+        undercut = box(blackpill_holder_width + 8, 10.0, external_holder_height + 8 + .1)
+        shape = union([shape, translate(undercut, (0, -5, 0))])
+
+        shape = translate(shape,
+                          (
+                              external_start[0] + blackpill_holder_xoffset,
+                              external_start[1] + external_holder_yoffset,
+                              external_holder_height / 2 - .05,
+                          )
+                          )
+        return shape
+
 
     def external_mount_hole():
         print('external_mount_hole()')
@@ -1881,6 +1897,9 @@ def make_dactyl():
 
         if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL']:
             s2 = difference(s2, [rj9_space()])
+
+        if controller_mount_type in ['BLACKPILL_EXTERNAL']:
+            s2 = difference(s2, [blackpill_mount_hole()])
 
         if controller_mount_type in ['EXTERNAL']:
             s2 = difference(s2, [external_mount_hole()])

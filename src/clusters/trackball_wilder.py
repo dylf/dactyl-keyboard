@@ -419,15 +419,38 @@ class TrackballWild(TrackballOrbyl):
 
         # Duplicate of above, just offset by x: -0.5 to ensure wall thickness
         hulls.append(
-            triangle_hulls(
+            translate(triangle_hulls(
                 [
-                    self.mr_wall(web_post_tr()),
+                    self.tl_wall(web_post_tr()),
+                    key_place(web_post_bl(), 3, lastrow),  # col 2 bottom, top left corner
                     self.mr_wall(web_post_tl()),
-                    translate(self.mr_wall(web_post_tl()), [14, 15, -2]),
-                    self.mr_wall(web_post_tr()),
+                    self.tl_wall(web_post_tr())  # col 2 bottom, bottom left corner
                 ]
-            )
+            ), [-0.5, 0, 0])
         )
+
+        # hulls.append(
+        #     triangle_hulls(
+        #         [
+        #             self.mr_wall(web_post_tr()),
+        #             self.mr_wall(web_post_tl()),
+        #             translate(self.mr_wall(web_post_tl()), [14, 15, -2]),
+        #             self.mr_wall(web_post_tr()),
+        #         ]
+        #     )
+        # )
+        #
+        # # Duplicate of above, just offset by x: -0.5 to ensure wall thickness
+        # hulls.append(
+        #     translate(triangle_hulls(
+        #         [
+        #             self.mr_wall(web_post_tr()),
+        #             self.mr_wall(web_post_tl()),
+        #             translate(self.mr_wall(web_post_tl()), [14, 15, -2]),
+        #             self.mr_wall(web_post_tr()),
+        #         ]
+        #     ), [-0.5, 0, 0])
+        # )
 
 
         hulls.append(
@@ -449,24 +472,23 @@ class TrackballWild(TrackballOrbyl):
         return shape
 
     def get_extras(self, shape, pos):
-        return shape
-        # posts = [shape]
-        # all_pos = []
-        # for i in range(len(pos)):
-        #     all_pos.append(pos[i] + tb_socket_translation_offset[i])
-        # z_pos = abs(pos[2])
-        # for post_offset in self.post_offsets:
-        #     support_z = z_pos + post_offset[2]
-        #     new_offsets = post_offset.copy()
-        #     new_offsets[2] = -z_pos
-        #     support = cylinder(1.5, support_z, 10)
-        #     support = translate(support, all_pos)
-        #     support = translate(support, new_offsets)
-        #     base = cylinder(4, 1, 10)
-        #     new_offsets[2] = 0.5 - all_pos[2]
-        #     base = translate(base, all_pos)
-        #     base = translate(base, new_offsets)
-        #     posts.append(base)
-        #     support = union([support, base])
-        #     posts.append(support)
-        # return union(posts)
+        posts = [shape]
+        all_pos = []
+        for i in range(len(pos)):
+            all_pos.append(pos[i] + tb_socket_translation_offset[i])
+        z_pos = abs(pos[2])
+        for post_offset in self.post_offsets:
+            support_z = z_pos + post_offset[2]
+            new_offsets = post_offset.copy()
+            new_offsets[2] = -z_pos
+            support = cylinder(1.5, support_z, 10)
+            support = translate(support, all_pos)
+            support = translate(support, new_offsets)
+            base = cylinder(4, 1, 10)
+            new_offsets[2] = 0.5 - all_pos[2]
+            base = translate(base, all_pos)
+            base = translate(base, new_offsets)
+            posts.append(base)
+            support = union([support, base])
+            posts.append(support)
+        return union(posts)

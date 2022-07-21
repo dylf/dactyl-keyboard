@@ -4,7 +4,7 @@ import numpy
 import cadquery as cq
 
 ball_diam = 34  # ball diameter
-ball_space = 1  # additional room around ball in socket, 1mm
+ball_space = 2.0  # additional room around ball in socket, 1mm
 
 
 def get_ball(with_space: False):
@@ -28,8 +28,8 @@ def gen_holder():
     # PMW3360 dimensions
     # 28mm x 21mm
     l = 28  # not used for now, fudged with base_shape build
-    w = 22
-    h = 4.0
+    w = 24
+    h = 5.9
 
     # 24mm between screw centers
     screw_dist = 24
@@ -40,11 +40,12 @@ def gen_holder():
     cyl1 = translate(cylinder(w / 2, h, 100), (0, 5, 0))
     cyl2 = translate(cylinder(w / 2, h, 100), (0, -5, 0))
 
+    plate = box(w, 10, h)
     # tape those bits together
-    base_shape = hull_from_shapes([cyl1, cyl2])
+    base_shape = union([plate, cyl1, cyl2])
 
     # Ball with 2mm space extra diameter for socket
-    ball = translate(get_ball(True), (0, 0, 17.8))
+    ball = translate(rotate(get_ball(True), (180, 0, 0)), (0, 0, 15))
 
     # Screw holes with a bit of extra height to subtract cleanly
     # May need to be offset by one, as per the bottom hole...?
@@ -54,9 +55,9 @@ def gen_holder():
     # Attempt at bottom hole, numbers mostly fudged but seems in ballpark
     bottom_hole = union([translate(box(4.5, 4, 6), (0, -2, 0)), translate(cylinder(2.25, 6, 40), (0, 0, 0))])
 
-    final = difference(base_shape, [ball, screw1, screw2, bottom_hole])
+    final = translate(difference(base_shape, [ball, screw1, screw2, bottom_hole]), (0, 0, -15))
 
-    return final  # translate(final, [0, l / 2, 0])
+    return final
 
 
 def coords(angle, dist):

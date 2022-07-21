@@ -13,13 +13,26 @@ json_template = """
   "show_caps": false,
   "nrows": 6,
   "ncols": 6,
-  "plate_style": "NUB",
+  "plate_style": "NOTCH",
   "full_last_rows": false,
   "thumb_style": "DEFAULT",
   "other_thumb": "DEFAULT",
   "ball_side": "right"
 }
 """
+
+variations = [
+    [3, 5],
+    [3, 6],
+    [4, 5],
+    [4, 6],
+    [5, 6],
+    [5, 7],
+    [5, 8],
+    [6, 6],
+    [6, 7],
+    [6, 8]
+]
 
 gen_dir = sys.argv[1]
 
@@ -34,9 +47,10 @@ out_file = os.path.join(gen_dir, "bulk_config")
 engine = "cadquery"
 default = "DEFAULT"
 trackball = "TRACKBALL_WILD"
-hotswap = "HS_NUB"
-normal = "NUB"
+hotswap = "HS_NOTCH"
+normal = "NOTCH"
 run_config = os.path.join(r".", 'run_config.json')
+
 
 def write_file(file_path, data):
     if os.path.exists(file_path):
@@ -54,7 +68,9 @@ def set_overrides(override):
     write_file(run_config, data)
     return previous_overrides
 
+
 previous_overrides = set_overrides(out_file)
+
 
 def finished():
     set_overrides(previous_overrides)
@@ -80,14 +96,16 @@ def write_config(rows, cols, engine, thumb1, plate, last_rows):
 
     write_file(out_file + '.json', config)
 
-for rows in range(4, 7): #4, 5, 6
-    for cols in range(6, 8): # 6, 7 cols
-        for last_row in ["normal", "full"]:
-            for plate in ["normal", "hotswap"]:
-                for thumb1 in [default, trackball]:
-                    write_config(rows, cols, "cadquery", thumb1, plate, last_row)
-                    # print("Wrote file " + str(i))
-                    dactyl_manuform.make_dactyl()
+
+for v in variations:
+    rows = v[0]
+    cols = v[1]
+    for last_row in ["normal", "full"]:
+        for plate in ["normal", "hotswap"]:
+            for thumb1 in [default, trackball]:
+                write_config(rows, cols, "cadquery", thumb1, plate, last_row)
+                dactyl_manuform.make_dactyl()
+
 
 finished()
 

@@ -34,6 +34,12 @@ class MiniCluster(DefaultCluster):
         for item in parent_locals:
             globals()[item] = parent_locals[item]
 
+    def thumborigin(self):
+        # debugprint('thumborigin()')
+        origin = super().thumborigin()
+        origin[2] = origin[2] - 4
+        return origin
+
     def tl_place(self, shape):
         shape = rotate(shape, [10, -23, 25])
         shape = translate(shape, self.thumborigin())
@@ -333,7 +339,7 @@ class MiniCluster(DefaultCluster):
 
     def screw_positions(self):
         position = self.thumborigin()
-        position = list(np.array(position) + np.array([-29, -53, -16]))
+        position = list(np.array(position) + np.array([-29, -51, -16]))
         position[2] = 0
 
         return position
