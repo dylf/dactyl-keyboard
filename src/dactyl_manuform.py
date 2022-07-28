@@ -171,7 +171,11 @@ def make_dactyl():
         keyswitch_height = hole_keyswitch_height
         keyswitch_width = hole_keyswitch_width
 
-    if 'HS_' in plate_style:
+    if plate_style in "AMOEBA":
+        symmetry = "asymmetric"
+        pname = r"amoeba_key_hole"
+        plate_file = path.join(parts_path, r"amoeba_key_hole")
+    elif 'HS_' in plate_style:
         symmetry = "asymmetric"
         pname = r"hot_swap_plate"
         if plate_file_name is not None:
@@ -241,7 +245,7 @@ def make_dactyl():
 
 
     def single_plate(cylinder_segments=100, side="right"):
-        if plate_style in ['NUB', 'HS_NUB']:
+        if plate_style is not "AMOEBA" and plate_style in ['NUB', 'HS_NUB']:
             tb_border = (mount_height - keyswitch_height) / 2
             top_wall = box(mount_width, tb_border, plate_thickness)
             top_wall = translate(top_wall, (0, (tb_border / 2) + (keyswitch_height / 2), plate_thickness / 2))
@@ -266,6 +270,15 @@ def make_dactyl():
             plate_half2 = mirror(plate_half2, 'YZ')
 
             plate = union([plate_half1, plate_half2])
+
+        elif plate_style in "AMOEBA":  # 'HOLE' or default, square cutout for non-nub designs.
+            plate = box(mount_width + 1, mount_height + 1, mount_thickness)
+            plate = translate(plate, (0.0, 0.0, mount_thickness / 2.0))
+
+            shape_cut = box(keyswitch_width + 2, keyswitch_height + 2, mount_thickness * 2 + .02)
+            shape_cut = translate(shape_cut, (0.0, 0.0, mount_thickness - .01))
+
+            plate = difference(plate, [shape_cut])
 
         else:  # 'HOLE' or default, square cutout for non-nub designs.
             plate = box(mount_width, mount_height, mount_thickness)

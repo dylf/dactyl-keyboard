@@ -306,7 +306,7 @@ class DefaultCluster(object):
                         self.tl_place(self.thumb_post_tl()),
                         key_place(web_post_bl(), 0, cornerrow),
                         self.tl_place(self.thumb_post_tr()),
-                        key_place(web_post_br(), 0, cornerrow),
+                        key_place(web_post_bl(), 1, cornerrow),
                         self.tr_place(web_post_tl()),
                         key_place(web_post_bl(), 1, cornerrow),
                         self.tr_place(web_post_tr()),
