@@ -173,7 +173,6 @@ def make_dactyl():
 
     if plate_style in "AMOEBA":
         symmetry = "asymmetric"
-        pname = r"amoeba_key_hole"
         plate_file = path.join(parts_path, r"amoeba_key_hole")
     elif 'HS_' in plate_style:
         symmetry = "asymmetric"
@@ -245,7 +244,7 @@ def make_dactyl():
 
 
     def single_plate(cylinder_segments=100, side="right"):
-        if plate_style is not "AMOEBA" and plate_style in ['NUB', 'HS_NUB']:
+        if plate_style != "AMOEBA" and plate_style in ['NUB', 'HS_NUB']:
             tb_border = (mount_height - keyswitch_height) / 2
             top_wall = box(mount_width, tb_border, plate_thickness)
             top_wall = translate(top_wall, (0, (tb_border / 2) + (keyswitch_height / 2), plate_thickness / 2))
