@@ -20,7 +20,9 @@ shape_config = {
 
     'save_dir': '.',
     'config_name':  "DM",
-
+    'overrides': "",
+    'save_name': "",
+    "logo_file": None,
     'show_caps': True,
     'show_pcbs': False, #only runs if caps are shown, easist place to initially inject geometry
 
@@ -40,6 +42,7 @@ shape_config = {
     'column_style':  "standard",  # options include :standard, :orthographic, and :fixed
 
     'thumb_offsets':  [6, -3, 7],
+    'full_last_rows': False,
     'keyboard_z_offset':  (
         11  # controls overall height# original=9 with centercol=3# use 16 for centercol=2
     ),
@@ -321,6 +324,7 @@ shape_config = {
     # 'RJ9_USB_TEENSY' = Teensy holder
     # 'USB_TEENSY' = Teensy holder, no RJ9
     # 'EXTERNAL' = square cutout for a holder such as the one from lolligagger.
+    # 'BLACKPILL_EXTERNAL' = larger square cutout for lolligagger type holder modified for the blackpill.
     # 'NONE' = No openings in the back.
     'controller_mount_type':  'EXTERNAL',
 
@@ -330,6 +334,12 @@ shape_config = {
     'external_holder_yoffset': -4.5, #Tweak this value to get the right undercut for the tray engagement.
 
     # Offset is from the top inner corner of the top inner key.
+
+    ##### BLACKPILL EXTERNAL HOLDER
+    ## To use, set
+    "blackpill_holder_width": 32.0,
+    "blackpill_holder_xoffset": -6.5,
+
 
     ###################################
     ## Bottom Plate Dimensions
@@ -377,8 +387,29 @@ shape_config = {
         [0, -6, 5],# REDUCED STAGGER
         [0, -6, 5],# REDUCED STAGGER
         [0, -6, 5],# NOT USED IN MOST FORMATS (7th column)
+        [0, -6, 5],# NOT USED IN MOST FORMATS (8th column)
+        [0, -6, 5],# NOT USED IN MOST FORMATS (9th column)
     ],
 
+    ###################################
+    ## SCREW HOLE OFFSETS
+    ####################################
+
+    "screw_offsets": [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+    ],
+
+    ###################################
+    ## LOGO OFFSETS (IF LOGO FILE)
+    ####################################
+
+    "logo_offsets": [-10, -10, -1],
 }
 
     ####################################

@@ -15,6 +15,7 @@ from clusters.trackball_orbyl import TrackballOrbyl
 from clusters.trackball_wilder import TrackballWild
 from clusters.trackball_cj import TrackballCJ
 from clusters.custom_cluster import CustomCluster
+from clusters.trackball_btu import TrackballBTU
 
 
 def deg2rad(degrees: float) -> float:
@@ -137,6 +138,14 @@ def make_dactyl():
     # END HELPER FUNCTIONS
     ####################################################
 
+    quickly = False
+    global quick_render
+    try:
+        if quick_render:
+            quickly = quick_render
+    except NameError:
+        quickly = False
+
     if oled_mount_type is not None and oled_mount_type != "NONE":
         for item in oled_configurations[oled_mount_type]:
             globals()[item] = oled_configurations[oled_mount_type][item]
@@ -150,6 +159,7 @@ def make_dactyl():
     cornerrow = lastrow - 1
     lastcol = ncols - 1
 
+    oled_row = nrows - 1
     plate_file = None
 
     # Derived values
@@ -163,7 +173,10 @@ def make_dactyl():
         keyswitch_height = hole_keyswitch_height
         keyswitch_width = hole_keyswitch_width
 
-    if 'HS_' in plate_style:
+    if plate_style in "AMOEBA":
+        symmetry = "asymmetric"
+        plate_file = path.join(parts_path, r"amoeba_key_hole")
+    elif 'HS_' in plate_style:
         symmetry = "asymmetric"
         pname = r"hot_swap_plate"
         if plate_file_name is not None:
@@ -180,14 +193,21 @@ def make_dactyl():
 
     if default_1U_cluster and thumb_style == 'DEFAULT':
         double_plate_height = (.7 * sa_double_length - mount_height) / 3
+        # double_plate_height = (.95 * sa_double_length - mount_height) / 3
     elif thumb_style == 'DEFAULT':
-        double_plate_height = (.95 * sa_double_length - mount_height) / 3
+        double_plate_height = (.90 * sa_double_length - mount_height) / 3
     else:
         double_plate_height = (sa_double_length - mount_height) / 3
 
     if oled_mount_type is not None and oled_mount_type != "NONE":
         left_wall_x_offset = oled_left_wall_x_offset_override
-        left_wall_x_row_offsets = oled_left_x_row_offsets
+        if nrows == 4:
+            left_wall_x_row_offsets = [22, 22, 22, 22]
+        elif nrows == 5:
+            left_wall_x_row_offsets = [22, 22, 22, 8, 8]
+        elif nrows == 6:
+            left_wall_x_row_offsets = [22, 22, 22, 8, 8, 8]
+        # left_wall_x_row_offsets = [22 if row > oled_row else 8 for row in range(lastrow)]
         left_wall_z_offset = oled_left_wall_z_offset_override
         left_wall_lower_y_offset = oled_left_wall_lower_y_offset
         left_wall_lower_z_offset = oled_left_wall_lower_z_offset
@@ -226,7 +246,7 @@ def make_dactyl():
 
 
     def single_plate(cylinder_segments=100, side="right"):
-        if plate_style in ['NUB', 'HS_NUB']:
+        if plate_style != "AMOEBA" and plate_style in ['NUB', 'HS_NUB']:
             tb_border = (mount_height - keyswitch_height) / 2
             top_wall = box(mount_width, tb_border, plate_thickness)
             top_wall = translate(top_wall, (0, (tb_border / 2) + (keyswitch_height / 2), plate_thickness / 2))
@@ -252,6 +272,15 @@ def make_dactyl():
 
             plate = union([plate_half1, plate_half2])
 
+        elif plate_style in "AMOEBA":  # 'HOLE' or default, square cutout for non-nub designs.
+            plate = box(mount_width + 1, mount_height + 1, mount_thickness)
+            plate = translate(plate, (0.0, 0.0, mount_thickness / 2.0))
+
+            shape_cut = box(keyswitch_width + 2, keyswitch_height + 2, mount_thickness * 2 + .02)
+            shape_cut = translate(shape_cut, (0.0, 0.0, mount_thickness - .01))
+
+            plate = difference(plate, [shape_cut])
+
         else:  # 'HOLE' or default, square cutout for non-nub designs.
             plate = box(mount_width, mount_height, mount_thickness)
             plate = translate(plate, (0.0, 0.0, mount_thickness / 2.0))
@@ -260,11 +289,6 @@ def make_dactyl():
             shape_cut = translate(shape_cut, (0.0, 0.0, mount_thickness - .01))
 
             plate = difference(plate, [shape_cut])
-
-        if plate_file is not None:
-            socket = import_file(plate_file)
-            socket = translate(socket, [0, 0, plate_thickness + plate_offset])
-            plate = union([plate, socket])
 
         if plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH']:
             if plate_style in ['UNDERCUT', 'HS_UNDERCUT']:
@@ -281,12 +305,12 @@ def make_dactyl():
                     mount_thickness
                 )
                 undercut = union([undercut,
-                                  box(
-                                      keyswitch_width + 2 * clip_undercut,
-                                      notch_width,
-                                      mount_thickness
-                                  )
-                                  ])
+                    box(
+                        keyswitch_width + 2 * clip_undercut,
+                        notch_width,
+                        mount_thickness
+                    )
+                ])
 
             undercut = translate(undercut, (0.0, 0.0, -clip_thickness + mount_thickness / 2.0))
 
@@ -295,10 +319,10 @@ def make_dactyl():
 
             plate = difference(plate, [undercut])
 
-        # if plate_file is not None:
-        #     socket = import_file(plate_file)
-        #     socket = translate(socket, [0, 0, plate_thickness + plate_offset])
-        #     plate = union([plate, socket])
+        if plate_file is not None:
+            socket = import_file(plate_file)
+            socket = translate(socket, [0, 0, plate_thickness + plate_offset])
+            plate = union([plate, socket])
 
         if plate_holes:
             half_width = plate_holes_width / 2.
@@ -336,7 +360,7 @@ def make_dactyl():
         return shape
 
 
-    def trackball_socket(segments=100, side="right"):
+    def trackball_socket(btus=False,segments=100, side="right"):
         # shape = sphere(ball_diameter / 2)
         # cyl = cylinder(ball_diameter / 2 + 4, 20)
         # cyl = translate(cyl, (0, 0, -8))
@@ -344,7 +368,16 @@ def make_dactyl():
 
         tb_file = path.join(parts_path, r"trackball_socket_body_34mm")
         tbcut_file = path.join(parts_path, r"trackball_socket_cutter_34mm")
-        sens_file = path.join(parts_path, r"trackball_sensor_mount")
+
+        if btus:
+            tb_file = path.join(parts_path, r"btu_trackball_socket")
+            tbcut_file = path.join(parts_path, r"trackball_socket_w_btus_cutter")
+
+        if ENGINE == 'cadquery':
+            sens_file = path.join(parts_path, r"gen_holder")
+        else:
+            sens_file = path.join(parts_path, r"trackball_sensor_mount")
+
         senscut_file = path.join(parts_path, r"trackball_sensor_cutter")
 
         # shape = import_file(tb_file)
@@ -489,10 +522,6 @@ def make_dactyl():
                 column_x_delta_actual = column_x_delta - 1.5
                 column_angle = beta * (centercol - column - 0.27)
 
-        if row == 0:
-            shape = translate_fn(shape, [0, 6, 2.1])
-            shape = rotate_x_fn(shape, 0.3)
-
         if column_style == "orthographic":
             column_z_delta = column_radius * (1 - np.cos(column_angle))
             shape = translate_fn(shape, [0, 0, -row_radius])
@@ -521,8 +550,6 @@ def make_dactyl():
             shape = rotate_y_fn(shape, column_angle)
             shape = translate_fn(shape, [0, 0, column_radius])
             shape = translate_fn(shape, column_offset(column))
-
-
 
         shape = rotate_y_fn(shape, tenting_angle)
         shape = translate_fn(shape, [0, 0, keyboard_z_offset])
@@ -843,6 +870,7 @@ def make_dactyl():
         hulls.append(place2(post2))
         hulls.append(place2(translate(post2, wall_locate1(dx2, dy2))))
         hulls.append(place2(translate(post2, wall_locate1(dx2, dy2))))
+        hulls.append(place2(translate(post2, wall_locate1(dx2, dy2))))
         hulls.append(place2(translate(post2, wall_locate2(dx2, dy2, back))))
         hulls.append(place2(translate(post2, wall_locate3(dx2, dy2, back))))
         shape1 = hull_from_shapes(hulls)
@@ -894,7 +922,7 @@ def make_dactyl():
 
         torow = lastrow - 1
 
-        if (full_last_rows):
+        if (full_last_rows or ncols < 5):
             torow = lastrow
 
         tocol = lastcol
@@ -917,10 +945,11 @@ def make_dactyl():
             )])
             # STRANGE PARTIAL OFFSET
 
-        shape = union([
-            shape,
-            key_wall_brace(lastcol, torow, 0, -1, web_post_br(), lastcol, torow, 1, 0, web_post_br())
-        ])
+        if ncols > 4:
+            shape = union([
+                shape,
+                key_wall_brace(lastcol, torow, 0, -1, web_post_br(), lastcol, torow, 1, 0, web_post_br())
+            ])
         return shape
 
 
@@ -990,16 +1019,20 @@ def make_dactyl():
         shape = union([shape, key_wall_brace(
             3, lastrow, 0.5, -1, web_post_br(), 4, torow, 1, -1, web_post_bl()
         )])
-        for i in range(ncols - 4):
-            x = i + 4
-            shape = union([shape, key_wall_brace(
-                x, torow, 0, -1, web_post_bl(), x, torow, 0, -1, web_post_br()
-            )])
-        for i in range(ncols - 5):
-            x = i + 5
-            shape = union([shape, key_wall_brace(
-                x, torow, 0, -1, web_post_bl(), x - 1, torow, 0, -1, web_post_br()
-            )])
+
+        if ncols >= 4:
+            for i in range(ncols - 4):
+                x = i + 4
+                shape = union([shape, key_wall_brace(
+                    x, torow, 0, -1, web_post_bl(), x, torow, 0, -1, web_post_br()
+                )])
+
+        if ncols >= 5:
+            for i in range(ncols - 5):
+                x = i + 5
+                shape = union([shape, key_wall_brace(
+                    x, torow, 0, -1, web_post_bl(), x - 1, torow, 0, -1, web_post_br()
+                )])
 
         return shape
 
@@ -1102,6 +1135,21 @@ def make_dactyl():
         )
     )
 
+    def blackpill_mount_hole():
+        print('blackpill_external_mount_hole()')
+        shape = box(blackpill_holder_width, 20.0, external_holder_height + .1)
+        undercut = box(blackpill_holder_width + 8, 10.0, external_holder_height + 8 + .1)
+        shape = union([shape, translate(undercut, (0, -5, 0))])
+
+        shape = translate(shape,
+                          (
+                              external_start[0] + blackpill_holder_xoffset,
+                              external_start[1] + external_holder_yoffset,
+                              external_holder_height / 2 - .05,
+                          )
+                          )
+        return shape
+
 
     def external_mount_hole():
         print('external_mount_hole()')
@@ -1120,24 +1168,31 @@ def make_dactyl():
 
 
     def generate_trackball(pos, rot, cluster):
+        tb_t_offset = tb_socket_translation_offset
+        tb_r_offset = tb_socket_rotation_offset
+
+        if cluster is not None and cluster.has_btus():
+            tb_t_offset = tb_btu_socket_translation_offset
+            tb_r_offset = tb_btu_socket_rotation_offset
+
         precut = trackball_cutout()
-        precut = rotate(precut, tb_socket_rotation_offset)
-        precut = translate(precut, tb_socket_translation_offset)
+        precut = rotate(precut, tb_r_offset)
+        precut = translate(precut, tb_t_offset)
         precut = rotate(precut, rot)
         precut = translate(precut, pos)
 
-        shape, cutout, sensor = trackball_socket()
+        shape, cutout, sensor = trackball_socket(btus=cluster is not None and cluster.has_btus())
 
-        shape = rotate(shape, tb_socket_rotation_offset)
-        shape = translate(shape, tb_socket_translation_offset)
+        shape = rotate(shape, tb_r_offset)
+        shape = translate(shape, tb_t_offset)
         shape = rotate(shape, rot)
         shape = translate(shape, pos)
 
-        if cluster is not None:
+        if cluster is not None and resin is False:
             shape = cluster.get_extras(shape, pos)
 
-        cutout = rotate(cutout, tb_socket_rotation_offset)
-        cutout = translate(cutout, tb_socket_translation_offset)
+        cutout = rotate(cutout, tb_r_offset)
+        cutout = translate(cutout, tb_t_offset)
         # cutout = rotate(cutout, tb_sensor_translation_offset)
         # cutout = translate(cutout, tb_sensor_rotation_offset)
         cutout = rotate(cutout, rot)
@@ -1145,8 +1200,12 @@ def make_dactyl():
 
         # Small adjustment due to line to line surface / minute numerical error issues
         # Creates small overlap to assist engines in union function later
-        sensor = rotate(sensor, tb_socket_rotation_offset)
-        sensor = translate(sensor, tb_socket_translation_offset)
+        sensor = rotate(sensor, tb_r_offset)
+        sensor = translate(sensor, tb_t_offset)
+
+        # Hackish?  Oh, yes. But it builds with latest cadquery.
+        if ENGINE == 'cadquery':
+            sensor = translate(sensor, (0, 0, -15))
         # sensor = rotate(sensor, tb_sensor_translation_offset)
         # sensor = translate(sensor, tb_sensor_rotation_offset)
         sensor = translate(sensor, (0, 0, .005))
@@ -1154,8 +1213,8 @@ def make_dactyl():
         sensor = translate(sensor, pos)
 
         ball = trackball_ball()
-        ball = rotate(ball, tb_socket_rotation_offset)
-        ball = translate(ball, tb_socket_translation_offset)
+        ball = rotate(ball, tb_r_offset)
+        ball = translate(ball, tb_t_offset)
         ball = rotate(ball, rot)
         ball = translate(ball, pos)
 
@@ -1164,7 +1223,9 @@ def make_dactyl():
 
 
     def generate_trackball_in_cluster(cluster):
-        pos, rot = tbiw_position_rotation() if ball_side != "left" else left_cluster.position_rotation()
+        pos, rot = tbiw_position_rotation()
+        if cluster.is_tb:
+            pos, rot = cluster.position_rotation()
         return generate_trackball(pos, rot, cluster)
 
 
@@ -1636,18 +1697,19 @@ def make_dactyl():
 
     def screw_insert_all_shapes(bottom_radius, top_radius, height, offset=0, side='right'):
         print('screw_insert_all_shapes()')
+        so = screw_offsets
         shape = (
-            translate(screw_insert(0, 0, bottom_radius, top_radius, height, side=side), (0, 0, offset)),  # rear left
+            translate(screw_insert(0, 0, bottom_radius, top_radius, height, side=side), (so[0][0], so[0][1], so[0][2] + offset)),  # rear left
             translate(screw_insert(0, lastrow - 1, bottom_radius, top_radius, height, side=side),
-                      (0, left_wall_lower_y_offset, offset)),  # front left
+                      (so[1][0], so[1][1] + left_wall_lower_y_offset, so[1][2] + offset)),  # front left
             translate(screw_insert(3, lastrow, bottom_radius, top_radius, height, side=side),
-                      (0, 0, offset)),  # front middle
-            translate(screw_insert(3, 0, bottom_radius, top_radius, height, side=side), (0, 0, offset)),  # rear middle
+                      (so[2][0], so[2][1], so[2][2] + offset)),  # front middle
+            translate(screw_insert(3, 0, bottom_radius, top_radius, height, side=side), (so[3][0], so[3][1], so[3][2] + offset)),  # rear middle
             translate(screw_insert(lastcol, 0, bottom_radius, top_radius, height, side=side),
-                      (0, 0, offset)),  # rear right
+                      (so[4][0], so[4][1], so[4][2] + offset)),  # rear right
             translate(screw_insert(lastcol, lastrow - 1, bottom_radius, top_radius, height, side=side),
-                      (0.5, -10, offset)),  # front right # TODO CONFIGURE IN JSON
-            translate(screw_insert_thumb(bottom_radius, top_radius, height, side), (0, 0, offset)),  # thumb cluster
+                      (so[5][0], so[5][1], so[5][2] + offset)),  # front right
+            translate(screw_insert_thumb(bottom_radius, top_radius, height, side), (so[6][0], so[6][1], so[6][2] + offset)),  # thumb cluster
         )
 
         return shape
@@ -1972,6 +2034,8 @@ def make_dactyl():
             clust = TrackballOrbyl(all_merged)
         elif style == TrackballWild.name():
             clust = TrackballWild(all_merged)
+        elif style == TrackballBTU.name():
+            clust = TrackballBTU(all_merged)
         elif style == TrackballCJ.name():
             clust = TrackballCJ(all_merged)
         elif style == CustomCluster.name():

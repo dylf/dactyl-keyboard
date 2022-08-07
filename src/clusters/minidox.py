@@ -35,6 +35,12 @@ class MinidoxCluster(DefaultCluster):
         for item in parent_locals:
             globals()[item] = parent_locals[item]
 
+    def thumborigin(self):
+        # debugprint('thumborigin()')
+        origin = super().thumborigin()
+        origin[1] = origin[1] - .4 * (trackball_Usize - 1) * sa_length
+        return origin
+
     def tl_place(self, shape):
         shape = rotate(shape, [10, -23, 25])
         shape = translate(shape, self.thumborigin())

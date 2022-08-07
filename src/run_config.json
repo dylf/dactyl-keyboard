@@ -4,20 +4,22 @@
   "overrides": "flat_testing",
   "save_name": "",
   "config_name": "5x6",
+  "logo_file": null,
   "show_caps": false,
   "show_pcbs": false,
+  "resin": false,
   "nrows": 6,
   "ncols": 6,
   "alpha": 0.26179916666666664,
   "beta": 0.08726638888888888,
   "centercol": 3,
   "centerrow_offset": 3,
-  "tenting_angle": 0.26179916666666664,
+  "tenting_angle": 0.24479916666666664,
   "symmetry": "symmetric",
   "column_style_gt5": "orthographic",
   "column_style": "standard",
   "full_last_rows": false,
-  "keyboard_z_offset": 11,
+  "keyboard_z_offset": 12,
   "thumb_style": "TRACKBALL_WILD",
   "default_1U_cluster": true,
   "trackball_in_wall": false,
@@ -67,6 +69,16 @@
     0,
     0,
     0
+  ],
+  "tb_btu_socket_translation_offset": [
+    0,
+    0,
+    -22.0
+  ],
+  "tb_btu_socket_rotation_offset": [
+    0,
+    0,
+    40
   ],
   "tb_sensor_translation_offset": [
     0,
@@ -251,22 +263,25 @@
       "oled_clip_z_gap": 0.2
     }
   },
+  "logo_offsets": [-10, -10, -1],
   "web_thickness": 4.0,
   "post_size": 0.1,
   "post_adj": 0,
   "screws_offset": "INSIDE",
-  "screw_insert_height": 3.8,
-  "screw_insert_bottom_radius": 2.255,
-  "screw_insert_top_radius": 2.0,
+  "screw_insert_height": 3.5,
+  "screw_insert_bottom_radius": 2.05,
+  "screw_insert_top_radius": 1.95,
   "wire_post_height": 7,
   "wire_post_overhang": 3.5,
   "wire_post_diameter": 2.6,
   "controller_mount_type": "EXTERNAL",
   "external_holder_height": 12.5,
-  "external_holder_width": 28.75,
+  "external_holder_width": 29.2,
+  "blackpill_holder_width": 32.0,
+  "blackpill_holder_xoffset": -6.5,
   "external_holder_xoffset": -5.0,
   "external_holder_yoffset": -4.5,
-  "screw_hole_diameter": 2.5,
+  "screw_hole_diameter": 3.05,
   "base_thickness": 3.0,
   "base_offset": 3.0,
   "base_rim_thickness": 5.0,
@@ -332,6 +347,43 @@
       0,
       -6,
       5
+    ]
+  ],
+  "screw_offsets": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      -4,
+      0
+    ],
+   [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+   [
+      0,
+      0,
+      0
     ]
   ]
 }

@@ -25,5 +25,6 @@ config/
 .iml
 **/*.iml
 
+/src/.ipynb_checkpoints/
 src/.ipynb_checkpoints/bulk_build-checkpoint.py
 src/.ipynb_checkpoints/builder-checkpoint.py

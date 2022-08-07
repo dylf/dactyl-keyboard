@@ -1,5 +1,10 @@
 {
     "key_diameter": 75,
+    "thumb_offsets": [
+        0,
+        -2,
+        7
+      ],
     "translation_offset": [
         10,
         0,
@@ -9,6 +14,28 @@
         10,
         -10,
         0
+    ],
+    "wall_offsets":[
+        [
+            0.3,
+            0.3,
+            0.0
+        ],
+        [
+            0.3,
+            0.3,
+            0.0
+        ],
+        [
+            0.0,
+            0.0,
+            0.0
+        ],
+        [
+            0.0,
+            0.0,
+            0.0
+        ]
     ],
     "key_translation_offsets": [
         [

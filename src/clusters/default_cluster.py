@@ -45,9 +45,6 @@ class DefaultCluster(object):
         for i in range(len(origin)):
             origin[i] = origin[i] + self.thumb_offsets[i]
 
-        if thumb_style == 'MINIDOX':
-            origin[1] = origin[1] - .4 * (trackball_Usize - 1) * sa_length
-
         return origin
 
     def tl_place(self, shape):
@@ -309,7 +306,7 @@ class DefaultCluster(object):
                         self.tl_place(self.thumb_post_tl()),
                         key_place(web_post_bl(), 0, cornerrow),
                         self.tl_place(self.thumb_post_tr()),
-                        key_place(web_post_br(), 0, cornerrow),
+                        key_place(web_post_bl(), 1, cornerrow),
                         self.tr_place(web_post_tl()),
                         key_place(web_post_bl(), 1, cornerrow),
                         self.tr_place(web_post_tr()),
@@ -480,3 +477,6 @@ class DefaultCluster(object):
 
     def get_extras(self, shape, pos):
         return shape
+
+    def has_btus(self):
+        return False
