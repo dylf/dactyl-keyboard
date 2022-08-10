@@ -10,9 +10,9 @@ class DefaultCluster(object):
         -3,
         7
     ]
-    thumb_plate_tr_rotation = 90
-    thumb_plate_tl_rotation = 90
-    thumb_plate_mr_rotation = 90
+    thumb_plate_tr_rotation = 0
+    thumb_plate_tl_rotation = 0
+    thumb_plate_mr_rotation = 0
     thumb_plate_ml_rotation = 0
     thumb_plate_br_rotation = 0
     thumb_plate_bl_rotation = 0
@@ -369,16 +369,17 @@ class DefaultCluster(object):
             )
         )
 
-        hulls.append(
-            triangle_hulls(
-                [
-                    key_place(web_post_tr(), 3, lastrow),
-                    key_place(web_post_br(), 3, lastrow),
-                    key_place(web_post_tr(), 3, lastrow),
-                    key_place(web_post_bl(), 4, cornerrow),
-                ]
+        if not full_last_rows:
+            hulls.append(
+                triangle_hulls(
+                    [
+                        key_place(web_post_tr(), 3, lastrow),
+                        key_place(web_post_br(), 3, lastrow),
+                        key_place(web_post_tr(), 3, lastrow),
+                        key_place(web_post_bl(), 4, cornerrow),
+                    ]
+                )
             )
-        )
 
         return union(hulls)
 

@@ -1,9 +1,9 @@
 {
     "key_diameter": 75,
     "thumb_offsets": [
-        0,
         -2,
-        7
+        -6,
+        8
       ],
     "translation_offset": [
         10,
@@ -13,7 +13,7 @@
     "rotation_offset": [
         10,
         -10,
-        0
+        -5
     ],
     "wall_offsets":[
         [

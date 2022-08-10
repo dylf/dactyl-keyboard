@@ -1806,6 +1806,9 @@ def make_dactyl():
         if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL']:
             s2 = difference(s2, [rj9_space()])
 
+        if controller_mount_type in ['BLACKPILL_EXTERNAL']:
+            s2 = difference(s2, [blackpill_mount_hole()])
+
         if controller_mount_type in ['EXTERNAL']:
             s2 = difference(s2, [external_mount_hole()])
 
@@ -1833,35 +1836,40 @@ def make_dactyl():
             shape = difference(shape, [hole])
             shape = union([shape, frame])
 
-        if trackball_in_wall and (side == ball_side or ball_side == 'both'):
-            tbprecut, tb, tbcutout, sensor, ball = generate_trackball_in_wall()
+        if not quickly:
+            if trackball_in_wall and (side == ball_side or ball_side == 'both'):
+                tbprecut, tb, tbcutout, sensor, ball = generate_trackball_in_wall()
 
-            shape = difference(shape, [tbprecut])
-            # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_1"))
-            shape = union([shape, tb])
-            # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_2"))
-            shape = difference(shape, [tbcutout])
-            # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_3a"))
-            # export_file(shape=add([shape, sensor]), fname=path.join(save_path, config_name + r"_test_3b"))
-            shape = union([shape, sensor])
+                shape = difference(shape, [tbprecut])
+                # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_1"))
+                shape = union([shape, tb])
+                # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_2"))
+                shape = difference(shape, [tbcutout])
+                # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_3a"))
+                # export_file(shape=add([shape, sensor]), fname=path.join(save_path, config_name + r"_test_3b"))
+                shape = union([shape, sensor])
 
-            if show_caps:
-                shape = add([shape, ball])
+                if show_caps:
+                    shape = add([shape, ball])
 
-        if (trackball_in_wall or ('TRACKBALL' in thumb_style)) and (side == ball_side or ball_side == 'both'):
-            tbprecut, tb, tbcutout, sensor, ball = generate_trackball_in_cluster(cluster(side))
+            if cluster(side).is_tb:
+                tbprecut, tb, tbcutout, sensor, ball = generate_trackball_in_cluster(cluster(side))
 
-            shape = difference(shape, [tbprecut])
-            # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_1"))
-            shape = union([shape, tb])
-            # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_2"))
-            shape = difference(shape, [tbcutout])
-            # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_3a"))
-            # export_file(shape=add([shape, sensor]), fname=path.join(save_path, config_name + r"_test_3b"))
-            shape = union([shape, sensor])
+                shape = difference(shape, [tbprecut])
+                if cluster(side).has_btus():
+                    shape = difference(shape, [tbcutout])
+                    shape = union([shape, tb])
+                else:
+                    # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_1"))
+                    shape = union([shape, tb])
+                    # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_2"))
+                    shape = difference(shape, [tbcutout])
+                    # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_3a"))
+                    # export_file(shape=add([shape, sensor]), fname=path.join(save_path, config_name + r"_test_3b"))
+                    shape = union([shape, sensor])
 
-            if show_caps:
-                shape = add([shape, ball])
+                if show_caps:
+                    shape = add([shape, ball])
 
         block = box(350, 350, 40)
         block = translate(block, (0, 0, -20))
@@ -1876,9 +1884,16 @@ def make_dactyl():
 
         return shape
 
+    def wrist_rest(base, plate, side="right"):
+        rest = import_file(path.join(parts_path, "dactyl_wrist_rest_v3_" + side))
+        rest = rotate(rest, (0, 0, -60))
+        rest = translate(rest, (30, -150, 26))
+        rest = union([rest, translate(base, (0, 0, 5)), plate])
+        return rest
 
     # NEEDS TO BE SPECIAL FOR CADQUERY
     def baseplate(wedge_angle=None, side='right'):
+        global logo_file
         if ENGINE == 'cadquery':
             # shape = mod_r
             shape = union([case_walls(side=side), *screw_insert_outers(side=side)])
@@ -1921,8 +1936,17 @@ def make_dactyl():
                 cq.Workplane('XY').add(cq.Solid.revolve(outerWire, innerWires, angleDegrees, axisStart, axisEnd))
             else:
                 inner_shape = cq.Workplane('XY').add(
-                    cq.Solid.extrudeLinear(outerWire=inner_wire, innerWires=[], vecNormal=cq.Vector(0, 0, base_thickness)))
+                    cq.Solid.extrudeLinear(inner_wire, [], cq.Vector(0, 0, base_thickness)))
                 inner_shape = translate(inner_shape, (0, 0, -base_rim_thickness))
+
+                if logo_file not in ["", None]:
+                    logo = import_file(logo_file)
+                    if side == "left":
+                        logo = mirror(logo, "YZ")
+
+                    logo = translate(logo, logo_offsets)
+
+                    inner_shape = union([inner_shape, logo])
 
                 holes = []
                 for i in range(len(base_wires)):
@@ -1969,25 +1993,33 @@ def make_dactyl():
         mod_r = model_side(side="right")
         export_file(shape=mod_r, fname=path.join(save_path, config_name + r"_right"))
 
+        if quickly:
+            print(">>>>>  QUICK RENDER: Only rendering a the right side.")
+            exit(0)
+
         base = baseplate(side='right')
         export_file(shape=base, fname=path.join(save_path, config_name + r"_right_plate"))
         export_dxf(shape=base, fname=path.join(save_path, config_name + r"_right_plate"))
 
-        if symmetry == "asymmetric":
+        # rest = wrist_rest(mod_r, base, side="right")
+        #
+        # export_file(shape=rest, fname=path.join(save_path, config_name + r"_right_wrist_rest"))
 
-            mod_l = model_side(side="left")
-            export_file(shape=mod_l, fname=path.join(save_path, config_name + r"_left"))
+        # if symmetry == "asymmetric":
 
-            base_l = mirror(baseplate(side='left'), 'YZ')
-            export_file(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
-            export_dxf(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
+        mod_l = model_side(side="left")
+        export_file(shape=mod_l, fname=path.join(save_path, config_name + r"_left"))
 
-        else:
-            export_file(shape=mirror(mod_r, 'YZ'), fname=path.join(save_path, config_name + r"_left"))
+        base_l = mirror(baseplate(side='left'), 'YZ')
+        export_file(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
+        export_dxf(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
 
-            lbase = mirror(base, 'YZ')
-            export_file(shape=lbase, fname=path.join(save_path, config_name + r"_left_plate"))
-            export_dxf(shape=lbase, fname=path.join(save_path, config_name + r"_left_plate"))
+        # else:
+        #     export_file(shape=mirror(mod_r, 'YZ'), fname=path.join(save_path, config_name + r"_left"))
+        #
+        #     lbase = mirror(base, 'YZ')
+        #     export_file(shape=lbase, fname=path.join(save_path, config_name + r"_left_plate"))
+        #     export_dxf(shape=lbase, fname=path.join(save_path, config_name + r"_left_plate"))
 
         if ENGINE == 'cadquery':
             import freecad_that as freecad

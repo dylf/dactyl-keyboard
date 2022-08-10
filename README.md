@@ -29,11 +29,11 @@ The setup and run instructions are still more-or-less the same, but here's some 
 1. Do the Anaconda/Miniconda bit, above.
 2. In a conda shell, run the following lines:
 
-        conda create --name=dactyl-keyboard python=3.7 -y
+        conda create --name=dactyl-keyboard python=3.8 -y
 
         conda activate dactyl-keyboard
 
-        conda install -c conda-forge -c cadquery cadquery=2 -y
+        conda install -c conda-forge -c cadquery cadquery=master -y
 
         pip install dataclasses-json numpy scipy solidpython
 

@@ -38,11 +38,15 @@ class CarbonfetCluster(DefaultCluster):
         shape = translate(shape, [-13, -9.8, 4])
         return shape
 
+    def tl_wall(self, shape):
+        return translate(self.tl_place(shape), (1.7, 1, 0))
+
     def tr_place(self, shape):
         shape = rotate(shape, [6, -25, 10])
         shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-7.5, -29.5, 0])
         return shape
+
 
     def ml_place(self, shape):
         shape = rotate(shape, [8, -31, 14])
@@ -106,6 +110,30 @@ class CarbonfetCluster(DefaultCluster):
     def thumb_connectors(self, side="right"):
         print('thumb_connectors()')
         hulls = []
+
+        hulls.append(
+            triangle_hulls(
+                [
+                    self.tl_wall(web_post_tl()),
+                    self.tl_wall(web_post_tr()),
+                    self.tl_place(web_post_tr()),
+                    self.tl_place(web_post_tl()),
+                    self.tl_wall(web_post_tl()),
+                ]
+            )
+        )
+
+        hulls.append(
+            triangle_hulls(
+                [
+                    self.tl_wall(web_post_tr()),
+                    self.tl_wall(web_post_br()),
+                    self.tl_place(web_post_br()),
+                    self.tl_place(web_post_tr()),
+                    self.tl_wall(web_post_tr()),
+                ]
+            )
+        )
 
         # Top two
         hulls.append(
@@ -178,7 +206,7 @@ class CarbonfetCluster(DefaultCluster):
                     self.tr_place(web_post_tl()),
                     self.tl_place(web_post_bl()),
                     self.tr_place(web_post_tr()),
-                    self.tl_place(web_post_br()),
+                    self.tl_wall(web_post_br()),
                 ]
             )
         )
@@ -192,16 +220,16 @@ class CarbonfetCluster(DefaultCluster):
                     key_place(web_post_br(), 0, cornerrow),
                     self.tl_place(web_post_tl()),
                     key_place(web_post_bl(), 1, cornerrow),
-                    self.tl_place(web_post_tr()),
+                    self.tl_wall(web_post_tr()),
                     key_place(web_post_br(), 1, cornerrow),
                     key_place(web_post_tl(), 2, lastrow),
                     key_place(web_post_bl(), 2, lastrow),
-                    self.tl_place(web_post_tr()),
+                    self.tl_wall(web_post_tr()),
                     key_place(web_post_bl(), 2, lastrow),
-                    self.tl_place(web_post_br()),
+                    self.tl_wall(web_post_br()),
                     key_place(web_post_br(), 2, lastrow),
                     key_place(web_post_bl(), 3, lastrow),
-                    self.tl_place(web_post_br()),
+                    self.tl_wall(web_post_br()),
                     self.tr_place(web_post_tr()),
                 ]
             )
