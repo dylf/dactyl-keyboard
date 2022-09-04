@@ -1,6 +1,7 @@
 import json
 import os
 from key import Key
+from geom import *
 
 TL = 0
 TR = 1
@@ -91,9 +92,9 @@ class DefaultCluster(object):
 
     def _key_gen(self, index):
         key = Key(self.ids[index], globals())
-        key.rotate_deg(self.rot[index])
-        key.translate(self.thumborigin())
-        key.translate(self.pos[index])
+        key.rot = rotate_deg(key.rot, self.rot[index])
+        key.pos = add_translate(key.pos, self.thumborigin())
+        key.pos = add_translate(key.pos, self.pos[index])
         return key
 
     def _key_place(self, index, shape):

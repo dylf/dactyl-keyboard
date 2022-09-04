@@ -50,6 +50,7 @@ def rotate_around_z(position, angle):
 
 
 def rotate_rad(start, rotate_by):
+    xval = rotate_around_x(start, rotate_by[0])
     x_rot = rotate_around_x(start, rotate_by[0])[0]
     y_rot = rotate_around_y(start, rotate_by[1])[1]
     z_rot = rotate_around_z(start, rotate_by[2])[2]
