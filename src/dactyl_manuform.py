@@ -1,7 +1,8 @@
-import numpy as np
-from numpy import pi
+from geom import *
+from key import Key
 import os.path as path
-import getopt, sys
+import getopt
+import sys
 import json
 import os
 import importlib
@@ -16,15 +17,6 @@ from clusters.custom_cluster import CustomCluster
 from clusters.trackball_btu import TrackballBTU
 
 
-def deg2rad(degrees: float) -> float:
-    return degrees * pi / 180
-
-
-def rad2deg(rad: float) -> float:
-    return rad * 180 / pi
-
-def degrees(rots):
-    return rots
 
 debug_exports = False
 debug_trace = False
@@ -485,29 +477,6 @@ def make_dactyl():
     #########################
 
 
-    def rotate_around_x(position, angle):
-        # debugprint('rotate_around_x()')
-        t_matrix = np.array(
-            [
-                [1, 0, 0],
-                [0, np.cos(angle), -np.sin(angle)],
-                [0, np.sin(angle), np.cos(angle)],
-            ]
-        )
-        return np.matmul(t_matrix, position)
-
-
-    def rotate_around_y(position, angle):
-        # debugprint('rotate_around_y()')
-        t_matrix = np.array(
-            [
-                [np.cos(angle), 0, np.sin(angle)],
-                [0, 1, 0],
-                [-np.sin(angle), 0, np.cos(angle)],
-            ]
-        )
-        return np.matmul(t_matrix, position)
-
     def get_key_placement(
             position,
             column,
@@ -565,7 +534,7 @@ def make_dactyl():
         yrot += tenting_angle
         position = add_translate(position, [0, 0, keyboard_z_offset])
 
-        return [position, degrees([xrot, yrot, 0])]
+        return [position, to_degrees([xrot, yrot, 0])]
 
 
     def apply_key_geometry(
@@ -644,14 +613,6 @@ def make_dactyl():
         return apply_key_geometry(shape, translate, x_rot, y_rot, column, row)
 
 
-    def add_translate(shape, xyz):
-        debugprint('add_translate()')
-        vals = []
-        for i in range(len(shape)):
-            vals.append(shape[i] + xyz[i])
-        return vals
-
-
     def key_position(position, column, row):
         debugprint('key_position()')
         return apply_key_geometry(
@@ -683,13 +644,31 @@ def make_dactyl():
             c = []
             for column in range(ncols):
                 if valid_key(column, row):
-                    c.append(get_key_placement([0, 0, 0], column, row))
+                    key = Key(side + "_" + str(column) + "," + str(row), all_merged)
+                    key.calculate_key_placement(column, row, column_style=column_style)
+                    c.append(key)
                 else:
-                    c.append([])
+                    c.append(Key("NONE", None))
             r.append(c)
 
         return r
 
+    def test_keys():
+        rows = key_placements(side="right")
+
+        all_keys = []
+        for column in rows:
+            for key in column:
+                if key.get_id() != "NONE":
+                    all_keys.append(key)
+        for key in cluster("right").get_keys():
+            if key.get_id() != "NONE":
+                all_keys.append(key)
+
+        shapes = [key.render(plate_file, side="right") for key in all_keys]
+
+        keys = union(shapes)
+        export_file(shape=keys, fname=path.join(r"..", "things", r"keys_maybe"))
 
     def caps():
         caps = None
@@ -1852,19 +1831,19 @@ def make_dactyl():
     #             ])
     #     return shape
 
-    def test_keys():
-        rows = key_placements(side="right")
-        shapes = []
-        for column in rows:
-            for key in column:
-                if len(key) > 1:
-                    print(key[0], key[1])
-                    key_shape = translate(box(14, 14, 3), key[0])
-
-                    shapes.append(rotate(key_shape, key[1]))
-
-        keys = union(shapes)
-        export_file(shape=keys, fname=path.join(r"..", "things", r"keys_maybe"))
+    # def test_keys():
+    #     rows = key_placements(side="right")
+    #     shapes = []
+    #     for column in rows:
+    #         for key in column:
+    #             if len(key) > 1:
+    #                 print(key[0], key[1])
+    #                 key_shape = rotate(box(14, 14, 3), degrees(key[1]))
+    #
+    #                 shapes.append(translate(key_shape, key[0]))
+    #
+    #     keys = union(shapes)
+    #     export_file(shape=keys, fname=path.join(r"..", "things", r"keys_maybe"))
 
 
     def model_side(side="right"):
