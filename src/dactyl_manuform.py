@@ -23,6 +23,8 @@ def deg2rad(degrees: float) -> float:
 def rad2deg(rad: float) -> float:
     return rad * 180 / pi
 
+def degrees(rots):
+    return rots
 
 debug_exports = False
 debug_trace = False
@@ -506,6 +508,65 @@ def make_dactyl():
         )
         return np.matmul(t_matrix, position)
 
+    def get_key_placement(
+            position,
+            column,
+            row,
+            column_style=column_style,
+    ):
+        debugprint('get_key_placement()')
+        xrot = 0
+        yrot = 0
+
+        column_angle = beta * (centercol - column)
+        column_x_delta_actual = column_x_delta
+        if (pinky_1_5U and column == lastcol):
+            if row >= first_1_5U_row and row <= last_1_5U_row:
+                column_x_delta_actual = column_x_delta - 1.5
+                column_angle = beta * (centercol - column - 0.27)
+
+        if column_style == "orthographic":
+            column_z_delta = column_radius * (1 - np.cos(column_angle))
+            position = add_translate(position, [0, 0, -row_radius])
+            position = rotate_around_x(position, alpha * (centerrow - row))
+            xrot += alpha * (centerrow - row)
+            position = add_translate(position, [0, 0, row_radius])
+            position = rotate_around_y(position, column_angle)
+            yrot += column_angle
+            position = add_translate(
+                position, [-(column - centercol) * column_x_delta_actual, 0, column_z_delta]
+            )
+            position = add_translate(position, column_offset(column))
+
+        elif column_style == "fixed":
+            position = rotate_around_y(position, fixed_angles[column])
+            yrot += fixed_angles[column]
+            position = add_translate(position, [fixed_x[column], 0, fixed_z[column]])
+            position = add_translate(position, [0, 0, -(row_radius + fixed_z[column])])
+            position = rotate_around_x(position, alpha * (centerrow - row))
+            xrot += alpha * (centerrow - row)
+            position = add_translate(position, [0, 0, row_radius + fixed_z[column]])
+            position = rotate_around_y(position, fixed_tenting)
+            yrot += fixed_tenting
+            position = add_translate(position, [0, column_offset(column)[1], 0])
+
+        else:
+            position = add_translate(position, [0, 0, -row_radius])
+            position = rotate_around_x(position, alpha * (centerrow - row))
+            xrot += alpha * (centerrow - row)
+            position = add_translate(position, [0, 0, row_radius])
+            position = add_translate(position, [0, 0, -column_radius])
+            position = rotate_around_y(position, column_angle)
+            yrot += column_angle
+            position = add_translate(position, [0, 0, column_radius])
+            position = add_translate(position, column_offset(column))
+
+        position = rotate_around_y(position, tenting_angle)
+        yrot += tenting_angle
+        position = add_translate(position, [0, 0, keyboard_z_offset])
+
+        return [position, degrees([xrot, yrot, 0])]
+
 
     def apply_key_geometry(
             shape,
@@ -610,6 +671,24 @@ def make_dactyl():
         shape = union(holes)
 
         return shape
+
+
+    def key_placements(side="right"):
+        debugprint('key_holes()')
+        # hole = single_plate()
+
+        r = []
+
+        for row in range(nrows):
+            c = []
+            for column in range(ncols):
+                if valid_key(column, row):
+                    c.append(get_key_placement([0, 0, 0], column, row))
+                else:
+                    c.append([])
+            r.append(c)
+
+        return r
 
 
     def caps():
@@ -1773,6 +1852,20 @@ def make_dactyl():
     #             ])
     #     return shape
 
+    def test_keys():
+        rows = key_placements(side="right")
+        shapes = []
+        for column in rows:
+            for key in column:
+                if len(key) > 1:
+                    print(key[0], key[1])
+                    key_shape = translate(box(14, 14, 3), key[0])
+
+                    shapes.append(rotate(key_shape, key[1]))
+
+        keys = union(shapes)
+        export_file(shape=keys, fname=path.join(r"..", "things", r"keys_maybe"))
+
 
     def model_side(side="right"):
         print('model_side()' + side)
@@ -2090,7 +2183,7 @@ def make_dactyl():
     else:
         left_cluster = right_cluster  # this assumes thumb_style always overrides DEFAULT other_thumb
 
-    run()
+    test_keys()
 
 
 #
