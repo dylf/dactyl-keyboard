@@ -2,6 +2,13 @@ import json
 import os
 from key import Key
 
+TL = 0
+TR = 1
+ML = 2
+MR = 3
+BL = 4
+BR = 5
+
 
 class DefaultCluster(object):
     num_keys = 6
@@ -11,6 +18,34 @@ class DefaultCluster(object):
         -3,
         7
     ]
+
+    ids = [
+        "c_tl",
+        "c_tr",
+        "c_ml",
+        "c_mr",
+        "c_bl",
+        "c_br"
+    ]
+
+    pos = [
+        [-32.5, -14.5, -2.5],   # tl
+        [-12, -16, 3],          # tr
+        [-51, -25, -12],        # ml
+        [-29, -40, -13],        # mr
+        [-56.3, -43.3, -23.5],  # bl
+        [-37.8, -55.3, -25.3]   # br
+    ]
+
+    rot = [
+        [7.5, -18, 10],         # tl
+        [10, -15, 10],          # tr
+        [6, -34, 40],           # ml
+        [-6, -34, 48],          # mr
+        [-4, -35, 52],          # bl
+        [-16, -33, 54]          # br
+    ]
+
     thumb_plate_tr_rotation = 0
     thumb_plate_tl_rotation = 0
     thumb_plate_mr_rotation = 0
@@ -38,14 +73,8 @@ class DefaultCluster(object):
         for item in parent_locals:
             globals()[item] = parent_locals[item]
         self.get_config()
-        self._keys = [
-            self._tl_key(),
-            self._tr_key(),
-            self._ml_key(),
-            self._mr_key(),
-            self._bl_key(),
-            self._br_key()
-        ]
+        for index in range(6):
+            self._keys.append(self._key_gen(index))
         print(self.name(), " built")
 
     def get_keys(self):
@@ -60,89 +89,42 @@ class DefaultCluster(object):
 
         return origin
 
-    def _tl_key(self):
-        key = Key("c_tl", globals())
-        key.rotate_deg([7.5, -18, 10])
+    def _key_gen(self, index):
+        key = Key(self.ids[index], globals())
+        key.rotate_deg(self.rot[index])
         key.translate(self.thumborigin())
-        key.translate([-32.5, -14.5, -2.5])
+        key.translate(self.pos[index])
         return key
+
+    def _key_place(self, index, shape):
+        key = self._keys[index]
+        shape = rotate(shape, key.rot)
+        shape = translate(shape, key.pos)
+        return shape
 
     def tl_place(self, shape):
         debugprint('tl_place()')
-        shape = rotate(shape, [7.5, -18, 10])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-32.5, -14.5, -2.5])
-        return shape
-
-    def _tr_key(self):
-        key = Key("c_tr", globals())
-        key.rotate_deg([10, -15, 10])
-        key.translate(self.thumborigin())
-        key.translate([-12, -16, 3])
-        return key
+        return self._key_place(TL, shape)
 
     def tr_place(self, shape):
         debugprint('tr_place()')
-        shape = rotate(shape, [10, -15, 10])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-12, -16, 3])
-        return shape
-
-    def _mr_key(self):
-        key = Key("c_mr", globals())
-        key.rotate_deg([-6, -34, 48])
-        key.translate(self.thumborigin())
-        key.translate([-29, -40, -13])
-        return key
-
-    def mr_place(self, shape):
-        debugprint('mr_place()')
-        shape = rotate(shape, [-6, -34, 48])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-29, -40, -13])
-        return shape
-
-    def _ml_key(self):
-        key = Key("c_ml", globals())
-        key.rotate_deg([6, -34, 40])
-        key.translate(self.thumborigin())
-        key.translate([-51, -25, -12])
-        return key
+        return self._key_place(TR, shape)
 
     def ml_place(self, shape):
         debugprint('ml_place()')
-        shape = rotate(shape, [6, -34, 40])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-51, -25, -12])
-        return shape
+        return self._key_place(ML, shape)
 
-    def _br_key(self):
-        key = Key("c_br", globals())
-        key.rotate_deg([-16, -33, 54])
-        key.translate(self.thumborigin())
-        key.translate([-37.8, -55.3, -25.3])
-        return key
-
-    def br_place(self, shape):
-        debugprint('br_place()')
-        shape = rotate(shape, [-16, -33, 54])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-37.8, -55.3, -25.3])
-        return shape
-
-    def _bl_key(self):
-        key = Key("c_bl", globals())
-        key.rotate_deg([-4, -35, 52])
-        key.translate(self.thumborigin())
-        key.translate([-56.3, -43.3, -23.5])
-        return key
+    def mr_place(self, shape):
+        debugprint('mr_place()')
+        return self._key_place(MR, shape)
 
     def bl_place(self, shape):
         debugprint('bl_place()')
-        shape = rotate(shape, [-4, -35, 52])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-56.3, -43.3, -23.5])
-        return shape
+        return self._key_place(BL, shape)
+
+    def br_place(self, shape):
+        debugprint('br_place()')
+        return self._key_place(BR, shape)
 
     def thumb_1x_layout(self, shape, cap=False):
         debugprint('thumb_1x_layout()')
