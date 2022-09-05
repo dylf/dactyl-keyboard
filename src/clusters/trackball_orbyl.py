@@ -5,12 +5,12 @@ import os
 
 class TrackballOrbyl(DefaultCluster):
     key_diameter = 75
-    translation_offset = [
+    trackball_translation_offset = [
         0,
         0,
         10
     ]
-    rotation_offset = [
+    trackball_rotation_offset = [
         0,
         0,
         0
@@ -95,10 +95,10 @@ class TrackballOrbyl(DefaultCluster):
         # Changes size based on key diameter around ball, shifting off of the top left cluster key.
         shift = [-.9 * self.key_diameter/2 + 27 - 42, -.1 * self.key_diameter / 2 + 3 - 20, -5]
         for i in range(len(pos)):
-            pos[i] = pos[i] + shift[i] + self.translation_offset[i]
+            pos[i] = pos[i] + shift[i] + self.trackball_translation_offset[i]
 
         for i in range(len(rot)):
-            rot[i] = rot[i] + self.rotation_offset[i]
+            rot[i] = rot[i] + self.trackball_rotation_offset[i]
 
         return pos, rot
 

@@ -1,11 +1,11 @@
 {
   "key_diameter": 75,
-  "translation_offset": [
+  "trackball_translation_offset": [
     0,
     0,
     10
   ],
-  "rotation_offset": [
+  "trackball_rotation_offset": [
     0,
     0,
     0

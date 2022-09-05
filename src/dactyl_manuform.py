@@ -226,7 +226,6 @@ def make_dactyl():
     if not path.isdir(save_path):
         os.mkdir(save_path)
 
-
     def column_offset(column: int) -> list:
         result = column_offsets[column]
         # if (pinky_1_5U and column == lastcol):
@@ -548,6 +547,8 @@ def make_dactyl():
     ):
         debugprint('apply_key_geometry()')
 
+
+
         column_angle = beta * (centercol - column)
 
         column_x_delta_actual = column_x_delta
@@ -591,11 +592,6 @@ def make_dactyl():
         return shape
 
 
-    def valid_key(column, row):
-        if (full_last_rows):
-            return (not (column in [0, 1])) or (not row == lastrow)
-
-        return (column in [2, 3]) or (not row == lastrow)
 
 
     def x_rot(shape, angle):
@@ -610,15 +606,18 @@ def make_dactyl():
 
     def key_place(shape, column, row):
         debugprint('key_place()')
-        return apply_key_geometry(shape, translate, x_rot, y_rot, column, row)
+        key = Key.get_key_by_row_col(row, column)
+        return key.render(plate_file)
+        # return apply_key_geometry(shape, translate, x_rot, y_rot, column, row)
 
 
     def key_position(position, column, row):
         debugprint('key_position()')
-        return apply_key_geometry(
-            position, add_translate, rotate_around_x, rotate_around_y, column, row
-        )
-
+        key = Key.get_key_by_row_col(row, column)
+        return key.pos
+        # return apply_key_geometry(
+        #     position, add_translate, rotate_around_x, rotate_around_y, column, row
+        # )
 
     def key_holes(side="right"):
         debugprint('key_holes()')
@@ -632,26 +631,6 @@ def make_dactyl():
         shape = union(holes)
 
         return shape
-
-
-    def key_placements(side="right"):
-        debugprint('key_holes()')
-        # hole = single_plate()
-
-        r = []
-
-        for row in range(nrows):
-            c = []
-            for column in range(ncols):
-                if valid_key(column, row):
-                    key = Key(side + "_" + str(column) + "," + str(row), all_merged)
-                    key.calculate_key_placement(column, row, column_style=column_style)
-                    c.append(key)
-                else:
-                    c.append(Key("NONE", None))
-            r.append(c)
-
-        return r
 
     def test_keys():
         rows = key_placements(side="right")
@@ -1110,20 +1089,6 @@ def make_dactyl():
         )
 
 
-    rj9_start = list(
-        np.array([0, -3, 0])
-        + np.array(
-            key_position(
-                list(np.array(wall_locate3(0, 1)) + np.array([0, (mount_height / 2), 0])),
-                0,
-                0,
-            )
-        )
-    )
-
-    rj9_position = (rj9_start[0], rj9_start[1], 11)
-
-
     def rj9_cube():
         debugprint('rj9_cube()')
         shape = box(14.78, 13, 22.38)
@@ -1142,14 +1107,7 @@ def make_dactyl():
         shape = difference(rj9_cube(), [shape])
         shape = translate(shape, rj9_position)
 
-        return shape
-
-
-    usb_holder_position = key_position(
-        list(np.array(wall_locate2(0, 1)) + np.array([0, (mount_height / 2), 0])), 1, 0
-    )
-    usb_holder_size = [6.5, 10.0, 13.6]
-    usb_holder_thickness = 4
+        return shap
 
 
     def usb_holder():
@@ -1181,18 +1139,6 @@ def make_dactyl():
                           )
         return shape
 
-
-    external_start = list(
-        # np.array([0, -3, 0])
-        np.array([external_holder_width / 2, 0, 0])
-        + np.array(
-            key_position(
-                list(np.array(wall_locate3(0, 1)) + np.array([0, (mount_height / 2), 0])),
-                0,
-                0,
-            )
-        )
-    )
 
     def blackpill_mount_hole():
         print('blackpill_external_mount_hole()')
@@ -2062,7 +2008,6 @@ def make_dactyl():
 
 
     def run():
-
         mod_r = model_side(side="right")
         export_file(shape=mod_r, fname=path.join(save_path, config_name + r"_right"))
 
@@ -2120,9 +2065,70 @@ def make_dactyl():
             export_file(shape=union((oled_clip_mount_frame()[1], oled_clip())),
                         fname=path.join(save_path, config_name + r"_oled_clip_assy_test"))
 
+    def valid_key(column, row):
+        if (full_last_rows):
+            return (not (column in [0, 1])) or (not row == lastrow)
+
+        return (column in [2, 3]) or (not row == lastrow)
+
+
     all_merged = locals().copy()
     for item in globals():
         all_merged[item] = globals()[item]
+
+    def key_placements(side="right"):
+        debugprint('key_holes()')
+        # hole = single_plate()
+
+        r = []
+
+        for row in range(nrows):
+            c = []
+            for column in range(ncols):
+                if valid_key(column, row):
+                    key = Key(Key.get_rc_id(row, column), all_merged)
+                    key.calculate_key_placement(column, row, column_style=column_style)
+                    c.append(key)
+                else:
+                    c.append(Key("NONE", None))
+            r.append(c)
+
+        return r
+
+    key_placements(side="right")
+
+    rj9_start = list(
+        np.array([0, -3, 0])
+        + np.array(
+            key_position(
+                list(np.array(wall_locate3(0, 1)) + np.array([0, (mount_height / 2), 0])),
+                0,
+                0,
+            )
+        )
+    )
+
+    rj9_position = (rj9_start[0], rj9_start[1], 11)
+
+    usb_holder_position = key_position(
+        list(np.array(wall_locate2(0, 1)) + np.array([0, (mount_height / 2), 0])), 1, 0
+    )
+    usb_holder_size = [6.5, 10.0, 13.6]
+    usb_holder_thickness = 4
+
+
+    external_start = list(
+        # np.array([0, -3, 0])
+        np.array([external_holder_width / 2, 0, 0])
+        + np.array(
+            key_position(
+                list(np.array(wall_locate3(0, 1)) + np.array([0, (mount_height / 2), 0])),
+                0,
+                0,
+            )
+        )
+    )
+
 
     def get_cluster(style):
         if style == CarbonfetCluster.name():
@@ -2162,7 +2168,7 @@ def make_dactyl():
     else:
         left_cluster = right_cluster  # this assumes thumb_style always overrides DEFAULT other_thumb
 
-    test_keys()
+    run()
 
 
 #

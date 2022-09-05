@@ -7,6 +7,8 @@ SIZES = {
     "ALPS": {"w": 15.5, "h": 12.8, "d": 10}
 }
 
+KEYS_BY_ID = {}
+
 
 class Key(object):
     _pos = [0, 0, 0]
@@ -17,6 +19,20 @@ class Key(object):
     h = SIZES["MX"]["h"]
     d = SIZES["MX"]["d"]
     hole = "NOTCH"
+    plate_rot_z = 0
+
+    @staticmethod
+    def get_key_by_id(key_id):
+        return KEYS_BY_ID[key_id]
+
+    @staticmethod
+    def get_key_by_row_col(row, col):
+        return KEYS_BY_ID[Key.get_rc_id(row, col)]
+
+    @staticmethod
+    def get_rc_id(row, col):
+        return "r" + str(row) + "c" + str(col)
+
 
     def __init__(self, key_id, parent_locals, key_type="MX", hole_type="NOTCH"):
         self._key_id = key_id
@@ -28,6 +44,13 @@ class Key(object):
         if parent_locals is not None:
             for item in parent_locals:
                 globals()[item] = parent_locals[item]
+        try:
+            test = KEYS_BY_ID[key_id]
+            if test is not None:
+                print("WARNING: KEY ID ALREADY PRESENT", key_id)
+        except:
+            print("Key generated ", key_id)
+        KEYS_BY_ID[key_id] = self
 
     def set_pos(self, new_pos):
         self._pos = new_pos
@@ -243,6 +266,8 @@ class Key(object):
             plate = mirror(plate, 'YZ')
 
         plate = rotate(plate, self.rot)
+        if self.plate_rot_z != 0:
+            plate = rotate(plate, [0, 0, self.plate_rot_z])
         plate = translate(plate, self.pos)
 
         return plate

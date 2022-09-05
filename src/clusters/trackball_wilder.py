@@ -4,7 +4,6 @@ import os
 
 
 class TrackballWild(TrackballOrbyl):
-    key_to_thumb_rotation = [] # may no longer be used?
     post_offsets = [
             [14, -8, 3],
             [3, -9, -7],
@@ -69,10 +68,10 @@ class TrackballWild(TrackballOrbyl):
         # Changes size based on key diameter around ball, shifting off of the top left cluster key.
         shift = [-.9*self.key_diameter/2+27-42, -.1*self.key_diameter/2+3-20, -5]
         for i in range(len(pos)):
-            pos[i] = pos[i] + shift[i] + self.translation_offset[i]
+            pos[i] = pos[i] + shift[i] + self.trackball_translation_offset[i]
 
         for i in range(len(rot)):
-            rot[i] = rot[i] + self.rotation_offset[i]
+            rot[i] = rot[i] + self.trackball_rotation_offset[i]
 
         return pos, rot
 
