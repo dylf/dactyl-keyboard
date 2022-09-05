@@ -92,7 +92,7 @@ class DefaultCluster(object):
 
     def _key_gen(self, index):
         key = Key(self.ids[index], globals())
-        key.rot = rotate_deg(key.rot, self.rot[index])
+        key.rot = self.rot[index]
         key.pos = add_translate(key.pos, self.thumborigin())
         key.pos = add_translate(key.pos, self.pos[index])
         return key

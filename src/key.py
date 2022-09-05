@@ -43,22 +43,30 @@ class Key(object):
     def get_rot(self):
         return self._rot
 
+    def update_rot_by(self, deltas):
+        self._rot = [self._rot[i] + deltas[i] for i in range(len(self._rot))]
+
     rot = property(get_rot, set_rot)
 
     def get_id(self):
         return self._key_id
 
     def rotate_deg(self, rotate_by):
-        self._rot = rotate_deg(self._rot, rotate_by)
-        return self._rot
+        self._pos = rotate_deg(self._pos, rotate_by)
+        self.update_rot_by(rotate_by)
+        return self._pos
 
     def rotate_rad(self, rotate_by):
-        self._rot = rotate_rad(self._rot, rotate_by)
-        return self._rot
+        self._pos = rotate_rad(self._pos, rotate_by)
+        self.update_rot_by([rad2deg(rotate_by[i]) for i in range(len(rotate_by))])
+        return self._pos
 
     def translate(self, position):
         self._pos = add_translate(self._pos, position)
         return self._pos
+
+    def finalize(self):
+        top_
 
     def calculate_key_placement(self,
                                 column,
