@@ -33,7 +33,6 @@ class Key(object):
     def get_rc_id(row, col):
         return "r" + str(row) + "c" + str(col)
 
-
     def __init__(self, key_id, parent_locals, key_type="MX", hole_type="NOTCH"):
         self._key_id = key_id
         self.type = key_type

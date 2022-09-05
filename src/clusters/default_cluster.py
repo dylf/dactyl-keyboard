@@ -41,7 +41,7 @@ class DefaultCluster(object):
         self._key_gen()
         print(self.name(), " built")
 
-    def get_keys(self):
+    def get_keys(self) -> [Key]:
         return self._keys
 
     def thumborigin(self):

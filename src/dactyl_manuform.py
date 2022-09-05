@@ -235,7 +235,6 @@ def make_dactyl():
 
     # column_style='fixed'
 
-
     def single_plate(cylinder_segments=100, side="right"):
         if plate_style in ['NUB', 'HS_NUB']:
             tb_border = (mount_height - keyswitch_height) / 2
@@ -351,11 +350,9 @@ def make_dactyl():
 
         return plate
 
-
     def trackball_cutout(segments=100, side="right"):
         shape = cylinder(trackball_hole_diameter / 2, trackball_hole_height)
         return shape
-
 
     def trackball_socket(btus=False,segments=100, side="right"):
         # shape = sphere(ball_diameter / 2)
@@ -390,17 +387,13 @@ def make_dactyl():
         # return shape, cutter
         return shape, cutter, sensor
 
-
     def trackball_ball(segments=100, side="right"):
         shape = sphere(ball_diameter / 2)
         return shape
 
-
     ################
     ## SA Keycaps ##
     ################
-
-
     def sa_cap(Usize=1):
         # MODIFIED TO NOT HAVE THE ROTATION.  NEEDS ROTATION DURING ASSEMBLY
         # sa_length = 18.25
@@ -454,7 +447,6 @@ def make_dactyl():
 
         return key_cap
 
-
     def key_pcb():
         shape = box(pcb_width, pcb_height, pcb_thickness)
         shape = translate(shape, (0, 0, -pcb_thickness / 2))
@@ -470,12 +462,9 @@ def make_dactyl():
 
         return shape
 
-
     #########################
     ## Placement Functions ##
     #########################
-
-
     def get_key_placement(
             position,
             column,
@@ -547,8 +536,6 @@ def make_dactyl():
     ):
         debugprint('apply_key_geometry()')
 
-
-
         column_angle = beta * (centercol - column)
 
         column_x_delta_actual = column_x_delta
@@ -607,14 +594,16 @@ def make_dactyl():
     def key_place(shape, column, row):
         debugprint('key_place()')
         key = Key.get_key_by_row_col(row, column)
-        return key.render(plate_file)
+        shape = rotate(shape, key.rot)
+        shape = translate(shape, key.pos)
+        return shape
         # return apply_key_geometry(shape, translate, x_rot, y_rot, column, row)
 
 
     def key_position(position, column, row):
         debugprint('key_position()')
         key = Key.get_key_by_row_col(row, column)
-        return key.pos
+        return add_translate(position, key.pos)
         # return apply_key_geometry(
         #     position, add_translate, rotate_around_x, rotate_around_y, column, row
         # )
@@ -665,18 +654,14 @@ def make_dactyl():
 
         return caps
 
-
     ####################
     ## Web Connectors ##
     ####################
-
-
     def web_post():
         debugprint('web_post()')
         post = box(post_size, post_size, web_thickness)
         post = translate(post, (0, 0, plate_thickness - (web_thickness / 2)))
         return post
-
 
     def web_post_tr(wide=False):
         if wide:
@@ -2081,7 +2066,7 @@ def make_dactyl():
         # hole = single_plate()
 
         r = []
-
+        none_key = Key("NONE", None)
         for row in range(nrows):
             c = []
             for column in range(ncols):
@@ -2090,7 +2075,7 @@ def make_dactyl():
                     key.calculate_key_placement(column, row, column_style=column_style)
                     c.append(key)
                 else:
-                    c.append(Key("NONE", None))
+                    c.append(none_key)
             r.append(c)
 
         return r
