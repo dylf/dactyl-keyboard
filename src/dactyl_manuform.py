@@ -1,5 +1,5 @@
 from geom import *
-from key import Key
+from key import Key, KeyFactory
 import os.path as path
 import getopt
 import sys
@@ -593,7 +593,7 @@ def make_dactyl():
 
     def key_place(shape, column, row):
         debugprint('key_place()')
-        key = Key.get_key_by_row_col(row, column)
+        key = KeyFactory.get_key_by_row_col(row, column)
         shape = rotate(shape, key.rot)
         shape = translate(shape, key.pos)
         return shape
@@ -602,7 +602,7 @@ def make_dactyl():
 
     def key_position(position, column, row):
         debugprint('key_position()')
-        key = Key.get_key_by_row_col(row, column)
+        key = KeyFactory.get_key_by_row_col(row, column)
         return add_translate(position, key.pos)
         # return apply_key_geometry(
         #     position, add_translate, rotate_around_x, rotate_around_y, column, row
@@ -615,7 +615,8 @@ def make_dactyl():
         for column in range(ncols):
             for row in range(nrows):
                 if valid_key(column, row):
-                    holes.append(key_place(single_plate(side=side), column, row))
+                    key = KeyFactory.get_key_by_row_col(row, column)
+                    holes.append(key_place(key.render(plate_file, side=side), column, row))
 
         shape = union(holes)
 
@@ -2066,12 +2067,12 @@ def make_dactyl():
         # hole = single_plate()
 
         r = []
-        none_key = Key("NONE", None)
+        none_key = KeyFactory.new_key("NONE", None)
         for row in range(nrows):
             c = []
             for column in range(ncols):
                 if valid_key(column, row):
-                    key = Key(Key.get_rc_id(row, column), all_merged)
+                    key = KeyFactory.new_key_by_row_column(row, column, all_merged)
                     key.calculate_key_placement(column, row, column_style=column_style)
                     c.append(key)
                 else:

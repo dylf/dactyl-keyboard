@@ -1,13 +1,10 @@
-import json
-import os
 from geom import *
+
 
 SIZES = {
     "MX": {"w": 14, "h": 14, "d": 10},
     "ALPS": {"w": 15.5, "h": 12.8, "d": 10}
 }
-
-KEYS_BY_ID = {}
 
 
 class Key(object):
@@ -21,18 +18,6 @@ class Key(object):
     hole = "NOTCH"
     plate_rot_z = 0
 
-    @staticmethod
-    def get_key_by_id(key_id):
-        return KEYS_BY_ID[key_id]
-
-    @staticmethod
-    def get_key_by_row_col(row, col):
-        return KEYS_BY_ID[Key.get_rc_id(row, col)]
-
-    @staticmethod
-    def get_rc_id(row, col):
-        return "r" + str(row) + "c" + str(col)
-
     def __init__(self, key_id, parent_locals, key_type="MX", hole_type="NOTCH"):
         self._key_id = key_id
         self.type = key_type
@@ -43,13 +28,6 @@ class Key(object):
         if parent_locals is not None:
             for item in parent_locals:
                 globals()[item] = parent_locals[item]
-        try:
-            test = KEYS_BY_ID[key_id]
-            if test is not None:
-                print("WARNING: KEY ID ALREADY PRESENT", key_id)
-        except:
-            print("Key generated ", key_id)
-        KEYS_BY_ID[key_id] = self
 
     def set_pos(self, new_pos):
         self._pos = new_pos
@@ -86,9 +64,6 @@ class Key(object):
     def translate(self, position):
         self._pos = add_translate(self._pos, position)
         return self._pos
-
-    def finalize(self):
-        top_
 
     def calculate_key_placement(self,
                                 column,
@@ -178,15 +153,6 @@ class Key(object):
 
             plate = union([plate_half1, plate_half2])
 
-        # elif plate_style in "AMOEBA":  # 'HOLE' or default, square cutout for non-nub designs.
-        #     plate = box(mount_width, mount_height, mount_thickness)
-        #     plate = translate(plate, (0.0, 0.0, mount_thickness / 2.0))
-        #
-        #     shape_cut = box(keyswitch_width + 2, keyswitch_height + 2, mount_thickness * 2 + .02)
-        #     shape_cut = translate(shape_cut, (0.0, 0.0, mount_thickness - .01))
-        #
-        #     plate = difference(plate, [shape_cut])
-
         else:  # 'HOLE' or default, square cutout for non-nub designs.
             plate = box(mount_width, mount_height, mount_thickness)
             plate = translate(plate, (0.0, 0.0, mount_thickness / 2.0))
@@ -270,3 +236,34 @@ class Key(object):
         plate = translate(plate, self.pos)
 
         return plate
+
+
+KEYS_BY_ID = {}
+
+
+class KeyFactory(object):
+    @staticmethod
+    def get_key_by_id(key_id: str) -> Key:
+        return KEYS_BY_ID[key_id]
+
+    @classmethod
+    def get_key_by_row_col(cls, row, col) -> Key:
+        return KEYS_BY_ID[cls.get_rc_id(row, col)]
+
+    @staticmethod
+    def get_rc_id(row, col):
+        return "r" + str(row) + "c" + str(col)
+
+    @classmethod
+    def new_key(cls, key_id: str, parent_locals, key_type="MX", hole_type="NOTCH"):
+        key = Key(key_id, parent_locals, key_type=key_type, hole_type=hole_type)
+        if key_id in KEYS_BY_ID:
+            print("WARNING: key_id already in keys list", key_id)
+        else:
+            KEYS_BY_ID[key_id] = key
+        return key
+
+    @classmethod
+    def new_key_by_row_column(cls, row: int, col: int, parent_locals, key_type="MX", hole_type="NOTCH"):
+        return cls.new_key(cls.get_rc_id(row, col), parent_locals, key_type=key_type, hole_type=hole_type)
+

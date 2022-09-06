@@ -1,6 +1,6 @@
 import json
 import os
-from key import Key
+from key import Key, KeyFactory
 from geom import *
 
 TL = 0
@@ -56,7 +56,7 @@ class DefaultCluster(object):
     def _key_gen(self):
         for index in range(len(self.key_data)):
             data = self.key_data[index]
-            key = Key(data['id'], globals())
+            key = KeyFactory.new_key(data['id'], globals())
             key.rot = data['rot']
             key.pos = add_translate(key.pos, self.thumborigin())
             key.pos = add_translate(key.pos, data['pos'])
