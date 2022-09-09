@@ -616,7 +616,7 @@ def make_dactyl():
             for row in range(nrows):
                 if valid_key(column, row):
                     key = KeyFactory.get_key_by_row_col(row, column)
-                    holes.append(key_place(key.render(plate_file, side=side), column, row))
+                    holes.append(key.render(plate_file, side=side))
 
         shape = union(holes)
 
