@@ -39,9 +39,9 @@ The setup and run instructions are still more-or-less the same, but here's some 
 
         conda update --all -y
 
-Then, still in the shell, navigate to the src directory under the repository root and run:
+Then, still in the shell, from the base repo directory, run:
 
-    python dactyl_manuform.py
+    python src/dactyl_manuform.py
 
 This will churn and pump out models into the "things" directory.  In run_config.json, "ENGINE": "solid" or "cadquery" will specify OpenSCAD or STEP/STL files, respectively.  Note that the cadquery option takes considerably longer.  Openscad is best for fast iteration.
 

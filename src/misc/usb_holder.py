@@ -246,4 +246,4 @@ def usb_holder():
 
 shape = usb_holder()
 
-export_file(shape, "../../things/holder_test.scad")
+export_file(shape, "../things/holder_test.scad")

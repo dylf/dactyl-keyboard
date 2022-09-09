@@ -47,7 +47,7 @@ def make_dactyl():
 
     symmetry = None
     column_style = None
-    save_path = path.join(r"..", "things")
+    save_path = path.join(r".", "things")
 
     def cluster(side="right"):
         return right_cluster if side == "right" else left_cluster
@@ -62,7 +62,7 @@ def make_dactyl():
     opts, args = getopt.getopt(sys.argv[1:], "", ["config=", "save_path="])
     for opt, arg in opts:
         if opt in '--config':
-            with open(os.path.join(r"..", "configs", arg + '.json'), mode='r') as fid:
+            with open(os.path.join(r".", "configs", arg + '.json'), mode='r') as fid:
                 data = json.load(fid)
         elif opt in '--save_path':
             print("save_path set to argument: ", arg)
@@ -70,7 +70,7 @@ def make_dactyl():
 
     if data is None:
         print("NO CONFIGURATION SPECIFIED, USING run_config.json")
-        with open(os.path.join(r".", 'run_config.json'), mode='r') as fid:
+        with open(os.path.join("src", "run_config.json"), mode='r') as fid:
             data = json.load(fid)
 
     if data["overrides"] not in [None, ""]:
@@ -99,7 +99,7 @@ def make_dactyl():
         # ENGINE = 'cadquery'
         print('Setting Current Engine = {}'.format(ENGINE))
 
-    parts_path = os.path.abspath(path.join(r".", "parts"))
+    parts_path = os.path.abspath(path.join(r"src", "parts"))
 
     if save_dir not in ['', None, '.']:
         save_path = save_dir
@@ -1782,22 +1782,22 @@ def make_dactyl():
         print('model_side()' + side)
         shape = union([key_holes(side=side)])
         if debug_exports:
-            export_file(shape=shape, fname=path.join(r"..", "things", r"debug_key_plates"))
+            export_file(shape=shape, fname=path.join(r".", "things", r"debug_key_plates"))
         connector_shape = connectors()
         shape = union([shape, connector_shape])
         if debug_exports:
-            export_file(shape=shape, fname=path.join(r"..", "things", r"debug_connector_shape"))
+            export_file(shape=shape, fname=path.join(r".", "things", r"debug_connector_shape"))
         thumb_shape = cluster(side).thumb(side=side)
         if debug_exports:
-            export_file(shape=thumb_shape, fname=path.join(r"..", "things", r"debug_thumb_shape"))
+            export_file(shape=thumb_shape, fname=path.join(r".", "things", r"debug_thumb_shape"))
         shape = union([shape, thumb_shape])
         thumb_connector_shape = cluster(side).thumb_connectors(side=side)
         shape = union([shape, thumb_connector_shape])
         if debug_exports:
-            export_file(shape=shape, fname=path.join(r"..", "things", r"debug_thumb_connector_shape"))
+            export_file(shape=shape, fname=path.join(r".", "things", r"debug_thumb_connector_shape"))
         walls_shape = case_walls(side=side)
         if debug_exports:
-            export_file(shape=walls_shape, fname=path.join(r"..", "things", r"debug_walls_shape"))
+            export_file(shape=walls_shape, fname=path.join(r".", "things", r"debug_walls_shape"))
         s2 = union([walls_shape])
         s2 = union([s2, *screw_insert_outers(side=side)])
 

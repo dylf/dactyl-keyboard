@@ -49,7 +49,7 @@ default = "DEFAULT"
 trackball = "TRACKBALL_WILD"
 hotswap = "HS_NOTCH"
 normal = "NOTCH"
-run_config = os.path.join(r".", 'run_config.json')
+run_config = os.path.join(r"src", 'run_config.json')
 
 
 def write_file(file_path, data):

@@ -45,13 +45,13 @@ fi
 
 inform "Creating conda environment: $envName..."
 
-conda create --name=$envName python=3.7 -y
+conda create --name=$envName python=3.8 -y
 
 conda activate $envName
 
 inform "Installing CadQuery..."
 
-conda install -c conda-forge -c cadquery cadquery=2 -y
+conda install -c conda-forge -c cadquery cadquery=master -y
 
 inform "Installing dataclasses-json..."
 
