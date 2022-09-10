@@ -125,8 +125,8 @@ class DefaultCluster(object):
         if plate:
             if cap:
                 shape = rotate(shape, (0, 0, 90))
-                cap_list = [self.tl_place(rotate(shape, [0, 0, self._keys[TL].plate_rot_z]))]
-                cap_list.append(self.tr_place(rotate(shape, [0, 0, self._keys[TR].plate_rot_z])))
+                cap_list = [self.tl_place(rotate(shape, [0, 0, self._keys[TL].plate_rot_z])),
+                            self.tr_place(rotate(shape, [0, 0, self._keys[TR].plate_rot_z]))]
                 return add(cap_list)
             else:
                 shape_list = [self.tl_place(rotate(shape, [0, 0, self._keys[TL].plate_rot_z]))]
@@ -136,10 +136,7 @@ class DefaultCluster(object):
         else:
             if cap:
                 shape = rotate(shape, (0, 0, 90))
-                shape_list = [
-                    self.tl_place(shape),
-                ]
-                shape_list.append(self.tr_place(shape))
+                shape_list = [self.tl_place(shape), self.tr_place(shape)]
 
                 return add(shape_list)
             else:

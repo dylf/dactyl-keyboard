@@ -578,18 +578,13 @@ def make_dactyl():
 
         return shape
 
-
-
-
     def x_rot(shape, angle):
         # debugprint('x_rot()')
         return rotate(shape, [rad2deg(angle), 0, 0])
 
-
     def y_rot(shape, angle):
         # debugprint('y_rot()')
         return rotate(shape, [0, rad2deg(angle), 0])
-
 
     def key_place(shape, column, row):
         debugprint('key_place()')
@@ -598,7 +593,6 @@ def make_dactyl():
         shape = translate(shape, key.pos)
         return shape
         # return apply_key_geometry(shape, translate, x_rot, y_rot, column, row)
-
 
     def key_position(position, column, row):
         debugprint('key_position()')
@@ -621,23 +615,6 @@ def make_dactyl():
         shape = union(holes)
 
         return shape
-
-    def test_keys():
-        rows = key_placements(side="right")
-
-        all_keys = []
-        for column in rows:
-            for key in column:
-                if key.get_id() != "NONE":
-                    all_keys.append(key)
-        for key in cluster("right").get_keys():
-            if key.get_id() != "NONE":
-                all_keys.append(key)
-
-        shapes = [key.render(plate_file, side="right") for key in all_keys]
-
-        keys = union(shapes)
-        export_file(shape=keys, fname=path.join(r"..", "things", r"keys_maybe"))
 
     def caps():
         caps = None
