@@ -2,6 +2,7 @@ from geom import *
 from key import Key, KeyFactory
 import os.path as path
 import getopt
+import yaml
 import sys
 import json
 import os
@@ -33,6 +34,21 @@ def debugprint(info):
 ## IMPORT DEFAULT CONFIG IN CASE NEW PARAMETERS EXIST
 
 
+def load_data(file_base_path):
+    try:
+        with open(file_base_path + ".json", mode='r') as fid:
+            data = json.load(fid)
+            return data
+    except:
+        try:
+            with open(file_base_path + ".yml", mode='r') as fid:
+                data = yaml.safe_load(fid)
+                return data
+        except:
+            print("NO FILE FOUND: " + file_base_path)
+            exit(-1)
+
+
 def make_dactyl():
     right_cluster = None
     left_cluster = None
@@ -62,22 +78,19 @@ def make_dactyl():
     opts, args = getopt.getopt(sys.argv[1:], "", ["config=", "save_path="])
     for opt, arg in opts:
         if opt in '--config':
-            with open(os.path.join(r".", "configs", arg + '.json'), mode='r') as fid:
-                data = json.load(fid)
+            data = load_data(os.path.join(r".", "configs", arg))
         elif opt in '--save_path':
             print("save_path set to argument: ", arg)
             save_path = arg
 
     if data is None:
         print("NO CONFIGURATION SPECIFIED, USING run_config.json")
-        with open(os.path.join("src", "run_config.json"), mode='r') as fid:
-            data = json.load(fid)
+        data = load_data(os.path.join("src", "run_config"))
 
     if data["overrides"] not in [None, ""]:
         save_path = path.join(save_path, data["overrides"])
-        override_file = path.join(save_path, data["overrides"] + '.json')
-        with open(override_file, mode='r') as fid:
-            override_data = json.load(fid)
+        override_file = path.join(save_path, data["overrides"])
+        override_data = load_data(override_file)
         for item in override_data:
             data[item] = override_data[item]
 

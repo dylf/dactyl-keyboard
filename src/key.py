@@ -65,6 +65,47 @@ class Key(object):
         self._pos = add_translate(self._pos, position)
         return self._pos
 
+    def tr(self, add_x=0, add_y=0):
+        offset = rotate_deg([(mount_width / 2.0) + add_x, (mount_height / 2) + add_y, 0], self._rot)
+        return add_translate(self._pos, offset)
+
+    def tl(self, add_x=0, add_y=0):
+        offset = rotate_deg([-(mount_width / 2.0) - add_x, (mount_height / 2) + add_y, 0], self._rot)
+        return add_translate(self._pos, offset)
+
+    def br(self, add_x=0, add_y=0):
+        offset = rotate_deg([(mount_width / 2.0) + add_x, -(mount_height / 2) - add_y, 0], self._rot)
+        return add_translate(self._pos, offset)
+
+    def bl(self, add_x=0, add_y=0):
+        offset = rotate_deg([-(mount_width / 2.0) - add_x, -(mount_height / 2) - add_y, 0], self._rot)
+        return add_translate(self._pos, offset)
+
+    def closest_corner(self, rel_pos):
+        dist = 99999999999.0
+        all_dist = [
+            distance(rel_pos, self._tl),
+            distance(rel_pos, self._tr),
+            distance(rel_pos, self._bl),
+            distance(rel_pos, self._br)
+        ]
+
+        index = -1
+
+        for i in range(4):
+            if all_dist[i] < dist:
+                index = i
+                dist = all_dist[i]
+
+        if index == 0:
+            return self._tl
+        elif index == 1:
+            return self._tr
+        elif index == 2:
+            return self._bl
+
+        return self._br
+
     def calculate_key_placement(self,
                                 column,
                                 row,

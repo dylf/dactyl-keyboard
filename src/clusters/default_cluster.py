@@ -61,6 +61,8 @@ class DefaultCluster(object):
             key.pos = add_translate(key.pos, self.thumborigin())
             key.pos = add_translate(key.pos, data['pos'])
             key.plate_rot_z = data['plate_rot_z']
+            tr = key.tr()
+            pos = key.pos
             self._keys.append(key)
 
     def _key_place(self, index, shape):

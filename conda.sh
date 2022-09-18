@@ -69,6 +69,10 @@ inform "Installing solidpython..."
 
 pip install solidpython
 
+inform "Installing pyyaml"
+
+pip install pyyaml
+
 inform "Updating conda dependencies..."
 
 conda update --all -y

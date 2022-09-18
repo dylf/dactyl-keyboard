@@ -1,0 +1,28 @@
+# This file overrides the settings in the run_config.json or whatever base configuration file you may load.
+# Its intent is to have a simple, clear, short file for configuring specific settings where the critical changes
+# are all plain to see in one place.
+#
+# You can specify the location of this path in run_config.json via the "overrides" value.
+#
+# My use for this feature has primarily been to keep track of the specific build needs for my customers
+# at Wylderbuilds, but it also comes in extremely handy for iterating various settings when testing code changes.
+#
+# And COMMENTS!  You can add comments to yaml or comment out lines to swap among config settings with ease
+# and document in place WHY THE HELL YOU DID THAT CRAZY THING.
+
+# In the default setup here, nothing is overridden so you'll just get the settings as specified in
+# run_config.json
+
+# ---------------------------------------------------------------------------------------------------
+
+# ENGINE: "cadqyery"
+# plate_style: "HS_NOTCH"
+# quick_render: false
+# thumb_style: "TRACKBALL_DEFAULT"
+# other_thumb: "DEFAULT"
+# ball_side: "right"
+# show_caps: false
+# pinky_1_5U: false
+# last_1_5U_row: 3
+# full_last_rows: false
+# default_1U_cluster: false

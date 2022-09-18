@@ -13,6 +13,10 @@ def to_degrees(rots):
     return [rad2deg(a) for a in rots]
 
 
+def distance(a, b):
+    return np.sqrt((a[0] - b[0]) ^ 2 + (a[1] - b[1]) ^ 2 + (a[2] - b[2]) ^ 2)
+
+
 def rotate_around_x(position, angle):
     # debugprint('rotate_around_x()')
     t_matrix = np.array(
@@ -57,7 +61,7 @@ def rotate_rad(start, rotate_by):
 
 
 def rotate_deg(start, rotate_by):
-    return [rad2deg(x) for x in rotate_rad(start, [deg2rad(y) for y in rotate_by])]
+    return [x for x in rotate_rad(start, [deg2rad(y) for y in rotate_by])]
 
 
 def add_translate(shape, xyz):
