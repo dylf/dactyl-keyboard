@@ -17,6 +17,21 @@ def distance(a, b):
     return np.sqrt((a[0] - b[0]) ^ 2 + (a[1] - b[1]) ^ 2 + (a[2] - b[2]) ^ 2)
 
 
+def rotate_around_x2(position, around_point, angle):
+    dist = distance(position, around_point)
+    return [position[0], position[1] - (dist * np.sin(angle)), position[2] - (dist * np.cos(angle))]
+
+
+def rotate_around_y2(position, around_point, angle):
+    dist = distance(position, around_point)
+    return [position[0] - (dist * np.sin(angle)), 0, position[2] - (dist * np.cos(angle))]
+
+
+def rotate_around_yz(position, around_point, angle):
+    dist = distance(position, around_point)
+    return [position[0] - (dist * np.sin(angle)), position[1] - (dist * np.cos(angle)), position[2]]
+
+
 def rotate_around_x(position, angle):
     # debugprint('rotate_around_x()')
     t_matrix = np.array(
@@ -54,10 +69,10 @@ def rotate_around_z(position, angle):
 
 
 def rotate_rad(start, rotate_by):
-    x_pos = rotate_around_x(start, rotate_by[0])[0]
-    y_pos = rotate_around_y(start, rotate_by[1])[1]
-    z_pos = rotate_around_z(start, rotate_by[2])[2]
-    return [x_pos, y_pos, z_pos]
+    result = rotate_around_x(start, rotate_by[0])
+    result = rotate_around_y(result, rotate_by[1])
+    result = rotate_around_z(result, rotate_by[2])
+    return result
 
 
 def rotate_deg(start, rotate_by):

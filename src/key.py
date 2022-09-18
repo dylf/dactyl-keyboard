@@ -84,10 +84,10 @@ class Key(object):
     def closest_corner(self, rel_pos):
         dist = 99999999999.0
         all_dist = [
-            distance(rel_pos, self._tl),
-            distance(rel_pos, self._tr),
-            distance(rel_pos, self._bl),
-            distance(rel_pos, self._br)
+            distance(rel_pos, self.tl()),
+            distance(rel_pos, self.tr()),
+            distance(rel_pos, self.bl()),
+            distance(rel_pos, self.br())
         ]
 
         index = -1
@@ -98,13 +98,13 @@ class Key(object):
                 dist = all_dist[i]
 
         if index == 0:
-            return self._tl
+            return self.tl()
         elif index == 1:
-            return self._tr
+            return self.tr()
         elif index == 2:
-            return self._bl
+            return self.bl()
 
-        return self._br
+        return self.br()
 
     def calculate_key_placement(self,
                                 column,

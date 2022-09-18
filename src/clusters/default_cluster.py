@@ -3,12 +3,12 @@ import os
 from key import Key, KeyFactory
 from geom import *
 
-TL = 0
-TR = 1
-ML = 2
-MR = 3
-BL = 4
-BR = 5
+TL = "tl"
+TR = "tr"
+ML = "ml"
+MR = "mr"
+BL = "bl"
+BR = "br"
 
 
 class DefaultCluster(object):
@@ -18,7 +18,7 @@ class DefaultCluster(object):
 
     key_data = []
 
-    _keys = []
+    _keys = {}
 
     @staticmethod
     def name():
@@ -61,9 +61,7 @@ class DefaultCluster(object):
             key.pos = add_translate(key.pos, self.thumborigin())
             key.pos = add_translate(key.pos, data['pos'])
             key.plate_rot_z = data['plate_rot_z']
-            tr = key.tr()
-            pos = key.pos
-            self._keys.append(key)
+            self._keys[key.id] = key
 
     def _key_place(self, index, shape):
         key = self._keys[index]
