@@ -55,7 +55,7 @@ def make_dactyl():
 
     symmetry = None
     column_style = None
-    save_path = path.join(r"..", "things")
+    save_path = path.join(r".", "things")
 
     def cluster(side="right"):
         return right_cluster if side == "right" else left_cluster
@@ -70,7 +70,7 @@ def make_dactyl():
     opts, args = getopt.getopt(sys.argv[1:], "", ["config=", "save_path="])
     for opt, arg in opts:
         if opt in '--config':
-            with open(os.path.join(r"..", "configs", arg + '.json'), mode='r') as fid:
+            with open(os.path.join(r".", "configs", arg + '.json'), mode='r') as fid:
                 data = json.load(fid)
         elif opt in '--save_path':
             print("save_path set to argument: ", arg)
@@ -78,7 +78,7 @@ def make_dactyl():
 
     if data is None:
         print("NO CONFIGURATION SPECIFIED, USING run_config.json")
-        with open(os.path.join(r".", 'run_config.json'), mode='r') as fid:
+        with open(os.path.join("src", "run_config.json"), mode='r') as fid:
             data = json.load(fid)
 
     if data["overrides"] not in [None, ""]:
@@ -107,7 +107,7 @@ def make_dactyl():
         # ENGINE = 'cadquery'
         print('Setting Current Engine = {}'.format(ENGINE))
 
-    parts_path = os.path.abspath(path.join(r".", "parts"))
+    parts_path = os.path.abspath(path.join(r"src", "parts"))
 
     if save_dir not in ['', None, '.']:
         save_path = save_dir
@@ -246,7 +246,7 @@ def make_dactyl():
 
 
     def single_plate(cylinder_segments=100, side="right"):
-        if plate_style != "AMOEBA" and plate_style in ['NUB', 'HS_NUB']:
+        if plate_style in ['NUB', 'HS_NUB']:
             tb_border = (mount_height - keyswitch_height) / 2
             top_wall = box(mount_width, tb_border, plate_thickness)
             top_wall = translate(top_wall, (0, (tb_border / 2) + (keyswitch_height / 2), plate_thickness / 2))
@@ -272,14 +272,14 @@ def make_dactyl():
 
             plate = union([plate_half1, plate_half2])
 
-        elif plate_style in "AMOEBA":  # 'HOLE' or default, square cutout for non-nub designs.
-            plate = box(mount_width + 1, mount_height + 1, mount_thickness)
-            plate = translate(plate, (0.0, 0.0, mount_thickness / 2.0))
-
-            shape_cut = box(keyswitch_width + 2, keyswitch_height + 2, mount_thickness * 2 + .02)
-            shape_cut = translate(shape_cut, (0.0, 0.0, mount_thickness - .01))
-
-            plate = difference(plate, [shape_cut])
+        # elif plate_style in "AMOEBA":  # 'HOLE' or default, square cutout for non-nub designs.
+        #     plate = box(mount_width, mount_height, mount_thickness)
+        #     plate = translate(plate, (0.0, 0.0, mount_thickness / 2.0))
+        #
+        #     shape_cut = box(keyswitch_width + 2, keyswitch_height + 2, mount_thickness * 2 + .02)
+        #     shape_cut = translate(shape_cut, (0.0, 0.0, mount_thickness - .01))
+        #
+        #     plate = difference(plate, [shape_cut])
 
         else:  # 'HOLE' or default, square cutout for non-nub designs.
             plate = box(mount_width, mount_height, mount_thickness)
@@ -290,7 +290,12 @@ def make_dactyl():
 
             plate = difference(plate, [shape_cut])
 
-        if plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH']:
+        if plate_file is not None:
+            socket = import_file(plate_file)
+            socket = translate(socket, [0, 0, plate_thickness + plate_offset])
+            plate = union([plate, socket])
+
+        if plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH', 'AMOEBA']:
             if plate_style in ['UNDERCUT', 'HS_UNDERCUT']:
                 undercut = box(
                     keyswitch_width + 2 * clip_undercut,
@@ -298,7 +303,7 @@ def make_dactyl():
                     mount_thickness
                 )
 
-            if plate_style in ['NOTCH', 'HS_NOTCH']:
+            if plate_style in ['NOTCH', 'HS_NOTCH', 'AMOEBA']:
                 undercut = box(
                     notch_width,
                     keyswitch_height + 2 * clip_undercut,
@@ -319,10 +324,11 @@ def make_dactyl():
 
             plate = difference(plate, [undercut])
 
-        if plate_file is not None:
-            socket = import_file(plate_file)
-            socket = translate(socket, [0, 0, plate_thickness + plate_offset])
-            plate = union([plate, socket])
+        # if plate_file is not None:
+        #     socket = import_file(plate_file)
+        #
+        #     socket = translate(socket, [0, 0, plate_thickness + plate_offset])
+        #     plate = union([plate, socket])
 
         if plate_holes:
             half_width = plate_holes_width / 2.
@@ -1777,22 +1783,22 @@ def make_dactyl():
         print('model_side()' + side)
         shape = union([key_holes(side=side)])
         if debug_exports:
-            export_file(shape=shape, fname=path.join(r"..", "things", r"debug_key_plates"))
+            export_file(shape=shape, fname=path.join(r".", "things", r"debug_key_plates"))
         connector_shape = connectors()
         shape = union([shape, connector_shape])
         if debug_exports:
-            export_file(shape=shape, fname=path.join(r"..", "things", r"debug_connector_shape"))
+            export_file(shape=shape, fname=path.join(r".", "things", r"debug_connector_shape"))
         thumb_shape = cluster(side).thumb(side=side)
         if debug_exports:
-            export_file(shape=thumb_shape, fname=path.join(r"..", "things", r"debug_thumb_shape"))
+            export_file(shape=thumb_shape, fname=path.join(r".", "things", r"debug_thumb_shape"))
         shape = union([shape, thumb_shape])
         thumb_connector_shape = cluster(side).thumb_connectors(side=side)
         shape = union([shape, thumb_connector_shape])
         if debug_exports:
-            export_file(shape=shape, fname=path.join(r"..", "things", r"debug_thumb_connector_shape"))
+            export_file(shape=shape, fname=path.join(r".", "things", r"debug_thumb_connector_shape"))
         walls_shape = case_walls(side=side)
         if debug_exports:
-            export_file(shape=walls_shape, fname=path.join(r"..", "things", r"debug_walls_shape"))
+            export_file(shape=walls_shape, fname=path.join(r".", "things", r"debug_walls_shape"))
         s2 = union([walls_shape])
         s2 = union([s2, *screw_insert_outers(side=side)])
 
@@ -1969,6 +1975,7 @@ def make_dactyl():
                 shape = difference(shape, hole_shapes)
                 shape = translate(shape, (0, 0, -base_rim_thickness))
                 shape = union([shape, inner_shape])
+
 
             return shape
         else:
