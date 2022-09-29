@@ -47,7 +47,7 @@ def make_dactyl():
 
     left_wall_x_offset = 8
     left_wall_x_row_offsets = [
-        8, 8, 8, 8, 8, 8
+        8, 8, 8, 8, 8, 8, 8, 8
     ]
     left_wall_z_offset = 3
     left_wall_lower_y_offset = 0
@@ -207,6 +207,8 @@ def make_dactyl():
             left_wall_x_row_offsets = [22, 22, 22, 8, 8]
         elif nrows == 6:
             left_wall_x_row_offsets = [22, 22, 22, 8, 8, 8]
+        elif nrows == 7:
+            left_wall_x_row_offsets = [22, 22, 22, 8, 8, 8, 8]
         # left_wall_x_row_offsets = [22 if row > oled_row else 8 for row in range(lastrow)]
         left_wall_z_offset = oled_left_wall_z_offset_override
         left_wall_lower_y_offset = oled_left_wall_lower_y_offset
