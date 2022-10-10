@@ -1,75 +1,57 @@
 {
-    "key_diameter": 75,
-    "thumb_offsets": [
-        0,
-        -2,
-        7
-      ],
-    "translation_offset": [
-        10,
-        0,
-        0
+  "key_diameter": 75,
+  "translation_offset": [
+    0,
+    0,
+    5
+  ],
+  "rotation_offset": [
+    0,
+    0,
+    0
+  ],
+  "key_translation_offsets": [
+    [
+      0.0,
+      0.0,
+      -8.0
     ],
-    "rotation_offset": [
-        10,
-        -10,
-        0
+    [
+      0.0,
+      0.0,
+      -8.0
     ],
-    "wall_offsets":[
-        [
-            0.3,
-            0.3,
-            0.0
-        ],
-        [
-            0.3,
-            0.3,
-            0.0
-        ],
-        [
-            0.0,
-            0.0,
-            0.0
-        ]
+    [
+      -5.0,
+      0.0,
+      -8.0
     ],
-    "key_translation_offsets": [
-        [
-            0.0,
-            -5.0,
-            -3.0
-        ],
-        [
-            0.0,
-            -3.0,
-            -5.0
-        ],
-        [
-            -10.0,
-            0.0,
-            0.0
-        ]
+    [
+      0.0,
+      0.0,
+      -8.0
+    ]
+  ],
+  "key_rotation_offsets": [
+    [
+      0.0,
+      0.0,
+      0.0
     ],
-    "key_rotation_offsets": [
-        [
-            0.0,
-            0.0,
-            15
-        ],
-        [
-            0.0,
-            0.0,
-            -5
-        ],
-        [
-            25.0,
-            5.0,
-            0
-        ]
+    [
+      0.0,
+      0.0,
+      0.0
     ],
-    "key_to_thumb_rotation": [
-        -80, -150, -240
+    [
+      0.0,
+      0.0,
+      10.0
     ],
-    "thumb_plate_tr_rotation": 180.0,
-    "thumb_plate_mr_rotation": 180.0,
-    "thumb_plate_bl_rotation": 0.0
+    [
+      0.0,
+      0.0,
+      0.0
+    ]
+  ]
 }
