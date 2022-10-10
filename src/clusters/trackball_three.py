@@ -159,7 +159,7 @@ class TrackballThree(DefaultCluster):
         ])
 
     def thumb_15x_layout(self, shape, cap=False, plate=True):
-        return self.br_place(rotate(shape, [0, 0, self.thumb_plate_br_rotation])),
+        return self.br_place(rotate(shape, [0, 0, self.thumb_plate_br_rotation]))
 
     def thumb_fx_layout(self, shape):
         return union([])
