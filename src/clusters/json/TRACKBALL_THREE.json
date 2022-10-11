@@ -1,13 +1,13 @@
 {
   "key_diameter": 75,
   "translation_offset": [
-    0,
+    -5,
     0,
     5
   ],
   "rotation_offset": [
-    0,
-    0,
+    15,
+    15,
     0
   ],
   "key_translation_offsets": [

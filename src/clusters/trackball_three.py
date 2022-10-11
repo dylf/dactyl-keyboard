@@ -420,9 +420,9 @@ class TrackballThree(DefaultCluster):
         shape = union(hulls)
         return shape
 
-    # def screw_positions(self):
-    #     position = self.thumborigin()
-    #     position = list(np.array(position) + np.array([-72, -40, -16]))
-    #     position[2] = 0
-    #
-    #     return position
+    def screw_positions(self):
+        position = self.thumborigin()
+        position = list(np.array(position) + np.array([-72, -35, -16]))
+        position[2] = 0
+
+        return position
