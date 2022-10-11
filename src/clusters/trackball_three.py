@@ -230,7 +230,7 @@ class TrackballThree(DefaultCluster):
         print('thumb()')
         shape = self.thumb_1x_layout(rotate(single_plate(side=side), (0, 0, -90)))
         shape = union([shape, self.thumb_15x_layout(rotate(single_plate(side=side), (0, 0, -90)))])
-        shape = union([shape, self.thumb_15x_layout(rotate(double_plate(), (0, 0, -90)))])
+        # shape = union([shape, self.thumb_15x_layout(rotate(double_plate(), (0, 0, -90)))])
         # shape = union([shape, self.thumb_15x_layout(double_plate(), plate=False)])
 
         return shape
