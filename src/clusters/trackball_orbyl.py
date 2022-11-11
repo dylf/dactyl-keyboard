@@ -18,7 +18,7 @@ class TrackballOrbyl(DefaultCluster):
     key_translation_offsets = [
         [
             0.0,
-            0.0,
+            1.0,
             -8.0
         ],
         [
