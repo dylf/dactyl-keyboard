@@ -1,7 +1,8 @@
 {
   "ENGINE": "solid",
+  "branch": "",
   "save_dir": ".",
-  "overrides": "torrin_mcginty",
+  "overrides": "",
   "save_name": "",
   "config_name": "5x6",
   "logo_file": null,

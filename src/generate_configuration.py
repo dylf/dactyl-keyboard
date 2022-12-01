@@ -13,16 +13,21 @@ shape_config = {
     'ENGINE': 'solid',  # 'solid' = solid python / OpenSCAD, 'cadquery' = cadquery / OpenCascade
     # 'ENGINE': 'cadquery',  # 'solid' = solid python / OpenSCAD, 'cadquery' = cadquery / OpenCascade
 
+    ########################
+    ## Local Setup Params ##
+    ########################
+
+    'save_dir': '.',
+    'config_name': "DM",
+    'overrides': "",
+    'save_name': "",
+    "logo_file": None,
+    "branch": "",
 
     ######################
     ## Shape parameters ##
     ######################
 
-    'save_dir': '.',
-    'config_name':  "DM",
-    'overrides': "",
-    'save_name': "",
-    "logo_file": None,
     'show_caps': True,
     'show_pcbs': False, #only runs if caps are shown, easist place to initially inject geometry
 
@@ -222,6 +227,8 @@ shape_config = {
     'oled_center_row': 1.25, # if not None, this will override the oled_mount_location_xyz and oled_mount_rotation_xyz settings
     'oled_translation_offset': (0, 0, 4), # Z offset tweaks are expected depending on curvature and OLED mount choice.
     'oled_rotation_offset': (0, 0, 0),
+    'oled_horizontal': False,  # Default orientation is vertical on OLED mount, this sets horizontal which is similar
+                               # to the fat left wall of the trackball_in_wall option.
 
     'oled_configurations': {
         'UNDERCUT':{
@@ -410,6 +417,12 @@ shape_config = {
     ####################################
 
     "logo_offsets": [-10, -10, -1],
+
+    ###################################
+    ## Use circular 6.2mm diameter magnets
+    ## for base instead of screws
+    ####################################
+    "magnet_bottom": False
 }
 
     ####################################
