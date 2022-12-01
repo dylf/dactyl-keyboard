@@ -172,8 +172,19 @@ class Minithicc3(MinidoxCluster):
                     key_place(web_post_br(), 1, cornerrow),
                     key_place(web_post_tl(), 2, lastrow),
                     key_place(web_post_bl(), 2, lastrow),
+                    # self.tr_place(self.thumb_post_br()),
+                    key_place(web_post_bl(), 2, lastrow),
+
+                    # key_place(web_post_br(), 1, cornerrow),
+                    key_place(web_post_br(), 1, cornerrow),
                     self.tr_place(self.thumb_post_tr()),
                     key_place(web_post_bl(), 2, lastrow),
+                    self.tr_place(self.thumb_post_br()),
+                    self.tr_place(self.thumb_post_tr()),
+                    key_place(web_post_bl(), 2, lastrow),
+                    # self.tr_place(self.thumb_post_tr()),
+                    # key_place(web_post_br(), 1, lastrow),
+
                     self.tr_place(self.thumb_post_br()),
                     key_place(web_post_br(), 2, lastrow),
                     key_place(web_post_bl(), 3, lastrow),
@@ -298,7 +309,7 @@ class Minithicc3(MinidoxCluster):
 
     def screw_positions(self):
         position = self.thumborigin()
-        position = list(np.array(position) + np.array([-37, -33, -16]))
+        position = list(np.array(position) + np.array([-37, -37, -16]))
         position[1] = position[1] - .4 * (self.minidox_Usize - 1.7) * sa_length
         position[2] = 0
 

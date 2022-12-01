@@ -1,7 +1,8 @@
 import numpy as np
 from numpy import pi
 import os.path as path
-import getopt, sys
+import getopt
+import sys
 import json
 import os
 import importlib
@@ -13,10 +14,31 @@ from clusters.minithicc import Minithicc
 from clusters.minithicc3 import Minithicc3
 from clusters.trackball_orbyl import TrackballOrbyl
 from clusters.trackball_wilder import TrackballWild
+from clusters.trackball_three import TrackballThree
 from clusters.trackball_cj import TrackballCJ
 from clusters.custom_cluster import CustomCluster
 from clusters.trackball_btu import TrackballBTU
 from json_loader import load_json
+
+from os import path
+import subprocess
+
+
+def get_git_branch():
+
+    try:
+        output = str(
+            subprocess.check_output(
+                ['git', 'branch'], cwd=path.abspath('.'), universal_newlines=True
+            )
+        )
+        branch = [a for a in output.split('\n') if a.find('*') >= 0][0]
+        return branch[branch.find('*') + 2:]
+    except subprocess.CalledProcessError:
+        return None
+    except FileNotFoundError:
+        log("No git repository found.", "ERROR")
+        return None
 
 def deg2rad(degrees: float) -> float:
     return degrees * pi / 180
@@ -66,8 +88,11 @@ def make_dactyl():
 
     data = None
 
+    overrides_name = ""
+
+    local_branch = get_git_branch()
         ## CHECK FOR CONFIG FILE AND WRITE TO ANY VARIABLES IN FILE.
-    opts, args = getopt.getopt(sys.argv[1:], "", ["config=", "save_path="])
+    opts, args = getopt.getopt(sys.argv[1:], "", ["config=", "save_path=", "overrides="])
     for opt, arg in opts:
         if opt in '--config':
             with open(os.path.join(r".", "configs", arg + '.json'), mode='r') as fid:
@@ -75,28 +100,46 @@ def make_dactyl():
         elif opt in '--save_path':
             print("save_path set to argument: ", arg)
             save_path = arg
+        elif opt in '--overrides':
+            print("overrides set to: ", arg)
+            overrides_name = arg
 
     if data is None:
-        print("NO CONFIGURATION SPECIFIED, USING run_config.json")
+        print(f">>> Using config run_config.json on Git branch {local_branch}")
         data = load_json(os.path.join("src", "run_config.json"), None, save_path)
         # with open(os.path.join("src", "run_config.json"), mode='r') as fid:
         #     data = json.load(fid)
 
     if data["overrides"] not in [None, ""]:
-        save_path = path.join(save_path, data["overrides"])
-        override_file = path.join(save_path, data["overrides"] + '.json')
-        with open(override_file, mode='r') as fid:
-            data = load_json(override_file, data, save_path)
+        if overrides_name != "":
+            print("YO! overrides param set in run_config.json AND in command line 'overrides' argument! Can't compute!")
+            sys.exit(99)
+        overrides_name = data["overrides"]
+
         # for item in override_data:
         #     data[item] = override_data[item]
+    if overrides_name != "":
+        print(f"Importing config overrides for: {overrides_name}")
+        save_path = path.join(save_path, overrides_name)
+        override_file = path.join(save_path, overrides_name + '.json')
+        with open(override_file, mode='r') as fid:
+            data = load_json(override_file, data, save_path)
+
+    try:
+        if data["branch"] not in ["", None]:
+            if data["branch"] != local_branch:
+                print(f"INCORRECT GIT BRANCH! Local is {local_branch} but config requires {data['branch']}.  Exiting.")
+                sys.exit(101)
+    except Exception:
+        print("No 'branch' param found on config.")
 
     for item in data:
         globals()[item] = data[item]
 
     if save_name not in ['', None]:
         config_name = save_name
-    elif overrides is not None:
-        config_name = overrides + "_" + str(nrows) + "x" + str(ncols) + "_" + thumb_style
+    elif overrides_name is not None:
+        config_name = overrides_name + "_" + str(nrows) + "x" + str(ncols) + "_" + thumb_style
 
     ENGINE = data["ENGINE"]
     # Really rough setup.  Check for ENGINE, set it not present from configuration.
@@ -2054,6 +2097,8 @@ def make_dactyl():
             clust = TrackballOrbyl(all_merged)
         elif style == TrackballWild.name():
             clust = TrackballWild(all_merged)
+        elif style == TrackballThree.name():
+            clust = TrackballThree(all_merged)
         elif style == TrackballBTU.name():
             clust = TrackballBTU(all_merged)
         elif style == TrackballCJ.name():
