@@ -1,0 +1,68 @@
+{
+  "branch": "polydactyl",
+  "alpha": 0.16179916666666664,
+  "beta": 0.04726638888888888,
+  "tenting_angle": 0.24179916666666664,
+  "pinky_1_5U": true,
+  "last_1_5U_row": 4,
+  "default_1U_cluster": false,
+  "full_last_rows": true,
+  "oled_mount_type": "CLIP",
+  "oled_left_wall_lower_y_offset": 12,
+  "extra_height": 0.7,
+  "wall_z_offset": 8,
+  "wall_x_offset": 0,
+  "wall_y_offset": 0,
+  "wall_back_y_offset": 0,
+  "left_wall_x_offset": 8,
+  "left_wall_z_offset": 3,
+  "left_wall_lower_y_offset": 0,
+  "left_wall_lower_z_offset": 0,
+  "wall_thickness": 4.5,
+  "wall_base_y_thickness": 4.5,
+  "wall_base_x_thickness": 4.5,
+  "wall_base_back_thickness": 4.5,
+  "oled_translation_offset": [
+    2,
+    0,
+    5
+  ],
+  "screw_offsets": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      -4,
+      0
+    ],
+   [
+      -4,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      7,
+      0
+    ],
+    [
+      -1.5,
+      -11,
+      0
+    ],
+   [
+      0,
+      3,
+      0
+    ]
+  ]
+}
+

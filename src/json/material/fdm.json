@@ -1,0 +1,10 @@
+{
+  "resin": false,
+  "base_rim_thickness": 4.5,
+  "screw_cbore_diameter": 6,
+  "screw_insert_height": 4.5,
+  "screw_hole_diameter": 3.3,
+  "screw_cbore_depth": 4,
+  "base_thickness": 2.5,
+  "base_offset": 3
+}

@@ -1,7 +1,8 @@
 {
   "ENGINE": "solid",
+  "branch": "",
   "save_dir": ".",
-  "overrides": "testing",
+  "overrides": "",
   "save_name": "",
   "config_name": "5x6",
   "logo_file": null,
@@ -68,7 +69,7 @@
   "tb_socket_rotation_offset": [
     0,
     0,
-    0
+    -50
   ],
   "tb_btu_socket_translation_offset": [
     0,
@@ -154,6 +155,7 @@
   "plate_offset": -6,
   "oled_mount_type": null,
   "oled_center_row": 1.25,
+  "oled_horizontal": false,
   "oled_translation_offset": [
     0,
     0,
@@ -258,7 +260,8 @@
   "post_size": 0.1,
   "post_adj": 0,
   "screws_offset": "INSIDE",
-  "screw_insert_height": 3.5,
+  "magnet_bottom": false,
+  "screw_insert_height": 4.5,
   "screw_insert_bottom_radius": 2.05,
   "screw_insert_top_radius": 1.95,
   "wire_post_height": 7,
@@ -271,12 +274,12 @@
   "blackpill_holder_xoffset": -6.5,
   "external_holder_xoffset": -5.0,
   "external_holder_yoffset": -4.5,
-  "screw_hole_diameter": 3.05,
+  "screw_hole_diameter": 3.3,
   "base_thickness": 3.0,
   "base_offset": 3.0,
-  "base_rim_thickness": 5.0,
-  "screw_cbore_diameter": 4.0,
-  "screw_cbore_depth": 2.0,
+  "base_rim_thickness": 4.5,
+  "screw_cbore_diameter": 6,
+  "screw_cbore_depth": 4,
   "plate_holes": false,
   "plate_holes_xy_offset": [
     0.0,

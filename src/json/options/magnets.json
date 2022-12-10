@@ -1,0 +1,9 @@
+{
+  "magnet_bottom": true,
+  "screw_insert_height": 2.3,
+  "screw_insert_bottom_radius": 3.2,
+  "screw_insert_top_radius": 3.2,
+  "screw_hole_diameter": 6.4,
+  "screw_cbore_diameter": 6.4,
+  "screw_cbore_depth": 8
+}
