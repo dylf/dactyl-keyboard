@@ -200,7 +200,7 @@ def make_dactyl():
     centerrow = nrows - centerrow_offset
 
     lastrow = nrows - 1
-    cornerrow = lastrow - 1 if nrows > 3 else lastrow
+    cornerrow = lastrow - 1
     lastcol = ncols - 1
 
     oled_row = nrows - 1
@@ -611,9 +611,6 @@ def make_dactyl():
 
 
     def valid_key(column, row):
-        if nrows == 3:
-            return True
-
         if (full_last_rows):
             return (not (column in [0, 1])) or (not row == lastrow)
 
@@ -709,8 +706,6 @@ def make_dactyl():
         return translate(web_post(), ((mount_width / 2.0) + off_w, -(mount_height / 2.0) - off_h, 0))
 
     def get_torow(column):
-        if nrows == 3:
-            return lastrow + 1
         torow = lastrow
         if full_last_rows:
             torow = lastrow + 1
@@ -1002,12 +997,9 @@ def make_dactyl():
             (lambda sh: left_key_place(sh, 0, 1, side=side)), -1, 0, web_post(),
         )])
 
-        torow = lastrow
-        if nrows == 3:
-            torow = lastrow + 1
-        for i in range(torow):
+        for i in range(lastrow):
             y = i
-            low = (y == torow - 1)
+            low = (y == (lastrow - 1))
             temp_shape1 = wall_brace(
                 (lambda sh: left_key_place(sh, y, 1, side=side)), -1, 0, web_post(),
                 (lambda sh: left_key_place(sh, y, -1, low_corner=low, side=side)), -1, 0, web_post(),
@@ -1021,9 +1013,9 @@ def make_dactyl():
             shape = union([shape, temp_shape1])
             shape = union([shape, temp_shape2])
 
-        for i in range(torow - 1):
+        for i in range(lastrow - 1):
             y = i + 1
-            low = (y == torow - 1)
+            low = (y == (lastrow - 1))
             temp_shape1 = wall_brace(
                 (lambda sh: left_key_place(sh, y - 1, -1, side=side)), -1, 0, web_post(),
                 (lambda sh: left_key_place(sh, y, 1, side=side)), -1, 0, web_post(),
@@ -1045,7 +1037,7 @@ def make_dactyl():
         print('front_wall()')
 
         torow = lastrow - 1
-        if full_last_rows or nrows == 3:
+        if (full_last_rows):
             torow = lastrow
 
         shape = union([
@@ -1060,32 +1052,19 @@ def make_dactyl():
             3, lastrow, 0.5, -1, web_post_br(), 4, torow, 1, -1, web_post_bl()
         )])
 
-        if nrows == 3:
-            if ncols > 5:
+        if ncols >= 4:
+            for i in range(ncols - 4):
+                x = i + 4
                 shape = union([shape, key_wall_brace(
-                    4, lastrow, 0, -1, web_post_br(), 5, torow, 1, -1, web_post_bl()
+                    x, torow, 0, -1, web_post_bl(), x, torow, 0, -1, web_post_br()
                 )])
 
-            if ncols >= 4:
-                for i in range(ncols - 4):
-                    x = i + 4
-                    shape = union([shape, key_wall_brace(
-                        x, torow, 0, -1, web_post_bl(), x, torow, 0, -1, web_post_br()
-                    )])
-        else:
-            if ncols >= 4:
-                for i in range(ncols - 4):
-                    x = i + 4
-                    shape = union([shape, key_wall_brace(
-                        x, torow, 0, -1, web_post_bl(), x, torow, 0, -1, web_post_br()
-                    )])
-
-            if ncols >= 5:
-                for i in range(ncols - 5):
-                    x = i + 5
-                    shape = union([shape, key_wall_brace(
-                        x, torow, 0, -1, web_post_bl(), x - 1, torow, 0, -1, web_post_br()
-                    )])
+        if ncols >= 5:
+            for i in range(ncols - 5):
+                x = i + 5
+                shape = union([shape, key_wall_brace(
+                    x, torow, 0, -1, web_post_bl(), x - 1, torow, 0, -1, web_post_br()
+                )])
 
         return shape
 
