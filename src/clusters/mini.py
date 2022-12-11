@@ -9,24 +9,6 @@ class MiniCluster(DefaultCluster):
     def name():
         return "MINI"
 
-    def get_config(self):
-        with open(os.path.join("src", "clusters", "json", "MINI.json"), mode='r') as fid:
-            data = json.load(fid)
-
-        superdata = super().get_config()
-
-        # overwrite any super variables with this class' needs
-        for item in data:
-            superdata[item] = data[item]
-
-        for item in superdata:
-            if not hasattr(self, str(item)):
-                print(self.name() + ": NO MEMBER VARIABLE FOR " + str(item))
-                continue
-            setattr(self, str(item), superdata[item])
-
-        return superdata
-
     def __init__(self, parent_locals):
         self.num_keys = 5
         super().__init__(parent_locals)

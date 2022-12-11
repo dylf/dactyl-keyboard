@@ -24,7 +24,7 @@
   "thumb_style": "TRACKBALL_WILD",
   "default_1U_cluster": true,
   "trackball_in_wall": false,
-  "tbiw_ball_center_row": 0.2,
+  "tbiw_ball_center_row": 1,
   "tbiw_translational_offset": [
     0.0,
     0.0,

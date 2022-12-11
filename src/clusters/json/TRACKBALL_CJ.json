@@ -1,5 +1,92 @@
 {
   "tbcj_inner_diameter": 42,
   "tbcj_thickness": 2,
-  "tbcj_outer_diameter": 53
+  "tbcj_outer_diameter": 53,
+  "key_diameter": 75,
+  "thumb_offsets": [
+    0,
+    -4,
+    7
+  ],
+  "trackball_translation_offset": [
+    0,
+    0,
+    10
+  ],
+  "trackball_rotation_offset": [
+    0,
+    0,
+    0
+  ],
+  "key_translation_offsets": [
+    [
+      0.0,
+      0.0,
+      -8.0
+    ],
+    [
+      0.0,
+      0.0,
+      -8.0
+    ],
+    [
+      0.0,
+      0.0,
+      -8.0
+    ],
+    [
+      0.0,
+      0.0,
+      -8.0
+    ]
+  ],
+  "key_rotation_offsets": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+    "key_data": [
+    {
+        "id": "tl",
+        "pos": [-32.5, -14.5, -2.5],
+        "rot": [0, 0, -80],
+        "plate_rot_z": 0
+      },
+      {
+        "id": "mr",
+        "pos": [-12, -16, 3],
+        "rot": [0, 0, -130],
+        "plate_rot_z": 0
+      },
+      {
+        "id": "br",
+        "pos": [-51, -25, -12],
+        "rot": [0, 0, -180],
+        "plate_rot_z": 0
+      },
+      {
+        "id": "bl",
+        "pos": [-29, -40, -13],
+        "rot": [0, 0, -230],
+        "plate_rot_z": 0
+      }
+    ]
+
 }

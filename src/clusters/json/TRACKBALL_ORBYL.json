@@ -1,7 +1,10 @@
 {
   "key_diameter": 75,
-
-
+  "thumb_offsets": [
+      0,
+      -4,
+      7
+    ],
   "trackball_translation_offset": [
     0,
     0,

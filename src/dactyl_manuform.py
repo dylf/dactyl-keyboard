@@ -2148,6 +2148,8 @@ def make_dactyl():
         else:
             clust = DefaultCluster(all_merged)
 
+        clust.build_keys()
+
         return clust
 
 

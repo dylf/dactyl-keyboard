@@ -2,13 +2,7 @@ import json
 import os
 from key import Key, KeyFactory
 from geom import *
-
-TL = "tl"
-TR = "tr"
-ML = "ml"
-MR = "mr"
-BL = "bl"
-BR = "br"
+from clusters.cluster_common import *
 
 
 class DefaultCluster(object):
@@ -25,7 +19,7 @@ class DefaultCluster(object):
         return "DEFAULT"
 
     def get_config(self):
-        with open(os.path.join("src", "clusters", "json", "DEFAULT.json"), mode='r') as fid:
+        with open(os.path.join("src", "clusters", "json", f"{self.name()}.json"), mode='r') as fid:
             data = json.load(fid)
         for item in data:
             if not hasattr(self, str(item)):
@@ -38,8 +32,10 @@ class DefaultCluster(object):
         for item in parent_locals:
             globals()[item] = parent_locals[item]
         self.get_config()
-        self._key_gen()
         print(self.name(), " built")
+
+    def build_keys(self):
+        self._key_gen()
 
     def get_keys(self) -> [Key]:
         return self._keys
@@ -54,6 +50,7 @@ class DefaultCluster(object):
         return origin
 
     def _key_gen(self):
+        self._keys = {}
         for index in range(len(self.key_data)):
             data = self.key_data[index]
             key = KeyFactory.new_key(data['id'], globals())
@@ -61,7 +58,7 @@ class DefaultCluster(object):
             key.pos = add_translate(key.pos, self.thumborigin())
             key.pos = add_translate(key.pos, data['pos'])
             key.plate_rot_z = data['plate_rot_z']
-            self._keys[key.id] = key
+            self._keys[key.get_id()] = key
 
     def _key_place(self, index, shape):
         key = self._keys[index]
