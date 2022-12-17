@@ -556,6 +556,7 @@ def make_dactyl():
         )
         return np.matmul(t_matrix, position)
 
+    fib = [0, 1, 1, 2, 3, 5, 8, 13]
 
     def apply_key_geometry(
             shape,
@@ -579,12 +580,13 @@ def make_dactyl():
                 column_x_delta_actual = column_x_delta - 1.5
                 column_angle = beta * (centercol - column - 0.27)
 
-        golden_radius = row_radius + (row * scipy.constants.golden * -1)
+        golden_radius = fib[row] * -0.1
+        print(f"{row} row golden is {golden_radius}")
         if column_style == "orthographic":
-            column_z_delta = golden_radius * (1 - np.cos(column_angle))
-            shape = translate_fn(shape, [0, 0, -golden_radius])
-            shape = rotate_x_fn(shape, alpha * (centerrow - row) * scipy.constants.golden)
-            shape = translate_fn(shape, [0, 0, golden_radius])
+            column_z_delta = column_radius * (1 - np.cos(column_angle))
+            shape = translate_fn(shape, [0, 0, -row_radius])
+            shape = rotate_x_fn(shape, alpha * (centerrow - row) + golden_radius)
+            shape = translate_fn(shape, [0, 0, row_radius])  #  + (golden_radius * 2)])
             shape = rotate_y_fn(shape, column_angle)
             shape = translate_fn(
                 shape, [-(column - centercol) * column_x_delta_actual, 0, column_z_delta]
