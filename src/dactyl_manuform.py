@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.constants
 from numpy import pi
 import os.path as path
 import getopt
@@ -567,6 +568,9 @@ def make_dactyl():
     ):
         debugprint('apply_key_geometry()')
 
+        # golden = row * scipy.constants.golden
+        # golden_radius = column_radius + golden
+
         column_angle = beta * (centercol - column)
 
         column_x_delta_actual = column_x_delta
@@ -575,11 +579,12 @@ def make_dactyl():
                 column_x_delta_actual = column_x_delta - 1.5
                 column_angle = beta * (centercol - column - 0.27)
 
+        golden_radius = row_radius + (row * scipy.constants.golden * -1)
         if column_style == "orthographic":
-            column_z_delta = column_radius * (1 - np.cos(column_angle))
-            shape = translate_fn(shape, [0, 0, -row_radius])
-            shape = rotate_x_fn(shape, alpha * (centerrow - row))
-            shape = translate_fn(shape, [0, 0, row_radius])
+            column_z_delta = golden_radius * (1 - np.cos(column_angle))
+            shape = translate_fn(shape, [0, 0, -golden_radius])
+            shape = rotate_x_fn(shape, alpha * (centerrow - row) * scipy.constants.golden)
+            shape = translate_fn(shape, [0, 0, golden_radius])
             shape = rotate_y_fn(shape, column_angle)
             shape = translate_fn(
                 shape, [-(column - centercol) * column_x_delta_actual, 0, column_z_delta]
