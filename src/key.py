@@ -1,4 +1,5 @@
 from geom import *
+from part import Part
 
 
 SIZES = {
@@ -7,19 +8,13 @@ SIZES = {
 }
 
 
-class Key(object):
-    _pos = [0, 0, 0]
-    _rot = [0, 0, 0]
-    _key_id = None
+class Key(Part):
     type = "MX"
-    w = SIZES["MX"]["w"]
-    h = SIZES["MX"]["h"]
-    d = SIZES["MX"]["d"]
     hole = "NOTCH"
     plate_rot_z = 0
 
     def __init__(self, key_id, parent_locals, key_type="MX", hole_type="NOTCH"):
-        self._key_id = key_id
+        super().__init__(key_id)
         self.type = key_type
         self.hole = hole_type
         self.w = SIZES[key_type]["w"]
@@ -28,42 +23,6 @@ class Key(object):
         if parent_locals is not None:
             for item in parent_locals:
                 globals()[item] = parent_locals[item]
-
-    def set_pos(self, new_pos):
-        self._pos = new_pos
-
-    def get_pos(self):
-        return self._pos
-
-    pos = property(get_pos, set_pos)
-
-    def set_rot(self, new_rot):
-        self._rot = new_rot
-
-    def get_rot(self):
-        return self._rot
-
-    def update_rot_by(self, deltas):
-        self._rot = [self._rot[i] + deltas[i] for i in range(len(self._rot))]
-
-    rot = property(get_rot, set_rot)
-
-    def get_id(self):
-        return self._key_id
-
-    def rotate_deg(self, rotate_by):
-        self._pos = rotate_deg(self._pos, rotate_by)
-        self.update_rot_by(rotate_by)
-        return self._pos
-
-    def rotate_rad(self, rotate_by):
-        self._pos = rotate_rad(self._pos, rotate_by)
-        self.update_rot_by([rad2deg(rotate_by[i]) for i in range(len(rotate_by))])
-        return self._pos
-
-    def translate(self, position):
-        self._pos = add_translate(self._pos, position)
-        return self._pos
 
     def tr(self, add_x=0, add_y=0):
         offset = rotate_deg([(mount_width / 2.0) + add_x, (mount_height / 2) + add_y, 0], self._rot)
