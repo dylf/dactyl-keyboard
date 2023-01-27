@@ -246,7 +246,7 @@ class TrackballOrbyl(DefaultCluster):
                     self.track_place(self.tb_post_r()),
                     self.tl_place(web_post_bl()),
                     self.track_place(self.tb_post_tr()),
-                    key_place(web_post_bl(), 0, cornerrow),
+                    cluster_key_place(web_post_bl(), 0, cornerrow),
                     self.track_place(self.tb_post_tl()),
                 ]
             )
@@ -290,12 +290,12 @@ class TrackballOrbyl(DefaultCluster):
         hulls.append(
             triangle_hulls(
                 [
-                    key_place(web_post_br(), 1, cornerrow),
-                    key_place(web_post_tl(), 2, lastrow),
-                    key_place(web_post_bl(), 2, cornerrow),
-                    key_place(web_post_tr(), 2, lastrow),
-                    key_place(web_post_br(), 2, cornerrow),
-                    key_place(web_post_bl(), 3, cornerrow),
+                    cluster_key_place(web_post_br(), 1, cornerrow),
+                    cluster_key_place(web_post_tl(), 2, lastrow),
+                    cluster_key_place(web_post_bl(), 2, cornerrow),
+                    cluster_key_place(web_post_tr(), 2, lastrow),
+                    cluster_key_place(web_post_br(), 2, cornerrow),
+                    cluster_key_place(web_post_bl(), 3, cornerrow),
                 ]
             )
         )
@@ -303,10 +303,10 @@ class TrackballOrbyl(DefaultCluster):
         hulls.append(
             triangle_hulls(
                 [
-                    key_place(web_post_tr(), 3, lastrow),
-                    key_place(web_post_br(), 3, lastrow),
-                    key_place(web_post_tr(), 3, lastrow),
-                    key_place(web_post_bl(), 4, cornerrow),
+                    cluster_key_place(web_post_tr(), 3, lastrow),
+                    cluster_key_place(web_post_br(), 3, lastrow),
+                    cluster_key_place(web_post_tr(), 3, lastrow),
+                    cluster_key_place(web_post_bl(), 4, cornerrow),
                 ]
             )
         )
@@ -318,7 +318,7 @@ class TrackballOrbyl(DefaultCluster):
         # thumb, walls
         shape = wall_brace(
             self.mr_place, .5, 1, web_post_tr(),
-            (lambda sh: key_place(sh, 3, lastrow)), 0, -1, web_post_bl(),
+            (lambda sh: cluster_key_place(sh, 3, lastrow)), 0, -1, web_post_bl(),
         )
         shape = union([shape, wall_brace(
             self.mr_place, .5, 1, web_post_tr(),
@@ -339,7 +339,7 @@ class TrackballOrbyl(DefaultCluster):
 
         shape = union([shape, wall_brace(
             self.track_place, -1.5, 0, self.tb_post_tl(),
-            (lambda sh: left_key_place(sh, lastrow - 1, -1, side=ball_side, low_corner=True)), -1, 0, web_post(),
+            (lambda sh: left_cluster_key_place(sh, lastrow - 1, -1, side=ball_side, low_corner=True)), -1, 0, web_post(),
         )])
         shape = union([shape, wall_brace(
             self.track_place, -1.5, 0, self.tb_post_tl(),
@@ -363,8 +363,8 @@ class TrackballOrbyl(DefaultCluster):
         hulls.append(
             triangle_hulls(
                 [
-                    key_place(web_post_bl(), 0, cornerrow),
-                    left_key_place(web_post(), lastrow - 1, -1, side=side, low_corner=True),                # left_key_place(translate(web_post(), wall_locate1(-1, 0)), cornerrow, -1, low_corner=True),
+                    cluster_key_place(web_post_bl(), 0, cornerrow),
+                    left_cluster_key_place(web_post(), lastrow - 1, -1, side=side, low_corner=True),                # left_cluster_key_place(translate(web_post(), wall_locate1(-1, 0)), cornerrow, -1, low_corner=True),
                     self.track_place(self.tb_post_tl()),
                 ]
             )
@@ -373,32 +373,32 @@ class TrackballOrbyl(DefaultCluster):
         hulls.append(
             triangle_hulls(
                 [
-                    key_place(web_post_bl(), 0, cornerrow),
+                    cluster_key_place(web_post_bl(), 0, cornerrow),
                     self.tl_place(web_post_bl()),
-                    key_place(web_post_br(), 0, cornerrow),
+                    cluster_key_place(web_post_br(), 0, cornerrow),
                     self.tl_place(web_post_tl()),
-                    key_place(web_post_bl(), 1, cornerrow),
+                    cluster_key_place(web_post_bl(), 1, cornerrow),
                     self.tl_place(web_post_tl()),
-                    key_place(web_post_br(), 1, cornerrow),
+                    cluster_key_place(web_post_br(), 1, cornerrow),
                     self.tl_place(web_post_tr()),
-                    key_place(web_post_tl(), 2, lastrow),
-                    key_place(web_post_bl(), 2, lastrow),
+                    cluster_key_place(web_post_tl(), 2, lastrow),
+                    cluster_key_place(web_post_bl(), 2, lastrow),
                     self.tl_place(web_post_tr()),
-                    key_place(web_post_bl(), 2, lastrow),
+                    cluster_key_place(web_post_bl(), 2, lastrow),
                     self.mr_place(web_post_tl()),
-                    key_place(web_post_br(), 2, lastrow),
-                    key_place(web_post_bl(), 3, lastrow),
+                    cluster_key_place(web_post_br(), 2, lastrow),
+                    cluster_key_place(web_post_bl(), 3, lastrow),
                     self.mr_place(web_post_tr()),
                     self.mr_place(web_post_tl()),
-                    key_place(web_post_br(), 2, lastrow),
+                    cluster_key_place(web_post_br(), 2, lastrow),
 
-                    key_place(web_post_bl(), 3, lastrow),
-                    key_place(web_post_tr(), 2, lastrow),
-                    key_place(web_post_tl(), 3, lastrow),
-                    key_place(web_post_bl(), 3, cornerrow),
-                    key_place(web_post_tr(), 3, lastrow),
-                    key_place(web_post_br(), 3, cornerrow),
-                    key_place(web_post_bl(), 4, cornerrow),
+                    cluster_key_place(web_post_bl(), 3, lastrow),
+                    cluster_key_place(web_post_tr(), 2, lastrow),
+                    cluster_key_place(web_post_tl(), 3, lastrow),
+                    cluster_key_place(web_post_bl(), 3, cornerrow),
+                    cluster_key_place(web_post_tr(), 3, lastrow),
+                    cluster_key_place(web_post_br(), 3, cornerrow),
+                    cluster_key_place(web_post_bl(), 4, cornerrow),
                 ]
             )
         )

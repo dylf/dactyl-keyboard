@@ -281,12 +281,17 @@ def make_dactyl():
     if not path.isdir(save_path):
         os.mkdir(save_path)
 
+    def col(from_column):
+        return from_column if not inner_column else from_column - 1
+
 
     def column_offset(column: int) -> list:
-        result = column_offsets[column]
-        # if (pinky_1_5U and column == lastcol):
-        #     result[0] = result[0] + 1
-        return result
+        if inner_column:
+            if column == 0:
+                return column_offsets[0]
+            return column_offsets[column - 1]
+
+        return column_offsets[column]
 
 
     # column_style='fixed'
@@ -609,13 +614,26 @@ def make_dactyl():
 
         return shape
 
+    def bottom_key(column):
+        if all_last_rows:
+            return nrows - 1
+        if column == 0:
+            # if inner_column:
+            #     return nrows - 3
+            return nrows - 2
+        if column == 1:
+            return nrows - 2
+        if column == 2:
+            if inner_column:
+                return nrows - 2
+        if not full_last_rows and column > 3:
+            return nrows - 2
+
+        return nrows - 1
+
 
     def valid_key(column, row):
-        if (full_last_rows):
-            return (not (column in [0, 1])) or (not row == lastrow)
-
-        return (column in [2, 3]) or (not row == lastrow)
-
+        return row <= bottom_key(column)
 
     def x_rot(shape, angle):
         # debugprint('x_rot()')
@@ -632,6 +650,10 @@ def make_dactyl():
         return apply_key_geometry(shape, translate, x_rot, y_rot, column, row)
 
 
+    def cluster_key_place(shape, column, row):
+        debugprint('key_place()')
+        c = column if not inner_column else column + 1
+        return apply_key_geometry(shape, translate, x_rot, y_rot, c, row)
     def add_translate(shape, xyz):
         debugprint('add_translate()')
         vals = []
@@ -859,6 +881,10 @@ def make_dactyl():
         pos = left_key_position(row, direction, low_corner=low_corner, side=side)
         return translate(shape, pos)
 
+    # This is hackish... It just allows the search and replace of key_place in the cluster code
+    # to not go big boom
+    def left_cluster_key_place(shape, row, direction, low_corner=False, side='right'):
+        return left_key_place(shape, row, direction, low_corner, side)
 
     def wall_locate1(dx, dy):
         debugprint("wall_locate1()")
@@ -1037,7 +1063,7 @@ def make_dactyl():
         print('front_wall()')
 
         torow = lastrow - 1
-        if (full_last_rows):
+        if full_last_rows:
             torow = lastrow
 
         shape = union([
