@@ -202,7 +202,6 @@ def make_dactyl():
     lastrow = nrows - 1
     cornerrow = lastrow - 1
     lastcol = ncols - 1
-
     oled_row = nrows - 1
     plate_file = None
 
@@ -617,16 +616,14 @@ def make_dactyl():
     def bottom_key(column):
         if all_last_rows:
             return nrows - 1
-        if column == 0:
-            # if inner_column:
-            #     return nrows - 3
-            return nrows - 2
-        if column == 1:
+        if column in [0, 1]:
             return nrows - 2
         if column == 2:
             if inner_column:
                 return nrows - 2
         if not full_last_rows and column > 3:
+            if inner_column and column == 4:
+                return nrows - 1
             return nrows - 2
 
         return nrows - 1
@@ -728,12 +725,14 @@ def make_dactyl():
         return translate(web_post(), ((mount_width / 2.0) + off_w, -(mount_height / 2.0) - off_h, 0))
 
     def get_torow(column):
-        torow = lastrow
-        if full_last_rows:
-            torow = lastrow + 1
-        if column in [0, 1]:
-            torow = lastrow
-        return torow
+        return bottom_key(column) + 1
+        # torow = lastrow
+        # if full_last_rows or (column == 4 and inner_column):
+        #     torow = lastrow + 1
+        #
+        # if column in [0, 1]:
+        #     torow = lastrow
+        # return torow
 
 
     def connectors():
@@ -1081,15 +1080,21 @@ def make_dactyl():
         if ncols >= 4:
             for i in range(ncols - 4):
                 x = i + 4
+                actually_this_row = torow
+                if x == 4 and inner_column:
+                    actually_this_row = lastrow
                 shape = union([shape, key_wall_brace(
-                    x, torow, 0, -1, web_post_bl(), x, torow, 0, -1, web_post_br()
+                    x, actually_this_row, 0, -1, web_post_bl(), x, actually_this_row, 0, -1, web_post_br()
                 )])
 
         if ncols >= 5:
             for i in range(ncols - 5):
                 x = i + 5
+                actually_this_row = torow
+                if x == 4 and inner_column:
+                    actually_this_row = lastrow
                 shape = union([shape, key_wall_brace(
-                    x, torow, 0, -1, web_post_bl(), x - 1, torow, 0, -1, web_post_br()
+                    x, actually_this_row, 0, -1, web_post_bl(), x - 1, actually_this_row, 0, -1, web_post_br()
                 )])
 
         return shape
