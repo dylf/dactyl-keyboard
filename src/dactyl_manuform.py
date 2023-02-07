@@ -427,7 +427,7 @@ def make_dactyl():
         tbcut_file = path.join(parts_path, r"trackball_socket_cutter_34mm")
 
         if btus:
-            tb_file = path.join(parts_path, r"btu_trackball_socket")
+            tb_file = path.join(parts_path, r"btu_trackball_socket_wider")
             tbcut_file = path.join(parts_path, r"trackball_socket_w_btus_cutter")
 
         if ENGINE == 'cadquery':
@@ -2055,15 +2055,17 @@ def make_dactyl():
 
 
     def run():
-
         mod_r = model_side(side="right")
         export_file(shape=mod_r, fname=path.join(save_path, config_name + r"_right"))
 
+        if right_side_only:
+            print(">>>>>  RIGHT SIDE ONLY: Only rendering a the right side.")
+            return
         base = baseplate(side='right')
         export_file(shape=base, fname=path.join(save_path, config_name + r"_right_plate"))
         if quickly:
-            print(">>>>>  QUICK RENDER: Only rendering a the right side.")
-            exit(0)
+            print(">>>>>  QUICK RENDER: Only rendering a the right side and bottom plate.")
+            return
         export_dxf(shape=base, fname=path.join(save_path, config_name + r"_right_plate"))
 
         # rest = wrist_rest(mod_r, base, side="right")
