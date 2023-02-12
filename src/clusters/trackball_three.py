@@ -1,9 +1,10 @@
-from clusters.default_cluster import DefaultCluster
 import json
 import os
 
+from clusters.trackball_orbyl import TrackballOrbyl
 
-class TrackballThree(DefaultCluster):
+
+class TrackballThree(TrackballOrbyl):
     key_diameter = 75
     translation_offset = [
         0,
