@@ -418,6 +418,18 @@ def make_dactyl():
         return shape
 
 
+    # def trackball_mount():
+    #     radius = trackball_hole_diameter / 2
+    #     tube = cone(radius, radius + 6, (radius + 4))
+    #     return translate(tube, (0, 0, -18))
+
+    def trackball_mount():
+        radius = trackball_hole_diameter / 2
+        tube = sphere(radius + 6)
+        cut = translate(box(radius * 4, radius * 4, radius + 10), (0, 0, ((radius + 10) / 2)))
+        tube = difference(tube, [cut])
+        return translate(tube, (0, 0, 3))
+
     def trackball_socket(btus=False,segments=100, side="right"):
         # shape = sphere(ball_diameter / 2)
         # cyl = cylinder(ball_diameter / 2 + 4, 20)
@@ -1232,6 +1244,15 @@ def make_dactyl():
             tb_t_offset = tb_btu_socket_translation_offset
             tb_r_offset = tb_btu_socket_rotation_offset
 
+        mount = None
+
+        if trackball_in_wall:
+            mount = trackball_mount()
+            mount = rotate(mount, tb_r_offset)
+            mount = translate(mount, tb_t_offset)
+            mount = rotate(mount, rot)
+            mount = translate(mount, pos)
+
         precut = trackball_cutout()
         precut = rotate(precut, tb_r_offset)
         precut = translate(precut, tb_t_offset)
@@ -1276,7 +1297,7 @@ def make_dactyl():
         ball = translate(ball, pos)
 
         # return precut, shape, cutout, ball
-        return precut, shape, cutout, sensor, ball
+        return precut, shape, cutout, sensor, ball, mount
 
 
     def generate_trackball_in_cluster(cluster):
@@ -1891,11 +1912,11 @@ def make_dactyl():
 
         if not quickly:
             if trackball_in_wall and (side == ball_side or ball_side == 'both'):
-                tbprecut, tb, tbcutout, sensor, ball = generate_trackball_in_wall()
-
-                shape = difference(shape, [tbprecut])
+                tbprecut, tb, tbcutout, sensor, ball, mount = generate_trackball_in_wall()
+                shape = union([shape, mount])
+                shape = difference(shape, [tbprecut, mount])
                 # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_1"))
-                shape = union([shape, tb])
+                shape = union([shape, tb, mount])
                 # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_2"))
                 shape = difference(shape, [tbcutout])
                 # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_3a"))
