@@ -206,7 +206,7 @@ def make_dactyl():
     lastcol = ncols - 1
 
     if all_last_rows:
-        full_last_rows = True
+        globals()["full_last_rows"] = True
 
     oled_row = nrows - 1
     plate_file = None
