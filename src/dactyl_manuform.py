@@ -440,8 +440,8 @@ def make_dactyl():
         tbcut_file = path.join(parts_path, r"trackball_socket_cutter_34mm")
 
         if btus:
-            tb_file = path.join(parts_path, r"smooth_btu_socket")
-            tbcut_file = path.join(parts_path, r"smooth_btu_socket_cutter")
+            tb_file = path.join(parts_path, r"btu_socket_2023_2")
+            tbcut_file = path.join(parts_path, r"btu_socket_cutter_2023_2")
         else:
             tb_file = path.join(parts_path, r"trackball_socket_body_34mm")
             tbcut_file = path.join(parts_path, r"trackball_socket_cutter_34mm")
@@ -1240,7 +1240,7 @@ def make_dactyl():
 
 
     def use_btus(cluster):
-        return trackball_in_wall or (cluster is not None and cluster.has_btus())
+        return (cluster is not None and cluster.has_btus())
 
 
     def generate_trackball(pos, rot, cluster):
