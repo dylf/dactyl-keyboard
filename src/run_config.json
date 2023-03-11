@@ -1,7 +1,7 @@
 {
   "ENGINE": "solid",
   "save_dir": ".",
-  "overrides": "mbarquero90",
+  "overrides": "",
   "save_name": "",
   "config_name": "5x6",
   "logo_file": null,
@@ -14,7 +14,7 @@
   "beta": 0.08726638888888888,
   "centercol": 3,
   "centerrow_offset": 3,
-  "tenting_angle": 0.24479916666666664,
+  "tenting_angle": 0.24479916666666665,
   "symmetry": "symmetric",
   "column_style_gt5": "orthographic",
   "column_style": "standard",
@@ -253,7 +253,11 @@
       "oled_clip_z_gap": 0.2
     }
   },
-  "logo_offsets": [-10, -10, -1],
+  "logo_offsets": [
+    -10,
+    -10,
+    -1
+  ],
   "web_thickness": 4.0,
   "post_size": 0.1,
   "post_adj": 0,
@@ -351,11 +355,6 @@
       -4,
       0
     ],
-   [
-      0,
-      0,
-      0
-    ],
     [
       0,
       0,
@@ -371,7 +370,12 @@
       0,
       0
     ],
-   [
+    [
+      0,
+      0,
+      0
+    ],
+    [
       0,
       0,
       0
