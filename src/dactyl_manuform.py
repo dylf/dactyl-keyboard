@@ -413,63 +413,6 @@ def make_dactyl():
         return plate
 
 
-    def trackball_cutout(segments=100, side="right"):
-        shape = cylinder(trackball_hole_diameter / 2, trackball_hole_height)
-        return shape
-
-
-    # def trackball_mount():
-    #     radius = trackball_hole_diameter / 2
-    #     tube = cone(radius, radius + 6, (radius + 4))
-    #     return translate(tube, (0, 0, -18))
-
-    def trackball_mount():
-        radius = trackball_hole_diameter / 2
-        tube = sphere(radius + 6)
-        cut = translate(box(radius * 4, radius * 4, radius + 10), (0, 0, ((radius + 10) / 2)))
-        tube = difference(tube, [cut])
-        return translate(tube, (0, 0, 3))
-
-    def trackball_socket(btus=False,segments=100, side="right"):
-        # shape = sphere(ball_diameter / 2)
-        # cyl = cylinder(ball_diameter / 2 + 4, 20)
-        # cyl = translate(cyl, (0, 0, -8))
-        # shape = union([shape, cyl])
-
-        tb_file = path.join(parts_path, r"trackball_socket_body_34mm")
-        tbcut_file = path.join(parts_path, r"trackball_socket_cutter_34mm")
-
-        if btus:
-            tb_file = path.join(parts_path, r"btu_socket_2023_2")
-            tbcut_file = path.join(parts_path, r"btu_socket_cutter_2023_2")
-        else:
-            tb_file = path.join(parts_path, r"trackball_socket_body_34mm")
-            tbcut_file = path.join(parts_path, r"trackball_socket_cutter_34mm")
-
-        if ENGINE == 'cadquery':
-            sens_file = path.join(parts_path, r"gen_holder")
-        else:
-            sens_file = path.join(parts_path, r"trackball_sensor_mount")
-
-        senscut_file = path.join(parts_path, r"trackball_sensor_cutter")
-
-        # shape = import_file(tb_file)
-        # # shape = difference(shape, [import_file(senscut_file)])
-        # # shape = union([shape, import_file(sens_file)])
-        # cutter = import_file(tbcut_file)
-
-        shape = import_file(tb_file)
-        sensor = import_file(sens_file)
-        cutter = import_file(tbcut_file)
-        cutter = union([cutter, import_file(senscut_file)])
-
-        # return shape, cutter
-        return shape, cutter, sensor
-
-
-    def trackball_ball(segments=100, side="right"):
-        shape = sphere(ball_diameter / 2)
-        return shape
 
 
     ################
@@ -1240,7 +1183,67 @@ def make_dactyl():
 
 
     def use_btus(cluster):
-        return (cluster is not None and cluster.has_btus())
+        return trackball_in_wall or (cluster is not None and cluster.has_btus())
+
+    def trackball_cutout(segments=100, side="right"):
+        shape = cylinder(trackball_hole_diameter / 2, trackball_hole_height)
+        return shape
+
+
+    # def trackball_mount():
+    #     radius = trackball_hole_diameter / 2
+    #     tube = cone(radius, radius + 6, (radius + 4))
+    #     return translate(tube, (0, 0, -18))
+
+    def trackball_mount():
+        radius = trackball_hole_diameter / 2
+        tube = sphere(radius + 6)
+        cut = translate(box(radius * 4, radius * 4, radius + 10), (0, 0, ((radius + 10) / 2)))
+        tube = difference(tube, [cut])
+        return translate(tube, (0, 0, 3))
+
+    def trackball_socket(btus=False,segments=100, side="right"):
+        # shape = sphere(ball_diameter / 2)
+        # cyl = cylinder(ball_diameter / 2 + 4, 20)
+        # cyl = translate(cyl, (0, 0, -8))
+        # shape = union([shape, cyl])
+
+        # tb_file = path.join(parts_path, r"trackball_socket_body_34mm")
+        # tbcut_file = path.join(parts_path, r"trackball_socket_cutter_34mm")
+
+        if btus:
+            # tb_file = path.join(parts_path, r"btu_socket_2023_2")
+            # tbcut_file = path.join(parts_path, r"btu_socket_cutter_2023_2")
+            tb_file = path.join(parts_path, r"btu_socket_2023_4_beta")
+            tbcut_file = path.join(parts_path, r"btu_socket_cutter_2023_4_beta")
+        else:
+            tb_file = path.join(parts_path, r"trackball_socket_body_34mm")
+            tbcut_file = path.join(parts_path, r"trackball_socket_cutter_34mm")
+
+        if ENGINE == 'cadquery':
+            sens_file = path.join(parts_path, r"gen_holder")
+        else:
+            sens_file = path.join(parts_path, r"trackball_sensor_mount")
+
+        senscut_file = path.join(parts_path, r"trackball_sensor_cutter")
+
+        # shape = import_file(tb_file)
+        # # shape = difference(shape, [import_file(senscut_file)])
+        # # shape = union([shape, import_file(sens_file)])
+        # cutter = import_file(tbcut_file)
+
+        shape = import_file(tb_file)
+        sensor = import_file(sens_file)
+        cutter = import_file(tbcut_file)
+        cutter = union([cutter, import_file(senscut_file)])
+
+        # return shape, cutter
+        return shape, cutter, sensor
+
+
+    def trackball_ball(segments=100, side="right"):
+        shape = sphere(ball_diameter / 2)
+        return shape
 
 
     def generate_trackball(pos, rot, cluster):
@@ -1921,15 +1924,19 @@ def make_dactyl():
         if not quickly:
             if trackball_in_wall and (side == ball_side or ball_side == 'both'):
                 tbprecut, tb, tbcutout, sensor, ball, mount = generate_trackball_in_wall()
-                shape = union([shape, mount])
-                shape = difference(shape, [tbprecut, mount])
-                # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_1"))
-                shape = union([shape, tb, mount])
-                # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_2"))
-                shape = difference(shape, [tbcutout])
-                # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_3a"))
-                # export_file(shape=add([shape, sensor]), fname=path.join(save_path, config_name + r"_test_3b"))
-                shape = union([shape, sensor])
+                # shape = union([shape, mount])
+                if use_btus(cluster):
+                    shape = difference(shape, [tbcutout])
+                    shape = union([shape, tb])
+                else:
+                    shape = difference(shape, [tbprecut, mount])
+                    # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_1"))
+                    shape = union([shape, tb, mount])
+                    # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_2"))
+                    shape = difference(shape, [tbcutout])
+                    # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_3a"))
+                    # export_file(shape=add([shape, sensor]), fname=path.join(save_path, config_name + r"_test_3b"))
+                    shape = union([shape, sensor])
 
                 if show_caps:
                     shape = add([shape, ball])
