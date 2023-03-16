@@ -1183,24 +1183,25 @@ def make_dactyl():
 
 
     def use_btus(cluster):
-        return trackball_in_wall or (cluster is not None and cluster.has_btus())
+        return (cluster is not None and cluster.has_btus())
 
     def trackball_cutout(segments=100, side="right"):
         shape = cylinder(trackball_hole_diameter / 2, trackball_hole_height)
         return shape
 
 
-    def trackball_mount():
-        radius = trackball_hole_diameter / 2
-        tube = cylinder(radius, (radius + 20))
-        return translate(tube, (0, 0, 15))
-
     # def trackball_mount():
     #     radius = trackball_hole_diameter / 2
-    #     tube = sphere(radius + 6)
-    #     cut = translate(box(radius * 4, radius * 4, radius + 10), (0, 0, ((radius + 10) / 2)))
-    #     tube = difference(tube, [cut])
-    #     return translate(tube, (0, 0, 3))
+    #     tube = cylinder(radius + 2, (radius + 40))
+    #     return tube
+
+    def trackball_mount():
+        radius = trackball_hole_diameter / 2
+        tube = sphere(radius + 3)
+        # cut = translate(box(radius * 4, radius * 4, radius + 10), (0, 0, ((radius + 10) / 2)))
+        # tube = difference(tube, [cut])
+        # return tube
+        return translate(tube, (0, 0, 0))
 
     def trackball_socket(btus=False,segments=100, side="right"):
         # shape = sphere(ball_diameter / 2)
@@ -1925,14 +1926,15 @@ def make_dactyl():
             if trackball_in_wall and (side == ball_side or ball_side == 'both'):
                 tbprecut, tb, tbcutout, sensor, ball, mount = generate_trackball_in_wall()
                 # shape = union([shape, mount])
-                if use_btus(cluster):
-                    shape = difference(shape, [tbprecut, tbcutout])
+                if use_btus(cluster(side)):
+                    cutter = union([tbprecut, tbcutout, mount])
+                    shape = difference(shape, [cutter])
                     # shape = difference(shape, [tbcutout])
                     shape = union([shape, tb])
                 else:
                     shape = difference(shape, [tbprecut, mount])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_1"))
-                    shape = union([shape, tb, mount])
+                    shape = union([shape, tb])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_2"))
                     shape = difference(shape, [tbcutout])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_3a"))
