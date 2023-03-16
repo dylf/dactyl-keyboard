@@ -1190,17 +1190,17 @@ def make_dactyl():
         return shape
 
 
-    # def trackball_mount():
-    #     radius = trackball_hole_diameter / 2
-    #     tube = cone(radius, radius + 6, (radius + 4))
-    #     return translate(tube, (0, 0, -18))
-
     def trackball_mount():
         radius = trackball_hole_diameter / 2
-        tube = sphere(radius + 6)
-        cut = translate(box(radius * 4, radius * 4, radius + 10), (0, 0, ((radius + 10) / 2)))
-        tube = difference(tube, [cut])
-        return translate(tube, (0, 0, 3))
+        tube = cylinder(radius, (radius + 20))
+        return translate(tube, (0, 0, 15))
+
+    # def trackball_mount():
+    #     radius = trackball_hole_diameter / 2
+    #     tube = sphere(radius + 6)
+    #     cut = translate(box(radius * 4, radius * 4, radius + 10), (0, 0, ((radius + 10) / 2)))
+    #     tube = difference(tube, [cut])
+    #     return translate(tube, (0, 0, 3))
 
     def trackball_socket(btus=False,segments=100, side="right"):
         # shape = sphere(ball_diameter / 2)
@@ -1926,7 +1926,8 @@ def make_dactyl():
                 tbprecut, tb, tbcutout, sensor, ball, mount = generate_trackball_in_wall()
                 # shape = union([shape, mount])
                 if use_btus(cluster):
-                    shape = difference(shape, [tbcutout])
+                    shape = difference(shape, [tbprecut, tbcutout])
+                    # shape = difference(shape, [tbcutout])
                     shape = union([shape, tb])
                 else:
                     shape = difference(shape, [tbprecut, mount])
