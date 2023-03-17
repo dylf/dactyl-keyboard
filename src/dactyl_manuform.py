@@ -248,10 +248,20 @@ def make_dactyl():
     else:
         double_plate_height = (sa_double_length - mount_height) / 3
 
-    wide = 22 if not oled_horizontal else tbiw_left_wall_x_offset_override
-    short = 8 if not oled_horizontal else tbiw_left_wall_x_offset_override
-
-    if oled_mount_type is not None and oled_mount_type != "NONE":
+    if trackball_in_wall:
+        wide = tbiw_left_wall_x_offset_override
+        if oled_mount_type == None:
+            short = 8
+        else:
+            left_wall_x_offset = oled_left_wall_x_offset_override
+            short = tbiw_left_wall_x_offset_override
+        if nrows == 4:
+            left_wall_x_row_offsets = [short, short, wide, wide]
+        elif nrows == 5:
+            left_wall_x_row_offsets = [wide, wide, wide, short, short]
+        elif nrows == 6:
+            left_wall_x_row_offsets = [wide, wide, wide, short, short, short]
+    elif oled_mount_type is not None and oled_mount_type != "NONE":
         left_wall_x_offset = oled_left_wall_x_offset_override
         if nrows == 4:
             left_wall_x_row_offsets = [wide, wide, wide, wide]
@@ -806,7 +816,7 @@ def make_dactyl():
                 z_offset = 0.0
 
             return list(pos - np.array([
-                tbiw_left_wall_x_offset_override,
+                left_wall_x_row_offsets[row],
                 -y_offset,
                 tbiw_left_wall_z_offset_override + z_offset
             ]))
