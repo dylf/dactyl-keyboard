@@ -811,6 +811,9 @@ def make_dactyl():
             if low_corner:
                 y_offset = tbiw_left_wall_lower_y_offset
                 z_offset = tbiw_left_wall_lower_z_offset
+            elif row == 2:
+                y_offset = -8
+                z_offset = 0
             else:
                 y_offset = 0.0
                 z_offset = 0.0
@@ -1193,7 +1196,7 @@ def make_dactyl():
 
 
     def use_btus(cluster):
-        return (cluster is not None and cluster.has_btus())
+        return trackball_in_wall or (cluster is not None and cluster.has_btus())
 
     def trackball_cutout(segments=100, side="right"):
         shape = cylinder(trackball_hole_diameter / 2, trackball_hole_height)
@@ -1226,7 +1229,7 @@ def make_dactyl():
             # tb_file = path.join(parts_path, r"btu_socket_2023_2")
             # tbcut_file = path.join(parts_path, r"btu_socket_cutter_2023_2")
             tb_file = path.join(parts_path, r"btu_socket_2023_4_beta")
-            tbcut_file = path.join(parts_path, r"btu_socket_cutter_2023_4_beta")
+            tbcut_file = path.join(parts_path, r"btu_socket_cutter_2023_5_beta")
         else:
             tb_file = path.join(parts_path, r"trackball_socket_body_34mm")
             tbcut_file = path.join(parts_path, r"trackball_socket_cutter_34mm")

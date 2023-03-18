@@ -19,6 +19,7 @@
   "column_style_gt5": "orthographic",
   "column_style": "standard",
   "full_last_rows": false,
+  "shift_column": 0,
   "all_last_rows": false,
   "keyboard_z_offset": 12,
   "thumb_style": "TRACKBALL_WILD",
