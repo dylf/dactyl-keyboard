@@ -7,7 +7,7 @@
   "last_1_5U_row": 4,
   "default_1U_cluster": false,
   "full_last_rows": true,
-  "oled_mount_type": "CLIP",
+  "oled_mount_type": "SLIDING",
   "oled_left_wall_lower_y_offset": 12,
   "extra_height": 0.7,
   "wall_z_offset": 8,

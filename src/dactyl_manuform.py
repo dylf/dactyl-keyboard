@@ -419,50 +419,6 @@ def make_dactyl():
         return plate
 
 
-    def trackball_cutout(segments=100, side="right"):
-        shape = cylinder(trackball_hole_diameter / 2, trackball_hole_height)
-        return shape
-
-
-    def trackball_socket(btus=False,segments=100, side="right"):
-        # shape = sphere(ball_diameter / 2)
-        # cyl = cylinder(ball_diameter / 2 + 4, 20)
-        # cyl = translate(cyl, (0, 0, -8))
-        # shape = union([shape, cyl])
-
-        tb_file = path.join(parts_path, r"trackball_socket_body_34mm")
-        tbcut_file = path.join(parts_path, r"trackball_socket_cutter_34mm")
-
-        if btus:
-            tb_file = path.join(parts_path, r"btu_trackball_socket_feb_14_12")
-            tbcut_file = path.join(parts_path, r"trackball_socket_w_btus_cutter")
-
-        if ENGINE == 'cadquery':
-            sens_file = path.join(parts_path, r"gen_holder")
-        else:
-            sens_file = path.join(parts_path, r"trackball_sensor_mount")
-
-        senscut_file = path.join(parts_path, r"trackball_sensor_cutter")
-
-        # shape = import_file(tb_file)
-        # # shape = difference(shape, [import_file(senscut_file)])
-        # # shape = union([shape, import_file(sens_file)])
-        # cutter = import_file(tbcut_file)
-
-        shape = import_file(tb_file)
-        sensor = import_file(sens_file)
-        cutter = import_file(tbcut_file)
-        cutter = union([cutter, import_file(senscut_file)])
-
-        # return shape, cutter
-        return shape, cutter, sensor
-
-
-    def trackball_ball(segments=100, side="right"):
-        shape = sphere(ball_diameter / 2)
-        return shape
-
-
     ################
     ## SA Keycaps ##
     ################
@@ -1212,6 +1168,45 @@ def make_dactyl():
         return shape
 
 
+    def trrs_mount_point():
+        shape = box(6.2, 14, 5.2)
+        jack = translate(rotate(cylinder(2.6, 5), (90, 0, 0)), (0, 9, 0))
+        jack_entry = translate(rotate(cylinder(4, 5), (90, 0, 0)), (0, 10.5, 0))
+        shape = translate(union([shape, jack, jack_entry]), (0, 0, 10))
+
+        shape = translate(shape,
+                      (
+                          usb_holder_position[0] - 18,
+                          usb_holder_position[1] - 8,
+                          -4,
+                      )
+                      )
+        return shape
+
+    def usb_c_shape(width, height, depth):
+        shape = box(width, depth, height)
+        cyl1 = translate(rotate(cylinder(height / 2, depth), (90, 0, 0)), (width / 2, 0, 0))
+        cyl2 = translate(rotate(cylinder(height / 2, depth), (90, 0, 0)), (-width / 2, 0, 0))
+        return union([shape, cyl1, cyl2])
+
+    def usb_c_hole():
+        debugprint('usb_c_hole()')
+        return usb_c_shape(usb_c_width, usb_c_height, 20)
+
+    def usb_c_mount_point():
+        width = usb_c_width * 1.4
+        height = usb_c_height * 1.4
+        front_bit = translate(usb_c_shape(usb_c_width + 2, usb_c_height + 2, wall_thickness / 2), (0, (wall_thickness / 2) + 1, 0))
+        shape = union([front_bit, usb_c_hole()])
+        shape = translate(shape,
+                          (
+                              usb_holder_position[0] - 3,
+                              usb_holder_position[1] ,
+                              5,
+                          )
+                          )
+        return shape
+
     external_start = list(
         # np.array([0, -3, 0])
         np.array([external_holder_width / 2, 0, 0])
@@ -1256,11 +1251,61 @@ def make_dactyl():
         return shape
 
 
+########### TRACKBALL GENERATION
+    def use_btus(cluster):
+        return trackball_in_wall or (cluster is not None and cluster.has_btus())
+
+    def trackball_cutout(segments=100, side="right"):
+        shape = cylinder(trackball_hole_diameter / 2, trackball_hole_height)
+        return shape
+
+
+    def trackball_socket(btus=False,segments=100, side="right"):
+        # shape = sphere(ball_diameter / 2)
+        # cyl = cylinder(ball_diameter / 2 + 4, 20)
+        # cyl = translate(cyl, (0, 0, -8))
+        # shape = union([shape, cyl])
+
+        # tb_file = path.join(parts_path, r"trackball_socket_body_34mm")
+        # tbcut_file = path.join(parts_path, r"trackball_socket_cutter_34mm")
+
+        if btus:
+            tb_file = path.join(parts_path, r"btu_socket_2023_4_beta")
+            tbcut_file = path.join(parts_path, r"btu_socket_cutter_2023_4_beta")
+        else:
+            tb_file = path.join(parts_path, r"trackball_socket_body_34mm")
+            tbcut_file = path.join(parts_path, r"trackball_socket_cutter_34mm")
+
+        if ENGINE == 'cadquery':
+            sens_file = path.join(parts_path, r"gen_holder")
+        else:
+            sens_file = path.join(parts_path, r"trackball_sensor_mount")
+
+        senscut_file = path.join(parts_path, r"trackball_sensor_cutter")
+
+        # shape = import_file(tb_file)
+        # # shape = difference(shape, [import_file(senscut_file)])
+        # # shape = union([shape, import_file(sens_file)])
+        # cutter = import_file(tbcut_file)
+
+        shape = import_file(tb_file)
+        sensor = import_file(sens_file)
+        cutter = import_file(tbcut_file)
+        cutter = union([cutter, import_file(senscut_file)])
+
+        # return shape, cutter
+        return shape, cutter, sensor
+
+
+    def trackball_ball(segments=100, side="right"):
+        shape = sphere(ball_diameter / 2)
+        return shape
+
     def generate_trackball(pos, rot, cluster):
         tb_t_offset = tb_socket_translation_offset
         tb_r_offset = tb_socket_rotation_offset
 
-        if cluster is not None and cluster.has_btus():
+        if use_btus(cluster):
             tb_t_offset = tb_btu_socket_translation_offset
             tb_r_offset = tb_btu_socket_rotation_offset
 
@@ -1270,7 +1315,7 @@ def make_dactyl():
         precut = rotate(precut, rot)
         precut = translate(precut, pos)
 
-        shape, cutout, sensor = trackball_socket(btus=cluster is not None and cluster.has_btus())
+        shape, cutout, sensor = trackball_socket(btus=use_btus(cluster))
 
         shape = rotate(shape, tb_r_offset)
         shape = translate(shape, tb_t_offset)
@@ -1706,7 +1751,7 @@ def make_dactyl():
 
     def screw_insert_shape(bottom_radius, top_radius, height, hole=False):
         debugprint('screw_insert_shape()')
-        mag_offset = 0.5 if magnet_bottom else 0
+        mag_offset = 0
         if bottom_radius == top_radius:
             shape = translate(cylinder(radius=bottom_radius, height=height),
                              (0, 0, mag_offset - (height / 2))  # offset magnet by 1 mm in case
@@ -1889,6 +1934,11 @@ def make_dactyl():
             s2 = union([s2, usb_holder()])
             s2 = difference(s2, [usb_holder_hole()])
 
+        if controller_mount_type in ['USB_C_WALL']:
+            # s2 = union([s2, usb_holder()])
+            s2 = difference(s2, [usb_c_mount_point(),trrs_mount_point()])
+            # s2 = union([s2, trrs_mount_point()])
+
         if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL']:
             s2 = difference(s2, [rj9_space()])
 
@@ -1938,7 +1988,7 @@ def make_dactyl():
                 if show_caps:
                     shape = add([shape, ball])
 
-            if cluster(side).is_tb:
+            elif cluster(side).is_tb:
                 tbprecut, tb, tbcutout, sensor, ball = generate_trackball_in_cluster(cluster(side))
 
                 shape = difference(shape, [tbprecut])
