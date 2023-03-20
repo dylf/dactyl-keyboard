@@ -328,17 +328,20 @@ shape_config = {
     # connector options are
     # 'RJ9_USB_WALL' = Standard internal plate with RJ9 opening and square cutout for connection.
     # 'USB_WALL' = Standard internal plate with a square cutout for connection, no RJ9.
+    # 'USB-C-WALL' = Simple hole for usb-c connector.
     # 'RJ9_USB_TEENSY' = Teensy holder
     # 'USB_TEENSY' = Teensy holder, no RJ9
     # 'EXTERNAL' = square cutout for a holder such as the one from lolligagger.
     # 'BLACKPILL_EXTERNAL' = larger square cutout for lolligagger type holder modified for the blackpill.
+
     # 'NONE' = No openings in the back.
     'controller_mount_type':  'EXTERNAL',
-
+    'controller_side': 'both',  # usually on both sides, but set this to have the holder/mount only one one side
+                                # eg. both, right, or left
     'external_holder_height':  12.5,
     'external_holder_width':  28.75,
     'external_holder_xoffset': -5.0,
-    'external_holder_yoffset': -4.5, #Tweak this value to get the right undercut for the tray engagement.
+    'external_holder_yoffset': -4.5,  #Tweak this value to get the right undercut for the tray engagement.
 
     # Offset is from the top inner corner of the top inner key.
 
@@ -347,6 +350,18 @@ shape_config = {
     "blackpill_holder_width": 32.0,
     "blackpill_holder_xoffset": -6.5,
 
+    ##### USB-C MOUNT # uses external mount point location
+    "usb_c_width": 9.5,
+    "usb_c_height": 3.5,
+    "usb_c_xoffset": -3,  # offsets from the external mount position
+    "usb_c_yoffset": 0,
+    "usb_c_zoffset": 5,
+
+    ##### TRRS MOUNT POINT
+    "trrs_hole": False,   # this will include a hole for a TRRS jack mount on both sides
+    "trrs_hole_xoffset": -18,  # These are offset from the external mount position
+    "trrs_hole_yoffset": -8,
+    "trrs_hole_zoffset": -4,
 
     ###################################
     ## Bottom Plate Dimensions
