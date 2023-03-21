@@ -811,14 +811,6 @@ def make_dactyl():
             if low_corner:
                 y_offset = tbiw_left_wall_lower_y_offset
                 z_offset = tbiw_left_wall_lower_z_offset
-            # RIDICULOUS HACK 1
-            elif row == 2:
-                y_offset = -8
-                z_offset = 0
-            # RIDICULOUS HACK 2
-            elif row == 3:
-                y_offset = 0
-                z_offset = 1
             else:
                 y_offset = 0.0
                 z_offset = 0.0
@@ -1234,7 +1226,7 @@ def make_dactyl():
             # tb_file = path.join(parts_path, r"phat_btu_socket")
             # tbcut_file = path.join(parts_path, r"btu_socket_cutter_2023_2")
             tb_file = path.join(parts_path, r"phat_btu_socket")
-            tbcut_file = path.join(parts_path, r"phat_btu_socket_cutter")
+            tbcut_file = path.join(parts_path, r"phatter_btu_socket_cutter")
         else:
             tb_file = path.join(parts_path, r"trackball_socket_body_34mm")
             tbcut_file = path.join(parts_path, r"trackball_socket_cutter_34mm")
@@ -1947,6 +1939,8 @@ def make_dactyl():
                 if use_btus(cluster(side)):
                     cutter = union([tbprecut, tbcutout, mount])
                     shape = difference(shape, [cutter])
+                    # t = translate(cutter, (0, 0, 5))
+                    # shape = difference(shape, [cutter])
                     # shape = difference(shape, [tbcutout])
                     shape = union([shape, tb])
                 else:
