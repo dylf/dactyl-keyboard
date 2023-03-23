@@ -811,6 +811,14 @@ def make_dactyl():
             if low_corner:
                 y_offset = tbiw_left_wall_lower_y_offset
                 z_offset = tbiw_left_wall_lower_z_offset
+                # RIDICULOUS HACK 1
+            elif row >= 2:
+                y_offset = -10
+                z_offset = 0
+                # RIDICULOUS HACK 2
+            # elif row == 3:
+            #     y_offset = -8
+            #     z_offset = 0
             else:
                 y_offset = 0.0
                 z_offset = 0.0
@@ -836,6 +844,10 @@ def make_dactyl():
         pos = left_key_position(row, direction, low_corner=low_corner, side=side)
         return translate(shape, pos)
 
+    # This is hackish... It just allows the search and replace of key_place in the cluster code
+    # to not go big boom
+    def left_cluster_key_place(shape, row, direction, low_corner=False, side='right'):
+        return left_key_place(shape, row, direction, low_corner, side)
 
     def wall_locate1(dx, dy):
         debugprint("wall_locate1()")
@@ -1211,7 +1223,7 @@ def make_dactyl():
         # cut = translate(box(radius * 4, radius * 4, radius + 10), (0, 0, ((radius + 10) / 2)))
         # tube = difference(tube, [cut])
         # return tube
-        return translate(tube, (0, 0, 0))
+        return translate(tube, (0, 0, 20))
 
     def trackball_socket(btus=False,segments=100, side="right"):
         # shape = sphere(ball_diameter / 2)
@@ -1714,7 +1726,7 @@ def make_dactyl():
 
     def screw_insert_shape(bottom_radius, top_radius, height, hole=False):
         debugprint('screw_insert_shape()')
-        mag_offset = 0.5 if magnet_bottom else 0
+        mag_offset = 0
         if bottom_radius == top_radius:
             shape = translate(cylinder(radius=bottom_radius, height=height),
                              (0, 0, mag_offset - (height / 2))  # offset magnet by 1 mm in case
@@ -1843,7 +1855,7 @@ def make_dactyl():
 
 
     def screw_insert_screw_holes(side='right'):
-        return screw_insert_all_shapes(1.7, 1.7, 350, side=side)
+        return screw_insert_all_shapes(1.7, 1.7, 200, side=side)
 
 
     def wire_post(direction, offset):
@@ -1890,24 +1902,31 @@ def make_dactyl():
         s2 = union([walls_shape])
         s2 = union([s2, *screw_insert_outers(side=side)])
 
-        if controller_mount_type in ['RJ9_USB_TEENSY', 'USB_TEENSY']:
-            s2 = union([s2, teensy_holder()])
+        if trrs_hole:
+            s2 = difference(s2, [trrs_mount_point()])
 
-        if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL', 'USB_WALL', 'USB_TEENSY']:
-            s2 = union([s2, usb_holder()])
-            s2 = difference(s2, [usb_holder_hole()])
+        if side == "both" or side == controller_side:
+            if controller_mount_type in ['RJ9_USB_TEENSY', 'USB_TEENSY']:
+                s2 = union([s2, teensy_holder()])
 
-        if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL']:
-            s2 = difference(s2, [rj9_space()])
+            if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL', 'USB_WALL', 'USB_TEENSY']:
+                s2 = union([s2, usb_holder()])
+                s2 = difference(s2, [usb_holder_hole()])
 
-        if controller_mount_type in ['BLACKPILL_EXTERNAL']:
-            s2 = difference(s2, [blackpill_mount_hole()])
+            if controller_mount_type in ['USB_C_WALL']:
+                s2 = difference(s2, [usb_c_mount_point()])
 
-        if controller_mount_type in ['EXTERNAL']:
-            s2 = difference(s2, [external_mount_hole()])
+            if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL']:
+                s2 = difference(s2, [rj9_space()])
 
-        if controller_mount_type in ['None']:
-            0  # do nothing, only here to expressly state inaction.
+            if controller_mount_type in ['BLACKPILL_EXTERNAL']:
+                s2 = difference(s2, [blackpill_mount_hole()])
+
+            if controller_mount_type in ['EXTERNAL']:
+                s2 = difference(s2, [external_mount_hole()])
+
+            if controller_mount_type in ['None']:
+                0  # do nothing, only here to expressly state inaction.
 
         s2 = difference(s2, [union(screw_insert_holes(side=side))])
         shape = union([shape, s2])
@@ -1935,7 +1954,7 @@ def make_dactyl():
                 tbprecut, tb, tbcutout, sensor, ball, mount = generate_trackball_in_wall()
                 # shape = union([shape, mount])
                 if use_btus(cluster(side)):
-                    cutter = union([tbprecut, tbcutout, mount])
+                    cutter = union([tbprecut, tbcutout])
                     shape = difference(shape, [cutter])
                     # t = translate(cutter, (0, 0, 5))
                     # shape = difference(shape, [cutter])
@@ -1954,11 +1973,11 @@ def make_dactyl():
                 if show_caps:
                     shape = add([shape, ball])
 
-            if cluster(side).is_tb:
+            elif cluster(side).is_tb:
                 tbprecut, tb, tbcutout, sensor, ball = generate_trackball_in_cluster(cluster(side))
 
                 shape = difference(shape, [tbprecut])
-                if use_btus(cluster):
+                if cluster(side).has_btus():
                     shape = difference(shape, [tbcutout])
                     shape = union([shape, tb])
                 else:
@@ -1973,7 +1992,7 @@ def make_dactyl():
                 if show_caps:
                     shape = add([shape, ball])
 
-        block = translate(box(500, 500, 40), (0, 0, -20))
+        block = translate(box(300, 300, 40), (0, 0, -20))
         shape = difference(shape, [block])
 
         if show_caps:
@@ -2005,7 +2024,7 @@ def make_dactyl():
                     item = translate(item, [0, 0, 1.2])
                     shape = difference(shape, [item])
             else:
-                tool = screw_insert_all_shapes(screw_hole_diameter / 2., screw_hole_diameter / 2., 350, side=side)
+                tool = screw_insert_all_shapes(screw_hole_diameter / 2., screw_hole_diameter / 2., 200, side=side)
                 for item in tool:
                     item = translate(item, [0, 0, -10])
                     shape = difference(shape, [item])
@@ -2076,8 +2095,8 @@ def make_dactyl():
                 shape = difference(shape, hole_shapes)
                 shape = translate(shape, (0, 0, -base_rim_thickness))
                 shape = union([shape, inner_shape])
-                if magnet_bottom:  # was 0.05, now 0.2, trying nothi
-                    shape = difference(shape, [translate(magnet, (0, 0, 1.7 - (screw_insert_height / 2))) for magnet in list(tool)])
+                if magnet_bottom:
+                    shape = difference(shape, [translate(magnet, (0, 0, 0.05 - (screw_insert_height / 2))) for magnet in list(tool)])
 
             return shape
         else:

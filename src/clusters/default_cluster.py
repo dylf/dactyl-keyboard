@@ -41,52 +41,71 @@ class DefaultCluster(object):
     def thumborigin(self):
         # debugprint('thumborigin()')
         origin = key_position([mount_width / 2, -(mount_height / 2), 0], 1, cornerrow)
-
+        _thumb_offsets = self.thumb_offsets.copy()
+        if shift_column != 0:
+            _thumb_offsets[0] = self.thumb_offsets[0] + (shift_column * (mount_width + 6))
+            # if shift_column < 0:  # raise cluster up when moving inward
+            #     _thumb_offsets[1] = self.thumb_offsets[1] - (shift_column * 3)
+            #     _thumb_offsets[2] = self.thumb_offsets[2] - (shift_column * 8)
+            #     if shift_column <= -2:
+            #         # y = shift_column * 15
+            #         _thumb_offsets[1] = self.thumb_offsets[1] - (shift_column * 15)
         for i in range(len(origin)):
-            origin[i] = origin[i] + self.thumb_offsets[i]
+            origin[i] = origin[i] + _thumb_offsets[i]
 
         return origin
+
+    def thumb_rotate(self):
+        x = y = z = 0
+        # if shift_column < 0:
+        #     y = shift_column * 4
+        #     z = shift_column * -10
+        return [x, y, z]
+
+    def thumb_place(self, shape):
+        shape = translate(shape, self.thumborigin())
+        return rotate(shape, self.thumb_rotate())
 
     def tl_place(self, shape):
         debugprint('tl_place()')
         shape = rotate(shape, [7.5, -18, 10])
-        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-32.5, -14.5, -2.5])
+        shape = self.thumb_place(shape)
         return shape
 
     def tr_place(self, shape):
         debugprint('tr_place()')
         shape = rotate(shape, [10, -15, 10])
-        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-12, -16, 3])
+        shape = self.thumb_place(shape)
         return shape
 
     def mr_place(self, shape):
         debugprint('mr_place()')
         shape = rotate(shape, [-6, -34, 48])
-        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-29, -40, -13])
+        shape = self.thumb_place(shape)
         return shape
 
     def ml_place(self, shape):
         debugprint('ml_place()')
         shape = rotate(shape, [6, -34, 40])
-        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-51, -25, -12])
+        shape = self.thumb_place(shape)
         return shape
 
     def br_place(self, shape):
         debugprint('br_place()')
         shape = rotate(shape, [-16, -33, 54])
-        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-37.8, -55.3, -25.3])
+        shape = self.thumb_place(shape)
         return shape
 
     def bl_place(self, shape):
         debugprint('bl_place()')
         shape = rotate(shape, [-4, -35, 52])
-        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-56.3, -43.3, -23.5])
+        shape = self.thumb_place(shape)
         return shape
 
     def thumb_1x_layout(self, shape, cap=False):

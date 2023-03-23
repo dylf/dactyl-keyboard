@@ -41,22 +41,29 @@ class Minithicc3(MinidoxCluster):
         for item in parent_locals:
             globals()[item] = parent_locals[item]
 
+    def thumb_rotate(self):
+        x = y = z = 0
+        # if shift_column < 0:
+        #     y = shift_column * 4
+        #     z = shift_column * -10
+        return [x, y, 15]
+
     def tl_place(self, shape):
         shape = rotate(shape, [14, -15, 20])
-        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-35, -16, -15])
+        shape = self.thumb_place(shape)
         return shape
 
     def tr_place(self, shape):
         shape = rotate(shape, [17, -15, 10])
-        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-15, -10, -9])
+        shape = self.thumb_place(shape)
         return shape
 
     def ml_place(self, shape):
         shape = rotate(shape, [10, -15, 30])
-        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-54, -26, -21])
+        shape = self.thumb_place(shape)
         return shape
 
     # def mr_place(self, shape):
@@ -269,8 +276,8 @@ class Minithicc3(MinidoxCluster):
         shape = union(
             [shape, wall_brace(self.ml_place, -1, 0, self.thumb_post_tl(), self.ml_place, 0, 1, self.thumb_post_tl())])
         # thumb, tweeners
-        shape = union(
-            [shape, wall_brace(self.ml_place, 0, 1, self.thumb_post_tr(), self.ml_place, 0, 1, self.thumb_post_tl())])
+        # shape = union(
+        #     [shape, wall_brace(self.ml_place, 0, 1, self.thumb_post_tr(), self.ml_place, 0, 1, self.thumb_post_tl())])
         shape = union([shape,
                        wall_brace(self.tr_place, 0, -1, self.thumb_post_br(), (lambda sh: key_place(sh, 3, lastrow)), 0,
                                   -1, web_post_bl())])
@@ -285,8 +292,8 @@ class Minithicc3(MinidoxCluster):
             [
                 left_key_place(translate(web_post(), wall_locate2(-1, 0)), lastrow, -1, low_corner=True, side=side),
                 left_key_place(translate(web_post(), wall_locate3(-1, 0)), lastrow, -1, low_corner=True, side=side),
-                self.bl_place(translate(self.thumb_post_tr(), wall_locate2(-0.3, 1))),
-                self.bl_place(translate(self.thumb_post_tr(), wall_locate3(-0.3, 1))),
+                self.bl_place(translate(self.thumb_post_tr(), wall_locate2(-0.3, -2))),
+                self.bl_place(translate(self.thumb_post_tr(), wall_locate3(-0.3, -2))),
             ]
         )])
 
