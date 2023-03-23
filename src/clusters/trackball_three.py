@@ -421,7 +421,7 @@ class TrackballThree(DefaultCluster):
         return shape
 
     def has_btus(self):
-        return True
+        return False
 
     def screw_positions(self):
         position = self.thumborigin()
