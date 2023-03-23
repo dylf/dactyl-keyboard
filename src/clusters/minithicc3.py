@@ -276,8 +276,8 @@ class Minithicc3(MinidoxCluster):
         shape = union(
             [shape, wall_brace(self.ml_place, -1, 0, self.thumb_post_tl(), self.ml_place, 0, 1, self.thumb_post_tl())])
         # thumb, tweeners
-        # shape = union(
-        #     [shape, wall_brace(self.ml_place, 0, 1, self.thumb_post_tr(), self.ml_place, 0, 1, self.thumb_post_tl())])
+        shape = union(
+            [shape, wall_brace(self.ml_place, -1, 3, self.thumb_post_tr(), self.ml_place, 0, 1, self.thumb_post_tl())])
         shape = union([shape,
                        wall_brace(self.tr_place, 0, -1, self.thumb_post_br(), (lambda sh: key_place(sh, 3, lastrow)), 0,
                                   -1, web_post_bl())])
@@ -288,6 +288,8 @@ class Minithicc3(MinidoxCluster):
         print('thumb_connection()')
         # clunky bit on the top left thumb connection  (normal connectors don't work well)
         # clunky bit on the top left thumb connection  (normal connectors don't work well)
+
+        ####### CONNECTION TO LEFT WALL AT TOP HERE
         shape = union([bottom_hull(
             [
                 left_key_place(translate(web_post(), wall_locate2(-1, 0)), lastrow, -1, low_corner=True, side=side),

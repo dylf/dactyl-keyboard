@@ -880,6 +880,11 @@ def make_dactyl():
         # ]
 
 
+    def wall_brace(pt1, pt2, face=1, thickness=wall_base_x_thickness, curve=0):
+        angle = numpy.atan
+        hulls = [pt1, pt2]
+
+
     def wall_brace(place1, dx1, dy1, post1, place2, dx2, dy2, post2, back=False):
         debugprint("wall_brace()")
         hulls = []
