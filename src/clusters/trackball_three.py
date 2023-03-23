@@ -424,6 +424,9 @@ class TrackballThree(TrackballOrbyl):
         shape = union(hulls)
         return shape
 
+    def has_btus(self):
+        return False
+
     def screw_positions(self):
         position = self.thumborigin()
         position = list(np.array(position) + np.array([-68, -50, -16]))
