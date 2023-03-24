@@ -255,7 +255,7 @@ def make_dactyl():
         else:
             left_wall_x_offset = oled_left_wall_x_offset_override
             short = tbiw_left_wall_x_offset_override
-        if nrows == 4:
+        if nrows <= 4:
             left_wall_x_row_offsets = [short, short, wide, wide]
         elif nrows == 5:
             left_wall_x_row_offsets = [wide, wide, wide, short, short]
@@ -263,7 +263,7 @@ def make_dactyl():
             left_wall_x_row_offsets = [wide, wide, wide, short, short, short]
     elif oled_mount_type is not None and oled_mount_type != "NONE":
         left_wall_x_offset = oled_left_wall_x_offset_override
-        if nrows == 4:
+        if nrows <= 4:
             left_wall_x_row_offsets = [wide, wide, wide, wide]
         elif nrows == 5:
             left_wall_x_row_offsets = [wide, wide, wide, short, short]
@@ -813,8 +813,10 @@ def make_dactyl():
                 z_offset = tbiw_left_wall_lower_z_offset
                 # RIDICULOUS HACK 1
             elif row >= 2:
-                y_offset = -10
+                y_offset = -26
                 z_offset = 0
+                if row >= 3:
+                    z_offset = 3
                 # RIDICULOUS HACK 2
             # elif row == 3:
             #     y_offset = -8
@@ -880,9 +882,6 @@ def make_dactyl():
         # ]
 
 
-    def wall_brace(pt1, pt2, face=1, thickness=wall_base_x_thickness, curve=0):
-        angle = numpy.atan
-        hulls = [pt1, pt2]
 
 
     def wall_brace(place1, dx1, dy1, post1, place2, dx2, dy2, post2, back=False):
@@ -895,7 +894,7 @@ def make_dactyl():
         hulls.append(place1(translate(post1, wall_locate3(dx1, dy1, back))))
 
         hulls.append(place2(post2))
-        hulls.append(place2(translate(post2, wall_locate1(dx2, dy2))))
+        # hulls.append(place2(translate(post2, wall_locate1(dx2, dy2))))
         hulls.append(place2(translate(post2, wall_locate1(dx2, dy2))))
         hulls.append(place2(translate(post2, wall_locate2(dx2, dy2))))
         hulls.append(place2(translate(post2, wall_locate3(dx2, dy2, back))))
@@ -977,6 +976,20 @@ def make_dactyl():
                 key_wall_brace(lastcol, torow, 0, -1, web_post_br(), lastcol, torow, 1, 0, web_post_br())
             ])
         return shape
+
+    def wall_brace_new(pt1, pt2, face=1, thickness=wall_base_x_thickness, curve=0):
+        hulls = [pt1, pt2]
+        angle = numpy.atan(10, 10)
+        return angle
+
+    def left_wall_cluster_join_location(shape):
+        torow = lastrow
+        if all_last_rows:
+            torow = lastrow + 1
+        pos = left_key_position(torow - 1, -1, low_corner=True)
+        if shape is not None:
+            return translate(shape, pos)
+        return pos
 
 
     def left_wall(side='right'):
@@ -1910,7 +1923,7 @@ def make_dactyl():
         if trrs_hole:
             s2 = difference(s2, [trrs_mount_point()])
 
-        if side == "both" or side == controller_side:
+        if controller_side == "both" or side == controller_side:
             if controller_mount_type in ['RJ9_USB_TEENSY', 'USB_TEENSY']:
                 s2 = union([s2, teensy_holder()])
 
