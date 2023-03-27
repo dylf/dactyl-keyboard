@@ -410,10 +410,10 @@ class Minithicc3(MinidoxCluster):
         shape = union([
                        hull_from_shapes(
                            [
-                               left_cluster_key_place(web_post(), lastrow, -1, low_corner=True, side=side),
-                               left_cluster_key_place(translate(web_post(), wall_locate1(-1, 0)), lastrow, -1, low_corner=True,
+                               left_cluster_key_place(web_post(), cornerrow, -1, low_corner=True, side=side),
+                               left_cluster_key_place(translate(web_post(), wall_locate1(-1, 0)), cornerrow, -1, low_corner=True,
                                               side=side),
-                               cluster_key_place(web_post_bl(), 0, lastrow),
+                               cluster_key_place(web_post_bl(), 0, cornerrow),
                                # key_place(translate(web_post_bl(), wall_locate1(-1, 0)), lastrow, -1, low_corner=True),
                                self.tl_place(self.thumb_post_tl()),
                            ]
