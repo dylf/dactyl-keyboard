@@ -1334,22 +1334,22 @@ def make_dactyl():
         return trackball_in_wall or (cluster is not None and cluster.has_btus())
 
     def trackball_cutout(segments=100, side="right"):
-        shape = cylinder(trackball_hole_diameter / 2, trackball_hole_height)
+        shape = translate(cylinder(trackball_hole_diameter / 2, trackball_hole_height), (0, 0, 20))
         return shape
 
-
-    # def trackball_mount():
-    #     radius = trackball_hole_diameter / 2
-    #     tube = cylinder(radius + 2, (radius + 40))
-    #     return tube
 
     def trackball_mount():
         radius = trackball_hole_diameter / 2
         tube = sphere(radius + 3)
+        return translate(tube, (0, 0, 20))
+
+    def trackball_surface_cutter(add_radius=10):
+        radius = (trackball_hole_diameter / 2) + add_radius
+        tube = cylinder(30, radius)
         # cut = translate(box(radius * 4, radius * 4, radius + 10), (0, 0, ((radius + 10) / 2)))
         # tube = difference(tube, [cut])
         # return tube
-        return translate(tube, (0, 0, 20))
+        return translate(tube, (0, 0, 20 + 21))
 
     def trackball_socket(btus=False,segments=100, side="right"):
         # shape = sphere(ball_diameter / 2)
@@ -1393,6 +1393,8 @@ def make_dactyl():
         shape = sphere(ball_diameter / 2)
         return shape
 
+
+
     def generate_trackball(pos, rot, cluster):
         tb_t_offset = tb_socket_translation_offset
         tb_r_offset = tb_socket_rotation_offset
@@ -1401,60 +1403,41 @@ def make_dactyl():
             tb_t_offset = tb_btu_socket_translation_offset
             tb_r_offset = tb_btu_socket_rotation_offset
 
+        def orient_to_trackball(shape):
+            shape = rotate(shape, tb_r_offset)
+            shape = translate(shape, tb_t_offset)
+            shape = rotate(shape, rot)
+            shape = translate(shape, pos)
+            return shape
+
+        top_cutter = None
         mount = None
 
         if trackball_in_wall:
-            mount = trackball_mount()
-            mount = rotate(mount, tb_r_offset)
-            mount = translate(mount, tb_t_offset)
-            mount = rotate(mount, rot)
-            mount = translate(mount, pos)
+            top_cutter = orient_to_trackball(trackball_surface_cutter())
+            mount = orient_to_trackball(trackball_mount())
 
-        precut = trackball_cutout()
-        precut = rotate(precut, tb_r_offset)
-        precut = translate(precut, tb_t_offset)
-        precut = rotate(precut, rot)
-        precut = translate(precut, pos)
+        precut = orient_to_trackball(trackball_cutout())
 
         shape, cutout, sensor = trackball_socket(btus=use_btus(cluster))
 
-        shape = rotate(shape, tb_r_offset)
-        shape = translate(shape, tb_t_offset)
-        shape = rotate(shape, rot)
-        shape = translate(shape, pos)
+        shape = orient_to_trackball(shape)
 
         if cluster is not None and resin is False:
             shape = cluster.get_extras(shape, pos)
 
-        cutout = rotate(cutout, tb_r_offset)
-        cutout = translate(cutout, tb_t_offset)
-        # cutout = rotate(cutout, tb_sensor_translation_offset)
-        # cutout = translate(cutout, tb_sensor_rotation_offset)
-        cutout = rotate(cutout, rot)
-        cutout = translate(cutout, pos)
-
-        # Small adjustment due to line to line surface / minute numerical error issues
-        # Creates small overlap to assist engines in union function later
-        sensor = rotate(sensor, tb_r_offset)
-        sensor = translate(sensor, tb_t_offset)
+        cutout = orient_to_trackball(cutout)
 
         # Hackish?  Oh, yes. But it builds with latest cadquery.
         if ENGINE == 'cadquery':
-            sensor = translate(sensor, (0, 0, -15))
-        # sensor = rotate(sensor, tb_sensor_translation_offset)
-        # sensor = translate(sensor, tb_sensor_rotation_offset)
-        sensor = translate(sensor, (0, 0, .005))
-        sensor = rotate(sensor, rot)
-        sensor = translate(sensor, pos)
+            sensor = translate(sensor, (0, 0, -14.005))
 
-        ball = trackball_ball()
-        ball = rotate(ball, tb_r_offset)
-        ball = translate(ball, tb_t_offset)
-        ball = rotate(ball, rot)
-        ball = translate(ball, pos)
+        sensor = orient_to_trackball(sensor)
+
+        ball = orient_to_trackball(trackball_ball())
 
         # return precut, shape, cutout, ball
-        return precut, shape, cutout, sensor, ball, mount
+        return precut, shape, cutout, sensor, ball, mount, top_cutter
 
 
     def generate_trackball_in_cluster(cluster):
@@ -1494,6 +1477,8 @@ def make_dactyl():
 
         return tbiw_mount_location_xyz, tbiw_mount_rotation_xyz
 
+    def trackball_present(side):
+        return cluster(side).is_tb or (trackball_in_wall and ball_side == side)
 
     def generate_trackball_in_wall():
         pos, rot = tbiw_position_rotation()
@@ -2077,15 +2062,15 @@ def make_dactyl():
 
         if not quickly:
             if trackball_in_wall and (side == ball_side or ball_side == 'both'):
-                tbprecut, tb, tbcutout, sensor, ball, mount = generate_trackball_in_wall()
+                tbprecut, tb, tbcutout, sensor, ball, mount, top_cutter = generate_trackball_in_wall()
                 # shape = union([shape, mount])
                 # HACK HACKETY HACK HACK!
                 spot = key_position([-10, -5, 13.5], 0, cornerrow)
                 # cut_corner = translate(box(10, 10, 10), spot)
-                cut_corner = translate(box(20, 20, 10), (-(mount_width / 2.0) - 0, -(mount_height / 2.0) - 0, 0))
-                cut_corner = rotate(cut_corner, (15, -20, 0))
+                cut_corner = translate(box(20, 20, 10), (-(mount_width / 2.0) - 0, -(mount_height / 2.0) - 0, -1))
+                cut_corner = rotate(cut_corner, (25, -10, 0))
                 cut_corner = translate(cut_corner, spot)
-                shape = difference(shape, [cut_corner])
+                shape = difference(shape,[ top_cutter])
                 # encoder_mount = translate(box(keyswitch_width, hole_keyswitch_height, 20), spot)
                 # encoder_mount = translate(rotate(encoder_mount, (0, 0, -20)), (-37, -4, -15))
                 # shape = difference(shape, [encoder_mount])

@@ -253,7 +253,7 @@ class Minithicc3(MinidoxCluster):
             )
         )
 
-        if not (trackball_in_wall and ball_side == side):
+        if not trackball_present(side):
             hulls.append(
                 triangle_hulls(
                     [
@@ -269,43 +269,28 @@ class Minithicc3(MinidoxCluster):
     def walls(self, side="right"):
         print('thumb_walls()')
         # thumb, walls
-        shape = union(
-            [wall_brace(self.tr_place, 0, -1, self.thumb_post_br(), self.tr_place, 0, -1, self.thumb_post_bl())])
-        shape = union(
-            [shape, wall_brace(self.tr_place, 0, -1, self.thumb_post_bl(), self.tl_place, 0, -1, self.thumb_post_br())])
-        shape = union(
-            [shape, wall_brace(self.tl_place, 0, -1, self.thumb_post_br(), self.tl_place, 0, -1, self.thumb_post_bl())])
-        shape = union([shape, wall_brace(self.tl_place, 0, -1, self.thumb_post_bl(), self.ml_place, -1, -1,
-                                         self.thumb_post_br())])
-        shape = union([shape, wall_brace(self.ml_place, -1, -1, self.thumb_post_br(), self.ml_place, 0, -1,
-                                         self.thumb_post_bl())])
-        shape = union(
-            [shape, wall_brace(self.ml_place, 0, -1, self.thumb_post_bl(), self.ml_place, -1, 0, self.thumb_post_bl())])
+        shape = union([wall_brace(self.tr_place, 0, -1, self.thumb_post_br(), self.tr_place, 0, -1, self.thumb_post_bl())])
+        shape = union([shape, wall_brace(self.tr_place, 0, -1, self.thumb_post_bl(), self.tl_place, 0, -1, self.thumb_post_br())])
+        shape = union([shape, wall_brace(self.tl_place, 0, -1, self.thumb_post_br(), self.tl_place, 0, -1, self.thumb_post_bl())])
+        shape = union([shape, wall_brace(self.tl_place, 0, -1, self.thumb_post_bl(), self.ml_place, -1, -1, self.thumb_post_br())])
+        shape = union([shape, wall_brace(self.ml_place, -1, -1, self.thumb_post_br(), self.ml_place, 0, -1, self.thumb_post_bl())])
+        shape = union([shape, wall_brace(self.ml_place, 0, -1, self.thumb_post_bl(), self.ml_place, -1, 0, self.thumb_post_bl())])
         # thumb, corners
-        shape = union(
-            [shape, wall_brace(self.ml_place, -1, 0, self.thumb_post_bl(), self.ml_place, -1, 0, self.thumb_post_tl())])
-        shape = union(
-            [shape, wall_brace(self.ml_place, -1, 0, self.thumb_post_tl(), self.ml_place, 0, 1, self.thumb_post_tl())])
+        shape = union([shape, wall_brace(self.ml_place, -1, 0, self.thumb_post_bl(), self.ml_place, -1, 0, self.thumb_post_tl())])
+        shape = union([shape, wall_brace(self.ml_place, -1, 0, self.thumb_post_tl(), self.ml_place, 0, 1, self.thumb_post_tl())])
         # thumb, tweeners
-        if trackball_in_wall and ball_side == side:
-            shape = union(
-                [shape, wall_brace(left_wall_cluster_join_location, -1, 0, web_post(), self.ml_place, 0, 1,
-                                   self.thumb_post_tl())])
+        if trackball_present(side):
+            shape = union([shape, wall_brace(left_wall_cluster_join_location, -1, 0, web_post(), self.ml_place, 0, 1, self.thumb_post_tl())])
         else:
-            shape = union(
-                [shape,
-                 wall_brace(self.ml_place, 0, 1, self.thumb_post_tr(), self.ml_place, 0, 1, self.thumb_post_tl())])
-        shape = union(
-            [shape, wall_brace(left_wall_cluster_join_location, -1, 0, web_post(), self.ml_place, 0, 1, self.thumb_post_tl())])
-        shape = union([shape,
-                       wall_brace(self.tr_place, 0, -1, self.thumb_post_br(), (lambda sh: key_place(sh, 3, lastrow)), 0,
-                                  -1, web_post_bl())])
+            shape = union([shape,wall_brace(self.ml_place, 0, 1, self.thumb_post_tr(), self.ml_place, 0, 1, self.thumb_post_tl())])
+        # shape = union([shape, wall_brace(left_wall_cluster_join_location, -1, 0, web_post(), self.ml_place, 0, 1, self.thumb_post_tl())])
+        shape = union([shape, wall_brace(self.tr_place, 0, -1, self.thumb_post_br(), (lambda sh: cluster_key_place(sh, 3, lastrow)), 0, -1, web_post_bl())])
 
         return shape
 
     def connection(self, side='right'):
         print('thumb_connection()')
-        if trackball_in_wall and ball_side == side:
+        if trackball_present(side):
             return self.trackball_in_wall_connection(side)
 
         # clunky bit on the top left thumb connection  (normal connectors don't work well)
