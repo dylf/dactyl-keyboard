@@ -20,6 +20,7 @@
   "column_style_gt5": "orthographic",
   "column_style": "standard",
   "shift_column": 0,
+  "inner_column": false,
   "all_last_rows": false,
   "full_last_rows": false,
   "keyboard_z_offset": 12,
@@ -77,7 +78,7 @@
   "tb_btu_socket_translation_offset": [
     0,
     0,
-    -22.0
+    -20.0
   ],
   "tb_btu_socket_rotation_offset": [
     0,
@@ -98,7 +99,7 @@
   "first_1_5U_row": 0,
   "last_1_5U_row": 5,
   "extra_width": 2.5,
-  "extra_height": 1.0,
+  "extra_height": 0.5,
   "wall_z_offset": 15,
   "wall_x_offset": 5,
   "wall_y_offset": 6,
@@ -274,6 +275,7 @@
   "post_adj": 0,
   "screws_offset": "INSIDE",
   "magnet_bottom": false,
+  "block_bottoms": false,
   "screw_insert_height": 4.5,
   "screw_insert_bottom_radius": 2.05,
   "screw_insert_top_radius": 1.95,

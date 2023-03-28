@@ -248,7 +248,7 @@ def make_dactyl():
 
     if oled_mount_type is not None and oled_mount_type != "NONE":
         left_wall_x_offset = oled_left_wall_x_offset_override
-        if nrows == 4:
+        if nrows <= 4:
             left_wall_x_row_offsets = [wide, wide, wide, wide]
         elif nrows == 5:
             left_wall_x_row_offsets = [wide, wide, wide, short, short]
@@ -1171,13 +1171,24 @@ def make_dactyl():
     def trrs_mount_point():
         shape = box(6.2, 14, 5.2)
         jack = translate(rotate(cylinder(2.6, 5), (90, 0, 0)), (0, 9, 0))
-        jack_entry = translate(rotate(cylinder(4, 5), (90, 0, 0)), (0, 10.5, 0))
-        shape = translate(union([shape, jack, jack_entry]), (0, 0, 10))
+        jack_entry = translate(rotate(cylinder(4, 5), (90, 0, 0)), (0, 11, 0))
+        shape = rotate(translate(union([shape, jack, jack_entry]), (0, 0, 10)), (0, 0, 75))
 
+        # shape = translate(shape,
+        #               (
+        #                   usb_holder_position[0] + trrs_hole_xoffset,
+        #                   usb_holder_position[1] + trrs_hole_yoffset,
+        #                   trrs_hole_zoffset,
+        #               )
+        #               )
+
+        pos = screw_position(0, 0, 5, 5, 5) # wall_locate2(0, 1)
+        # trans = wall_locate2(1, 1)
+        # pos = [pos[0] + trans[0], pos[1] + trans[1], pos[2]]
         shape = translate(shape,
                       (
-                          usb_holder_position[0] + trrs_hole_xoffset,
-                          usb_holder_position[1] + trrs_hole_yoffset,
+                          pos[0] + trrs_hole_xoffset,
+                          pos[1] + trrs_hole_yoffset + screw_offsets[0][1],
                           trrs_hole_zoffset,
                       )
                       )
@@ -1270,7 +1281,7 @@ def make_dactyl():
         # tbcut_file = path.join(parts_path, r"trackball_socket_cutter_34mm")
 
         if btus:
-            tb_file = path.join(parts_path, r"phat_btu_socket_w_access")
+            tb_file = path.join(parts_path, r"phat_btu_socket")
             tbcut_file = path.join(parts_path, r"phatter_btu_socket_cutter")
         else:
             tb_file = path.join(parts_path, r"trackball_socket_body_34mm")
@@ -1291,7 +1302,8 @@ def make_dactyl():
         shape = import_file(tb_file)
         sensor = import_file(sens_file)
         cutter = import_file(tbcut_file)
-        cutter = union([cutter, import_file(senscut_file)])
+        if not btus:
+            cutter = union([cutter, import_file(senscut_file)])
 
         # return shape, cutter
         return shape, cutter, sensor
@@ -1927,31 +1939,31 @@ def make_dactyl():
         s2 = union([walls_shape])
         s2 = union([s2, *screw_insert_outers(side=side)])
 
-        if controller_mount_type in ['RJ9_USB_TEENSY', 'USB_TEENSY']:
-            s2 = union([s2, teensy_holder()])
+        if trrs_hole:
+            s2 = difference(s2, [trrs_mount_point()])
 
-        if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL', 'USB_WALL', 'USB_TEENSY']:
-            s2 = union([s2, usb_holder()])
-            s2 = difference(s2, [usb_holder_hole()])
+        if controller_side == "both" or side == controller_side:
+            if controller_mount_type in ['RJ9_USB_TEENSY', 'USB_TEENSY']:
+                s2 = union([s2, teensy_holder()])
 
-        if controller_mount_type in ['USB_C_WALL']:
-            # s2 = union([s2, usb_holder()])
-            if side == "left":
-                s2 = difference(s2, [usb_c_mount_point(),trrs_mount_point()])
-            else:
-                s2 = difference(s2, [trrs_mount_point()])
+            if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL', 'USB_WALL', 'USB_TEENSY']:
+                s2 = union([s2, usb_holder()])
+                s2 = difference(s2, [usb_holder_hole()])
 
-        if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL']:
-            s2 = difference(s2, [rj9_space()])
+            if controller_mount_type in ['USB_C_WALL']:
+                s2 = difference(s2, [usb_c_mount_point()])
 
-        if controller_mount_type in ['BLACKPILL_EXTERNAL']:
-            s2 = difference(s2, [blackpill_mount_hole()])
+            if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL']:
+                s2 = difference(s2, [rj9_space()])
 
-        if controller_mount_type in ['EXTERNAL']:
-            s2 = difference(s2, [external_mount_hole()])
+            if controller_mount_type in ['BLACKPILL_EXTERNAL']:
+                s2 = difference(s2, [blackpill_mount_hole()])
 
-        if controller_mount_type in ['None']:
-            0  # do nothing, only here to expressly state inaction.
+            if controller_mount_type in ['EXTERNAL']:
+                s2 = difference(s2, [external_mount_hole()])
+
+            if controller_mount_type in ['None']:
+                0  # do nothing, only here to expressly state inaction.
 
         s2 = difference(s2, [union(screw_insert_holes(side=side))])
         shape = union([shape, s2])
@@ -2009,7 +2021,7 @@ def make_dactyl():
                 if show_caps:
                     shape = add([shape, ball])
 
-        block = translate(box(500, 500, 40), (0, 0, -20))
+        block = translate(box(400, 400, 40), (0, 0, -20))
         shape = difference(shape, [block])
 
         if show_caps:
@@ -2019,7 +2031,7 @@ def make_dactyl():
         if side == "left":
             shape = mirror(shape, 'YZ')
 
-        return shape
+        return shape, walls_shape
 
     def wrist_rest(base, plate, side="right"):
         rest = import_file(path.join(parts_path, "dactyl_wrist_rest_v3_" + side))
@@ -2029,11 +2041,11 @@ def make_dactyl():
         return rest
 
     # NEEDS TO BE SPECIAL FOR CADQUERY
-    def baseplate(wedge_angle=None, side='right'):
+    def baseplate(shape, wedge_angle=None, side='right'):
         global logo_file
         if ENGINE == 'cadquery':
             # shape = mod_r
-            shape = union([case_walls(side=side), *screw_insert_outers(side=side)])
+            shape = union([shape, *screw_insert_outers(side=side)])
             # tool = translate(screw_insert_screw_holes(side=side), [0, 0, -10])
             if magnet_bottom:
                 tool = screw_insert_all_shapes(screw_hole_diameter / 2., screw_hole_diameter / 2., 2.1, side=side)
@@ -2081,7 +2093,8 @@ def make_dactyl():
                 inner_shape = cq.Workplane('XY').add(
                     cq.Solid.extrudeLinear(inner_wire, [], cq.Vector(0, 0, base_thickness)))
                 inner_shape = translate(inner_shape, (0, 0, -base_rim_thickness))
-
+                if block_bottoms:
+                    inner_shape = blockerize(inner_shape)
                 if logo_file not in ["", None]:
                     logo = import_file(logo_file)
                     if side == "left":
@@ -2134,13 +2147,13 @@ def make_dactyl():
 
 
     def run():
-        mod_r = model_side(side="right")
+        mod_r, walls_r = model_side(side="right")
         export_file(shape=mod_r, fname=path.join(save_path, config_name + r"_right"))
 
         if right_side_only:
             print(">>>>>  RIGHT SIDE ONLY: Only rendering a the right side.")
             return
-        base = baseplate(side='right')
+        base = baseplate(walls_r, side='right')
         export_file(shape=base, fname=path.join(save_path, config_name + r"_right_plate"))
         if quickly:
             print(">>>>>  QUICK RENDER: Only rendering a the right side and bottom plate.")
@@ -2153,10 +2166,10 @@ def make_dactyl():
 
         # if symmetry == "asymmetric":
 
-        mod_l = model_side(side="left")
+        mod_l, walls_l = model_side(side="left")
         export_file(shape=mod_l, fname=path.join(save_path, config_name + r"_left"))
 
-        base_l = mirror(baseplate(side='left'), 'YZ')
+        base_l = mirror(baseplate(walls_l, side='left'), 'YZ')
         export_file(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
         export_dxf(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
 
