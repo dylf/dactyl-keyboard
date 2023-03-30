@@ -63,8 +63,8 @@ class DefaultCluster(object):
             data = self.key_data[index]
             key = KeyFactory.new_key(data['id'], globals())
             key.rot = data['rot']
-            key.pos = add_translate(key.pos, self.thumborigin())
             key.pos = add_translate(key.pos, data['pos'])
+            key.pos = add_translate(key.pos, self.thumborigin())
             key.plate_rot_z = data['plate_rot_z']
             self._keys[key.get_id()] = key
 
@@ -85,7 +85,7 @@ class DefaultCluster(object):
         key = self._keys[index]
         shape = rotate(shape, key.rot)
         shape = translate(shape, key.pos)
-        return self.thumb_place(shape)
+        return shape
 
     def tl_place(self, shape):
         debugprint('tl_place()')
