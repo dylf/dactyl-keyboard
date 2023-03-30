@@ -1,3 +1,5 @@
+from geom import *
+from key import Key, KeyFactory
 import numpy as np
 from numpy import pi
 import os.path as path
@@ -64,6 +66,7 @@ def debugprint(info):
 
 
 def make_dactyl():
+    KeyFactory.clear_keys()
     right_cluster = None
     left_cluster = None
 
@@ -253,10 +256,10 @@ def make_dactyl():
 
     if oled_mount_type is not None and oled_mount_type != "NONE":
         left_wall_x_offset = oled_left_wall_x_offset_override
-        if nrows <= 4:
+        if nrows == 4:
             left_wall_x_row_offsets = [wide, wide, wide, wide]
         elif nrows == 5:
-            left_wall_x_row_offsets = [wide, wide, wide, wide, short]
+            left_wall_x_row_offsets = [wide, wide, wide, short, short]
         elif nrows == 6:
             left_wall_x_row_offsets = [wide, wide, wide, short, short, short]
         # left_wall_x_row_offsets = [22 if row > oled_row else 8 for row in range(lastrow)]
@@ -534,30 +537,64 @@ def make_dactyl():
     #########################
     ## Placement Functions ##
     #########################
+    def get_key_placement(
+            position,
+            column,
+            row,
+            column_style=column_style,
+    ):
+        debugprint('get_key_placement()')
+        xrot = 0
+        yrot = 0
 
+        column_angle = beta * (centercol - column)
+        column_x_delta_actual = column_x_delta
+        if (pinky_1_5U and column == lastcol):
+            if row >= first_1_5U_row and row <= last_1_5U_row:
+                column_x_delta_actual = column_x_delta - 1.5
+                column_angle = beta * (centercol - column - 0.27)
 
-    def rotate_around_x(position, angle):
-        # debugprint('rotate_around_x()')
-        t_matrix = np.array(
-            [
-                [1, 0, 0],
-                [0, np.cos(angle), -np.sin(angle)],
-                [0, np.sin(angle), np.cos(angle)],
-            ]
-        )
-        return np.matmul(t_matrix, position)
+        if column_style == "orthographic":
+            column_z_delta = column_radius * (1 - np.cos(column_angle))
+            position = add_translate(position, [0, 0, -row_radius])
+            position = rotate_around_x(position, alpha * (centerrow - row))
+            xrot += alpha * (centerrow - row)
+            position = add_translate(position, [0, 0, row_radius])
+            position = rotate_around_y(position, column_angle)
+            yrot += column_angle
+            position = add_translate(
+                position, [-(column - centercol) * column_x_delta_actual, 0, column_z_delta]
+            )
+            position = add_translate(position, column_offset(column))
 
+        elif column_style == "fixed":
+            position = rotate_around_y(position, fixed_angles[column])
+            yrot += fixed_angles[column]
+            position = add_translate(position, [fixed_x[column], 0, fixed_z[column]])
+            position = add_translate(position, [0, 0, -(row_radius + fixed_z[column])])
+            position = rotate_around_x(position, alpha * (centerrow - row))
+            xrot += alpha * (centerrow - row)
+            position = add_translate(position, [0, 0, row_radius + fixed_z[column]])
+            position = rotate_around_y(position, fixed_tenting)
+            yrot += fixed_tenting
+            position = add_translate(position, [0, column_offset(column)[1], 0])
 
-    def rotate_around_y(position, angle):
-        # debugprint('rotate_around_y()')
-        t_matrix = np.array(
-            [
-                [np.cos(angle), 0, np.sin(angle)],
-                [0, 1, 0],
-                [-np.sin(angle), 0, np.cos(angle)],
-            ]
-        )
-        return np.matmul(t_matrix, position)
+        else:
+            position = add_translate(position, [0, 0, -row_radius])
+            position = rotate_around_x(position, alpha * (centerrow - row))
+            xrot += alpha * (centerrow - row)
+            position = add_translate(position, [0, 0, row_radius])
+            position = add_translate(position, [0, 0, -column_radius])
+            position = rotate_around_y(position, column_angle)
+            yrot += column_angle
+            position = add_translate(position, [0, 0, column_radius])
+            position = add_translate(position, column_offset(column))
+
+        position = rotate_around_y(position, tenting_angle)
+        yrot += tenting_angle
+        position = add_translate(position, [0, 0, keyboard_z_offset])
+
+        return [position, to_degrees([xrot, yrot, 0])]
 
 
     def apply_key_geometry(
@@ -614,8 +651,6 @@ def make_dactyl():
         return shape
 
     def bottom_key(column):
-        # if column < shift_column:  # attempt to make inner columns fewer keys
-        #     return nrows - 3
         if all_last_rows:
             return nrows - 1
         cluster_columns = 2 + shift_column
@@ -651,8 +686,10 @@ def make_dactyl():
 
     def key_place(shape, column, row):
         debugprint('key_place()')
-        return apply_key_geometry(shape, translate, x_rot, y_rot, column, row)
-
+        key = KeyFactory.get_key_by_row_col(row, column)
+        shape = rotate(shape, key.rot)
+        shape = translate(shape, key.pos)
+        return shape
 
     def cluster_key_place(shape, column, row):
         debugprint('key_place()')
@@ -663,20 +700,22 @@ def make_dactyl():
         #     c = ncols - 1
         # c = column if not inner_column else column + 1
         return apply_key_geometry(shape, translate, x_rot, y_rot, c, row)
+
     def add_translate(shape, xyz):
         debugprint('add_translate()')
         vals = []
         for i in range(len(shape)):
             vals.append(shape[i] + xyz[i])
         return vals
-
+        # return apply_key_geometry(shape, translate, x_rot, y_rot, column, row)
 
     def key_position(position, column, row):
         debugprint('key_position()')
-        return apply_key_geometry(
-            position, add_translate, rotate_around_x, rotate_around_y, column, row
-        )
-
+        key = KeyFactory.get_key_by_row_col(row, column)
+        return add_translate(position, key.pos)
+        # return apply_key_geometry(
+        #     position, add_translate, rotate_around_x, rotate_around_y, column, row
+        # )
 
     def key_holes(side="right"):
         debugprint('key_holes()')
@@ -685,7 +724,8 @@ def make_dactyl():
         for column in range(ncols):
             for row in range(nrows):
                 if valid_key(column, row):
-                    holes.append(key_place(single_plate(side=side), column, row))
+                    key = KeyFactory.get_key_by_row_col(row, column)
+                    holes.append(key.render(plate_file, side=side))
 
         shape = union(holes)
 
@@ -1131,49 +1171,6 @@ def make_dactyl():
             ])
         )
 
-
-    rj9_start = list(
-        np.array([0, -3, 0])
-        + np.array(
-            key_position(
-                list(np.array(wall_locate3(0, 1)) + np.array([0, (mount_height / 2), 0])),
-                0,
-                0,
-            )
-        )
-    )
-
-    rj9_position = (rj9_start[0], rj9_start[1], 11)
-
-
-    def rj9_cube():
-        debugprint('rj9_cube()')
-        shape = box(14.78, 13, 22.38)
-
-        return shape
-
-
-    def rj9_space():
-        debugprint('rj9_space()')
-        return translate(rj9_cube(), rj9_position)
-
-
-    def rj9_holder():
-        print('rj9_holder()')
-        shape = union([translate(box(10.78, 9, 18.38), (0, 2, 0)), translate(box(10.78, 13, 5), (0, 0, 5))])
-        shape = difference(rj9_cube(), [shape])
-        shape = translate(shape, rj9_position)
-
-        return shape
-
-
-    usb_holder_position = key_position(
-        list(np.array(wall_locate2(0, 1)) + np.array([0, (mount_height / 2), 0])), 1, 0
-    )
-    usb_holder_size = [6.5, 10.0, 13.6]
-    usb_holder_thickness = 4
-
-
     def usb_holder():
         print('usb_holder()')
         shape = box(
@@ -1253,18 +1250,6 @@ def make_dactyl():
                           )
                           )
         return shape
-
-    external_start = list(
-        # np.array([0, -3, 0])
-        np.array([external_holder_width / 2, 0, 0])
-        + np.array(
-            key_position(
-                list(np.array(wall_locate3(0, 1)) + np.array([0, (mount_height / 2), 0])),
-                0,
-                0,
-            )
-        )
-    )
 
     def blackpill_mount_hole():
         print('blackpill_external_mount_hole()')
@@ -2246,6 +2231,98 @@ def make_dactyl():
     for item in globals():
         all_merged[item] = globals()[item]
 
+    def key_placements(side="right"):
+        print('key_holes()')
+        # hole = single_plate()
+
+        r = []
+        none_key = KeyFactory.new_key("NONE", None)
+        for row in range(nrows):
+            c = []
+            for column in range(ncols):
+                if valid_key(column, row):
+                    key = KeyFactory.new_key_by_row_column(row, column, all_merged)
+                    key.calculate_key_placement(column, row, column_style=column_style)
+                    c.append(key)
+                else:
+                    c.append(none_key)
+            r.append(c)
+
+        return r
+
+    key_placements(side="right")
+
+
+    rj9_start = list(
+        np.array([0, -3, 0])
+        + np.array(
+            key_position(
+                list(np.array(wall_locate3(0, 1)) + np.array([0, (mount_height / 2), 0])),
+                0,
+                0,
+            )
+        )
+    )
+
+
+    rj9_position = (rj9_start[0], rj9_start[1], 11)
+
+    def rj9_cube():
+        debugprint('rj9_cube()')
+        shape = box(14.78, 13, 22.38)
+
+        return shape
+
+
+    def rj9_space():
+        debugprint('rj9_space()')
+        return translate(rj9_cube(), rj9_position)
+
+
+    def rj9_holder():
+        print('rj9_holder()')
+        shape = union([translate(box(10.78, 9, 18.38), (0, 2, 0)), translate(box(10.78, 13, 5), (0, 0, 5))])
+        shape = difference(rj9_cube(), [shape])
+        shape = translate(shape, rj9_position)
+
+        return shape
+
+    rj9_start = list(
+        np.array([0, -3, 0])
+        + np.array(
+            key_position(
+                list(np.array(wall_locate3(0, 1)) + np.array([0, (mount_height / 2), 0])),
+                0,
+                0,
+            )
+        )
+    )
+
+    rj9_position = (rj9_start[0], rj9_start[1], 11)
+
+    usb_holder_position = key_position(
+        list(np.array(wall_locate2(0, 1)) + np.array([0, (mount_height / 2), 0])), 1, 0
+    )
+    usb_holder_size = [6.5, 10.0, 13.6]
+    usb_holder_thickness = 4
+
+    usb_holder_position = key_position(
+        list(np.array(wall_locate2(0, 1)) + np.array([0, (mount_height / 2), 0])), 1, 0
+    )
+
+    external_start = list(
+        # np.array([0, -3, 0])
+        np.array([external_holder_width / 2, 0, 0])
+        + np.array(
+            key_position(
+                list(np.array(wall_locate3(0, 1)) + np.array([0, (mount_height / 2), 0])),
+                0,
+                0,
+            )
+        )
+    )
+
+
     def get_cluster(style):
         if style == CarbonfetCluster.name():
             clust = CarbonfetCluster(all_merged)
@@ -2271,6 +2348,8 @@ def make_dactyl():
             clust = CustomCluster(all_merged)
         else:
             clust = DefaultCluster(all_merged)
+
+        clust.build_keys()
 
         return clust
 

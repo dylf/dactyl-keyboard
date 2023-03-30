@@ -1,7 +1,7 @@
 from clusters.default_cluster import DefaultCluster
 import json
 import os
-
+from clusters.cluster_common import *
 
 class TrackballThree(DefaultCluster):
     key_diameter = 75
@@ -113,7 +113,7 @@ class TrackballThree(DefaultCluster):
         t_off = self.key_translation_offsets[0]
         shape = rotate(shape, self.key_rotation_offsets[0])
         shape = translate(shape, (t_off[0], t_off[1] + self.key_diameter / 2, t_off[2]))
-        shape = rotate(shape, [0,0,-80])
+        shape = rotate(shape, [0, 0, -80])
         shape = self.track_place(shape)
 
         return shape
@@ -123,7 +123,7 @@ class TrackballThree(DefaultCluster):
         shape = rotate(shape, self.key_rotation_offsets[1])
         t_off = self.key_translation_offsets[1]
         shape = translate(shape, (t_off[0], t_off[1] + self.key_diameter/2, t_off[2]))
-        shape = rotate(shape, [0,0,-118])
+        shape = rotate(shape, [0, 0, -118])
         shape = self.track_place(shape)
 
         return shape
@@ -133,7 +133,7 @@ class TrackballThree(DefaultCluster):
         shape = rotate(shape, self.key_rotation_offsets[2])
         t_off = self.key_translation_offsets[2]
         shape = translate(shape, (t_off[0], t_off[1]+self.key_diameter/2, t_off[2]))
-        shape = rotate(shape, [0,0,-180])
+        shape = rotate(shape, [0, 0, -180])
         shape = self.track_place(shape)
 
         return shape
@@ -144,7 +144,7 @@ class TrackballThree(DefaultCluster):
         shape = rotate(shape, self.key_rotation_offsets[3])
         t_off = self.key_translation_offsets[3]
         shape = translate(shape, (t_off[0], t_off[1]+self.key_diameter/2, t_off[2]))
-        shape = rotate(shape, [0,0,-230])
+        shape = rotate(shape, [0, 0, -230])
         shape = self.track_place(shape)
 
         return shape
@@ -152,14 +152,14 @@ class TrackballThree(DefaultCluster):
     def thumb_1x_layout(self, shape, cap=False):
         debugprint('thumb_1x_layout()')
         return union([
-            self.tl_place(rotate(shape, [0, 0, self.thumb_plate_tr_rotation])),
-            self.mr_place(rotate(shape, [0, 0, self.thumb_plate_mr_rotation])),
+            self.tl_place(rotate(shape, [0, 0, 180])),
+            self.mr_place(rotate(shape, [0, 0, 180])),
             # self.bl_place(rotate(shape, [0, 0, self.thumb_plate_bl_rotation])),
             # self.br_place(rotate(shape, [0, 0, self.thumb_plate_br_rotation])),
         ])
 
     def thumb_15x_layout(self, shape, cap=False, plate=True):
-        return self.br_place(rotate(shape, [0, 0, self.thumb_plate_br_rotation]))
+        return self.br_place(rotate(shape, [0, 0, 90]))
 
     def thumb_fx_layout(self, shape):
         return union([])

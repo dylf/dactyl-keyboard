@@ -1,26 +1,22 @@
 import json
 import os
+from key import Key, KeyFactory
+from geom import *
+from clusters.cluster_common import *
 
 
 class DefaultCluster(object):
     num_keys = 6
     is_tb = False
-    thumb_offsets = [
-        6,
-        -3,
-        7
-    ]
-    thumb_plate_tr_rotation = 0
-    thumb_plate_tl_rotation = 0
-    thumb_plate_mr_rotation = 0
-    thumb_plate_ml_rotation = 0
-    thumb_plate_br_rotation = 0
-    thumb_plate_bl_rotation = 0
+    thumb_offsets = []
+
+    key_data = []
+
+    _keys = {}
 
     @staticmethod
     def name():
         return "DEFAULT"
-
 
     def get_config(self):
         with open(os.path.join("src", "clusters", "json", "DEFAULT.json"), mode='r') as fid:
@@ -37,6 +33,12 @@ class DefaultCluster(object):
             globals()[item] = parent_locals[item]
         self.get_config()
         print(self.name(), " built")
+
+    def build_keys(self):
+        self._key_gen()
+
+    def get_keys(self) -> [Key]:
+        return self._keys
 
     def thumborigin(self):
         # debugprint('thumborigin()')
@@ -55,6 +57,17 @@ class DefaultCluster(object):
 
         return origin
 
+    def _key_gen(self):
+        self._keys = {}
+        for index in range(len(self.key_data)):
+            data = self.key_data[index]
+            key = KeyFactory.new_key(data['id'], globals())
+            key.rot = data['rot']
+            key.pos = add_translate(key.pos, self.thumborigin())
+            key.pos = add_translate(key.pos, data['pos'])
+            key.plate_rot_z = data['plate_rot_z']
+            self._keys[key.get_id()] = key
+
     def thumb_rotate(self):
         x = y = z = 0
         # if shift_column < 0:
@@ -62,77 +75,66 @@ class DefaultCluster(object):
         #     z = shift_column * -10
         return [x, y, z]
 
+
     def thumb_place(self, shape):
         shape = translate(shape, self.thumborigin())
         return rotate(shape, self.thumb_rotate())
 
+
+    def _key_place(self, index, shape):
+        key = self._keys[index]
+        shape = rotate(shape, key.rot)
+        shape = translate(shape, key.pos)
+        return self.thumb_place(shape)
+
     def tl_place(self, shape):
         debugprint('tl_place()')
-        shape = rotate(shape, [7.5, -18, 10])
-        shape = translate(shape, [-32.5, -14.5, -2.5])
-        shape = self.thumb_place(shape)
-        return shape
+        return self._key_place(TL, shape)
 
     def tr_place(self, shape):
         debugprint('tr_place()')
-        shape = rotate(shape, [10, -15, 10])
-        shape = translate(shape, [-12, -16, 3])
-        shape = self.thumb_place(shape)
-        return shape
-
-    def mr_place(self, shape):
-        debugprint('mr_place()')
-        shape = rotate(shape, [-6, -34, 48])
-        shape = translate(shape, [-29, -40, -13])
-        shape = self.thumb_place(shape)
-        return shape
+        return self._key_place(TR, shape)
 
     def ml_place(self, shape):
         debugprint('ml_place()')
-        shape = rotate(shape, [6, -34, 40])
-        shape = translate(shape, [-51, -25, -12])
-        shape = self.thumb_place(shape)
-        return shape
+        return self._key_place(ML, shape)
 
-    def br_place(self, shape):
-        debugprint('br_place()')
-        shape = rotate(shape, [-16, -33, 54])
-        shape = translate(shape, [-37.8, -55.3, -25.3])
-        shape = self.thumb_place(shape)
-        return shape
+    def mr_place(self, shape):
+        debugprint('mr_place()')
+        return self._key_place(MR, shape)
 
     def bl_place(self, shape):
         debugprint('bl_place()')
-        shape = rotate(shape, [-4, -35, 52])
-        shape = translate(shape, [-56.3, -43.3, -23.5])
-        shape = self.thumb_place(shape)
-        return shape
+        return self._key_place(BL, shape)
+
+    def br_place(self, shape):
+        debugprint('br_place()')
+        return self._key_place(BR, shape)
 
     def thumb_1x_layout(self, shape, cap=False):
         debugprint('thumb_1x_layout()')
         if cap:
             shape_list = [
-                self.mr_place(rotate(shape, [0, 0, self.thumb_plate_mr_rotation])),
-                self.ml_place(rotate(shape, [0, 0, self.thumb_plate_ml_rotation])),
-                self.br_place(rotate(shape, [0, 0, self.thumb_plate_br_rotation])),
-                self.bl_place(rotate(shape, [0, 0, self.thumb_plate_bl_rotation])),
+                self.mr_place(rotate(shape, [0, 0, self._keys[MR].plate_rot_z])),
+                self.ml_place(rotate(shape, [0, 0, self._keys[ML].plate_rot_z])),
+                self.br_place(rotate(shape, [0, 0, self._keys[BR].plate_rot_z])),
+                self.bl_place(rotate(shape, [0, 0, self._keys[BL].plate_rot_z])),
             ]
 
             if default_1U_cluster:
-                shape_list.append(self.tr_place(rotate(rotate(shape, (0, 0, 90)), [0, 0, self.thumb_plate_tr_rotation])))
-                shape_list.append(self.tr_place(rotate(rotate(shape, (0, 0, 90)), [0, 0, self.thumb_plate_tr_rotation])))
-                shape_list.append(self.tl_place(rotate(shape, [0, 0, self.thumb_plate_tl_rotation])))
+                shape_list.append(self.tr_place(rotate(rotate(shape, (0, 0, 90)), [0, 0, self._keys[TR].plate_rot_z])))
+                shape_list.append(self.tl_place(rotate(shape, [0, 0, self._keys[TL].plate_rot_z])))
             shapes = add(shape_list)
 
         else:
             shape_list = [
-                self.mr_place(rotate(shape, [0, 0, self.thumb_plate_mr_rotation])),
-                self.ml_place(rotate(shape, [0, 0, self.thumb_plate_ml_rotation])),
-                self.br_place(rotate(shape, [0, 0, self.thumb_plate_br_rotation])),
-                self.bl_place(rotate(shape, [0, 0, self.thumb_plate_bl_rotation])),
+                self.mr_place(rotate(shape, [0, 0, self._keys[MR].plate_rot_z])),
+                self.ml_place(rotate(shape, [0, 0, self._keys[ML].plate_rot_z])),
+                self.br_place(rotate(shape, [0, 0, self._keys[BR].plate_rot_z])),
+                self.bl_place(rotate(shape, [0, 0, self._keys[BL].plate_rot_z])),
             ]
             if default_1U_cluster:
-                shape_list.append(self.tr_place(rotate(rotate(shape, (0, 0, 90)), [0, 0, self.thumb_plate_tr_rotation])))
+                shape_list.append(self.tr_place(rotate(rotate(shape, (0, 0, 90)), [0, 0, self._keys[TR].plate_rot_z])))
             shapes = union(shape_list)
         return shapes
 
@@ -141,21 +143,18 @@ class DefaultCluster(object):
         if plate:
             if cap:
                 shape = rotate(shape, (0, 0, 90))
-                cap_list = [self.tl_place(rotate(shape, [0, 0, self.thumb_plate_tl_rotation]))]
-                cap_list.append(self.tr_place(rotate(shape, [0, 0, self.thumb_plate_tr_rotation])))
+                cap_list = [self.tl_place(rotate(shape, [0, 0, self._keys[TL].plate_rot_z])),
+                            self.tr_place(rotate(shape, [0, 0, self._keys[TR].plate_rot_z]))]
                 return add(cap_list)
             else:
-                shape_list = [self.tl_place(rotate(shape, [0, 0, self.thumb_plate_tl_rotation]))]
+                shape_list = [self.tl_place(rotate(shape, [0, 0, self._keys[TL].plate_rot_z]))]
                 if not default_1U_cluster:
-                    shape_list.append(self.tr_place(rotate(shape, [0, 0, self.thumb_plate_tr_rotation])))
+                    shape_list.append(self.tr_place(rotate(shape, [0, 0, self._keys[TR].plate_rot_z])))
                 return union(shape_list)
         else:
             if cap:
                 shape = rotate(shape, (0, 0, 90))
-                shape_list = [
-                    self.tl_place(shape),
-                ]
-                shape_list.append(self.tr_place(shape))
+                shape_list = [self.tl_place(shape), self.tr_place(shape)]
 
                 return add(shape_list)
             else:

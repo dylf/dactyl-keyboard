@@ -139,7 +139,7 @@ shape_config = {
     ##############################
     # EXPERIMENTAL PARAMETERS
     ##############################
-    'pinky_1_5U': False,
+    'pinky_1_5U': False,  # LEAVE AS FALSE, CURRENTLY BROKEN
     'first_1_5U_row': 0,
     'last_1_5U_row': 5,
     ##############################

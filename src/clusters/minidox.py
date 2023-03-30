@@ -1,6 +1,7 @@
 from clusters.default_cluster import DefaultCluster
 import os
 import json
+from clusters.cluster_common import *
 
 
 class MinidoxCluster(DefaultCluster):
@@ -42,60 +43,35 @@ class MinidoxCluster(DefaultCluster):
         return origin
 
     def tl_place(self, shape):
-        shape = rotate(shape, [10, -23, 25])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-35, -16, -2])
-        return shape
+        debugprint('tl_place()')
+        return self._key_place(TL, shape)
 
     def tr_place(self, shape):
-        shape = rotate(shape, [14, -15, 10])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-15, -10, 5])
-        return shape
+        debugprint('tr_place()')
+        return self._key_place(TR, shape)
 
     def ml_place(self, shape):
-        shape = rotate(shape, [6, -34, 40])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-53, -26, -12])
-        return shape
+        debugprint('ml_place()')
+        return self._key_place(ML, shape)
 
-    def mr_place(self, shape):
-        shape = rotate(shape, [10, -23, 25])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-23, -34, -6])
-        return shape
-
-    def br_place(self, shape):
-        shape = rotate(shape, [6, -32, 35])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-51, -25, -11.5])
-        return shape
-
-    def bl_place(self, shape):
-        shape = rotate(shape, [6, -32, 35])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-51, -25, -11.5])
-        return shape
 
     def fl_place(self, shape):
-        shape = rotate(shape, [0, -32, 40])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-25, -45, -15.5])
-        return shape
+        debugprint('fl_place()')
+        return self._key_place(FL, shape)
 
     def thumb_1x_layout(self, shape, cap=False):
         debugprint('thumb_1x_layout()')
         return union([
-            self.tr_place(rotate(shape, [0, 0, self.thumb_plate_tr_rotation])),
-            self.tl_place(rotate(shape, [0, 0, self.thumb_plate_tl_rotation])),
-            self.ml_place(rotate(shape, [0, 0, self.thumb_plate_ml_rotation])),
+            self.tr_place(shape),
+            self.tl_place(shape),
+            self.ml_place(shape)
         ])
 
     def thumb_fx_layout(self, shape):
         return union([
-            self.tr_place(rotate(shape, [0, 0, self.thumb_plate_tr_rotation])),
-            self.tl_place(rotate(shape, [0, 0, self.thumb_plate_tl_rotation])),
-            self.ml_place(rotate(shape, [0, 0, self.thumb_plate_ml_rotation])),
+            self.tr_place(shape),
+            self.tl_place(shape),
+            self.ml_place(shape)
             # self.fl_place(rotate(shape, [0, 0, self.thumb_plate_bl_rotation])),
         ])
 
@@ -263,8 +239,8 @@ class MinidoxCluster(DefaultCluster):
             [
                 left_cluster_key_place(translate(web_post(), wall_locate2(-1, 0)), cornerrow, -1, low_corner=True, side=side),
                 left_cluster_key_place(translate(web_post(), wall_locate3(-1, 0)), cornerrow, -1, low_corner=True, side=side),
-                self.bl_place(translate(self.thumb_post_tr(), wall_locate2(-0.3, 1))),
-                self.bl_place(translate(self.thumb_post_tr(), wall_locate3(-0.3, 1))),
+                self.ml_place(translate(self.thumb_post_tr(), wall_locate2(-0.3, 1))),
+                self.ml_place(translate(self.thumb_post_tr(), wall_locate3(-0.3, 1))),
             ]
         )])
 

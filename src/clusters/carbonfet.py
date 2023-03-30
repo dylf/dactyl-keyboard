@@ -1,6 +1,8 @@
 from clusters.default_cluster import DefaultCluster
 import json
 import os
+from clusters.cluster_common import *
+
 
 class CarbonfetCluster(DefaultCluster):
 
@@ -32,61 +34,85 @@ class CarbonfetCluster(DefaultCluster):
         for item in parent_locals:
             globals()[item] = parent_locals[item]
 
-    def tl_place(self, shape):
-        shape = rotate(shape, [10, -24, 10])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-13, -9.8, 4])
-        return shape
+    # def tl_place(self, shape):
+    #     shape = rotate(shape, [10, -24, 10])
+    #     shape = translate(shape, self.thumborigin())
+    #     shape = translate(shape, [-13, -9.8, 4])
+    #     return shape
 
     def tl_wall(self, shape):
         return translate(self.tl_place(shape), (1.7, 1, 0))
 
-    def tr_place(self, shape):
-        shape = rotate(shape, [6, -25, 10])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-7.5, -29.5, 0])
-        return shape
+    # def tl_place(self, shape):
+    #     debugprint('tl_place()')
+    #     return self._key_place(TL, shape)
+    #
+    # def tr_place(self, shape):
+    #     debugprint('tr_place()')
+    #     return self._key_place(TR, shape)
+    #
+    # def ml_place(self, shape):
+    #     debugprint('ml_place()')
+    #     return self._key_place(ML, shape)
+    #
+    # def mr_place(self, shape):
+    #     debugprint('mr_place()')
+    #     return self._key_place(MR, shape)
+    #
+    # def bl_place(self, shape):
+    #     debugprint('bl_place()')
+    #     return self._key_place(BL, shape)
+    #
+    # def br_place(self, shape):
+    #     debugprint('br_place()')
+    #     return self._key_place(BR, shape)
 
-
-    def ml_place(self, shape):
-        shape = rotate(shape, [8, -31, 14])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-30.5, -17, -6])
-        return shape
-
-    def mr_place(self, shape):
-        shape = rotate(shape, [4, -31, 14])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-22.2, -41, -10.3])
-        return shape
-
-    def br_place(self, shape):
-        shape = rotate(shape, [2, -37, 18])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-37, -46.4, -22])
-        return shape
-
-    def bl_place(self, shape):
-        shape = rotate(shape, [6, -37, 18])
-        shape = translate(shape, self.thumborigin())
-        shape = translate(shape, [-47, -23, -19])
-        return shape
+    # def tr_place(self, shape):
+    #     shape = rotate(shape, [6, -25, 10])
+    #     shape = translate(shape, self.thumborigin())
+    #     shape = translate(shape, [-7.5, -29.5, 0])
+    #     return shape
+    #
+    #
+    # def ml_place(self, shape):
+    #     shape = rotate(shape, [8, -31, 14])
+    #     shape = translate(shape, self.thumborigin())
+    #     shape = translate(shape, [-30.5, -17, -6])
+    #     return shape
+    #
+    # def mr_place(self, shape):
+    #     shape = rotate(shape, [4, -31, 14])
+    #     shape = translate(shape, self.thumborigin())
+    #     shape = translate(shape, [-22.2, -41, -10.3])
+    #     return shape
+    #
+    # def br_place(self, shape):
+    #     shape = rotate(shape, [2, -37, 18])
+    #     shape = translate(shape, self.thumborigin())
+    #     shape = translate(shape, [-37, -46.4, -22])
+    #     return shape
+    #
+    # def bl_place(self, shape):
+    #     shape = rotate(shape, [6, -37, 18])
+    #     shape = translate(shape, self.thumborigin())
+    #     shape = translate(shape, [-47, -23, -19])
+    #     return shape
 
     def thumb_1x_layout(self, shape, cap=False):
         debugprint('thumb_1x_layout()')
         return union([
-            self.tr_place(rotate(shape, [0, 0, thumb_plate_tr_rotation])),
-            self.mr_place(rotate(shape, [0, 0, thumb_plate_mr_rotation])),
-            self.br_place(rotate(shape, [0, 0, thumb_plate_br_rotation])),
-            self.tl_place(rotate(shape, [0, 0, thumb_plate_tl_rotation])),
+            self.tr_place(shape),
+            self.mr_place(shape),
+            self.br_place(shape),
+            self.tl_place(shape),
         ])
 
     def thumb_15x_layout(self, shape, cap=False, plate=True):
         debugprint('thumb_15x_layout()')
         if plate:
             return union([
-                self.bl_place(rotate(shape, [0, 0, thumb_plate_bl_rotation])),
-                self.ml_place(rotate(shape, [0, 0, thumb_plate_ml_rotation]))
+                self.bl_place(shape),
+                self.ml_place(shape)
             ])
         else:
             return union([

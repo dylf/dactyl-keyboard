@@ -1,6 +1,6 @@
 from clusters.trackball_orbyl import TrackballOrbyl
-import json
-import os
+from geom import *
+from key import Key, KeyFactory
 
 
 class TrackballWild(TrackballOrbyl):
@@ -91,46 +91,61 @@ class TrackballWild(TrackballOrbyl):
     def bl_wall(self, shape):
         return translate(self.bl_place(shape), self.wall_offsets[3])
 
-    def tl_place(self, shape):
-        shape = rotate(shape, [0, 0, 0])
-        t_off = self.key_translation_offsets[0]
-        shape = rotate(shape, self.key_rotation_offsets[0])
-        shape = translate(shape, (t_off[0], t_off[1]+self.key_diameter/2, t_off[2]))
-        shape = rotate(shape, [0, 0, -80])
-        shape = self.track_place(shape)
+    def _key_gen(self):
+        self._keys = {}
+        for index in range(len(self.key_data)):
+            data = self.key_data[index]
+            key = KeyFactory.new_key(data['id'], globals())
+            key.rot = data['rot']
+            t_off = data['pos']
+            key.pos = [t_off[0], t_off[1] + self.key_diameter / 2, t_off[2]]
+            key.plate_rot_z = data['plate_rot_z']
+            adjust_pos, adjust_rot = self.position_rotation()
+            key.translate(adjust_pos)
+            key.rotate_deg(adjust_rot)
+            self._keys[key.get_id()] = key
 
-        return shape
-
-    def mr_place(self, shape):
-        shape = rotate(shape, [0, 0, 0])
-        shape = rotate(shape, self.key_rotation_offsets[1])
-        t_off = self.key_translation_offsets[1]
-        shape = translate(shape, (t_off[0], t_off[1]+self.key_diameter/2, t_off[2]))
-        shape = rotate(shape, [0, 0, -150])
-        shape = self.track_place(shape)
-
-        return shape
-
-    def br_place(self, shape):
-        shape = rotate(shape, [0, 0, 180])
-        shape = rotate(shape, self.key_rotation_offsets[2])
-        t_off = self.key_translation_offsets[2]
-        shape = translate(shape, (t_off[0], t_off[1]+self.key_diameter/2, t_off[2]))
-        shape = rotate(shape, [0, 0, -195])
-        shape = self.track_place(shape)
-
-        return shape
-
-    def bl_place(self, shape):
-        debugprint('thumb_bl_place()')
-        shape = rotate(shape, [0, 0, 180])
-        shape = rotate(shape, self.key_rotation_offsets[3])
-        t_off = self.key_translation_offsets[3]
-        shape = translate(shape, (t_off[0], t_off[1]+self.key_diameter/2, t_off[2]))
-        shape = rotate(shape, [0, 0, -240])
-        shape = self.track_place(shape)
-
-        return shape
+    #
+    # def tl_place(self, shape):
+    #     shape = rotate(shape, [0, 0, 0])
+    #     t_off = self.key_translation_offsets[0]
+    #     shape = rotate(shape, self.key_rotation_offsets[0])
+    #     shape = translate(shape, (t_off[0], t_off[1]+self.key_diameter/2, t_off[2]))
+    #     shape = rotate(shape, [0, 0, -80])
+    #     shape = self.track_place(shape)
+    #
+    #     return shape
+    #
+    # def mr_place(self, shape):
+    #     shape = rotate(shape, [0, 0, 0])
+    #     shape = rotate(shape, self.key_rotation_offsets[1])
+    #     t_off = self.key_translation_offsets[1]
+    #     shape = translate(shape, (t_off[0], t_off[1]+self.key_diameter/2, t_off[2]))
+    #     shape = rotate(shape, [0, 0, -150])
+    #     shape = self.track_place(shape)
+    #
+    #     return shape
+    #
+    # def br_place(self, shape):
+    #     shape = rotate(shape, [0, 0, 180])
+    #     shape = rotate(shape, self.key_rotation_offsets[2])
+    #     t_off = self.key_translation_offsets[2]
+    #     shape = translate(shape, (t_off[0], t_off[1]+self.key_diameter/2, t_off[2]))
+    #     shape = rotate(shape, [0, 0, -195])
+    #     shape = self.track_place(shape)
+    #
+    #     return shape
+    #
+    # def bl_place(self, shape):
+    #     debugprint('thumb_bl_place()')
+    #     shape = rotate(shape, [0, 0, 180])
+    #     shape = rotate(shape, self.key_rotation_offsets[3])
+    #     t_off = self.key_translation_offsets[3]
+    #     shape = translate(shape, (t_off[0], t_off[1]+self.key_diameter/2, t_off[2]))
+    #     shape = rotate(shape, [0, 0, -240])
+    #     shape = self.track_place(shape)
+    #
+    #     return shape
 
 
     def thumb_connectors(self, side="right"):
