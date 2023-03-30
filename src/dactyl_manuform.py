@@ -691,6 +691,11 @@ def make_dactyl():
         shape = translate(shape, key.pos)
         return shape
 
+
+    def cluster_key(shape, column, bottom_offset=0):
+        c = col(column)
+        return apply_key_geometry(shape, translate_xrot, y_rot, c, bottom_key(row) + offset)
+
     def cluster_key_place(shape, column, row):
         debugprint('key_place()')
         c = col(column)
@@ -933,15 +938,16 @@ def make_dactyl():
 
         return list(pos - np.array([left_wall_x_row_offsets[row], -y_offset, left_wall_z_offset + z_offset]))
 
-
     def left_key_place(shape, row, direction, low_corner=False, side='right'):
         debugprint("left_key_place()")
-        pos = left_key_position(row, direction, low_corner=low_corner, side=side)
+        pos = left_key_position(bottom_key(0), direction, low_corner=low_corner, side=side)
         return translate(shape, pos)
 
     # This is hackish... It just allows the search and replace of key_place in the cluster code
     # to not go big boom
     def left_cluster_key_place(shape, row, direction, low_corner=False, side='right'):
+        if row > bottom_key(ncols - 1):
+            row = bottom_key(ncols - 1)
         return left_key_place(shape, row, direction, low_corner, side)
 
     def wall_locate1(dx, dy):
