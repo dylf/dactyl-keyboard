@@ -1,9 +1,12 @@
-from clusters.trackball_orbyl import TrackballOrbyl
+from clusters.default_cluster import DefaultCluster
 from geom import *
 from key import Key, KeyFactory
+import json
+import os
+from clusters.cluster_common import *
 
 
-class TrackballWild(TrackballOrbyl):
+class TrackballWild(DefaultCluster):
     key_to_thumb_rotation = [] # may no longer be used?
     post_offsets = [
             [14, -8, 3],
@@ -65,18 +68,18 @@ class TrackballWild(TrackballOrbyl):
         for item in parent_locals:
             globals()[item] = parent_locals[item]
 
-    def position_rotation(self):
-        rot = [10, -15, 5]
-        pos = self.thumborigin()
-        # Changes size based on key diameter around ball, shifting off of the top left cluster key.
-        shift = [-.9*self.key_diameter/2+27-42, -.1*self.key_diameter/2+3-20, -5]
-        for i in range(len(pos)):
-            pos[i] = pos[i] + shift[i] + self.translation_offset[i]
-
-        for i in range(len(rot)):
-            rot[i] = rot[i] + self.rotation_offset[i]
-
-        return pos, rot
+    # def position_rotation(self):
+    #     rot = [10, -15, 5]
+    #     pos = self.thumborigin()
+    #     # Changes size based on key diameter around ball, shifting off of the top left cluster key.
+    #     shift = [-.9*self.key_diameter/2+27-42, -.1*self.key_diameter/2+3-20, -5]
+    #     for i in range(len(pos)):
+    #         pos[i] = pos[i] + shift[i] + self.translation_offset[i]
+    #
+    #     for i in range(len(rot)):
+    #         rot[i] = rot[i] + self.rotation_offset[i]
+    #
+    #     return pos, rot
 
 
     def tl_wall(self, shape):
@@ -91,19 +94,19 @@ class TrackballWild(TrackballOrbyl):
     def bl_wall(self, shape):
         return translate(self.bl_place(shape), self.wall_offsets[3])
 
-    def _key_gen(self):
-        self._keys = {}
-        for index in range(len(self.key_data)):
-            data = self.key_data[index]
-            key = KeyFactory.new_key(data['id'], globals())
-            key.rot = data['rot']
-            t_off = data['pos']
-            key.pos = [t_off[0], t_off[1] + self.key_diameter / 2, t_off[2]]
-            key.plate_rot_z = data['plate_rot_z']
-            adjust_pos, adjust_rot = self.position_rotation()
-            key.translate(adjust_pos)
-            key.rotate_deg(adjust_rot)
-            self._keys[key.get_id()] = key
+    # def _key_gen(self):
+    #     self._keys = {}
+    #     for index in range(len(self.key_data)):
+    #         data = self.key_data[index]
+    #         key = KeyFactory.new_key(data['id'], globals())
+    #         key.rot = data['rot']
+    #         t_off = data['pos']
+    #         key.pos = [t_off[0], t_off[1] + self.key_diameter / 2, t_off[2]]
+    #         key.plate_rot_z = data['plate_rot_z']
+    #         adjust_pos, adjust_rot = self.position_rotation()
+    #         key.translate(adjust_pos)
+    #         key.rotate_deg(adjust_rot)
+    #         self._keys[key.get_id()] = key
 
     #
     # def tl_place(self, shape):
@@ -146,7 +149,99 @@ class TrackballWild(TrackballOrbyl):
     #     shape = self.track_place(shape)
     #
     #     return shape
+    def tb_post_r(self):
+        debugprint('post_r()')
+        radius = ball_diameter/2 + ball_wall_thickness + ball_gap
+        return translate(web_post(),
+                         [1.0*(radius - post_adj), 0.0*(radius - post_adj), 0]
+                         )
 
+    def tb_post_tr(self):
+        debugprint('post_tr()')
+        radius = ball_diameter/2+ball_wall_thickness + ball_gap
+        return translate(web_post(),
+                         [0.5*(radius - post_adj), 0.866*(radius - post_adj), 0]
+                         )
+
+
+    def tb_post_tl(self):
+        debugprint('post_tl()')
+        radius = ball_diameter/2+ball_wall_thickness + ball_gap
+        return translate(web_post(),
+                         [-0.5*(radius - post_adj), 0.866*(radius - post_adj), 0]
+                         )
+
+
+    def tb_post_l(self):
+        debugprint('post_l()')
+        radius = ball_diameter/2+ball_wall_thickness + ball_gap
+        return translate(web_post(),
+                         [-1.0*(radius - post_adj), 0.0*(radius - post_adj), 0]
+                         )
+
+    def tb_post_bl(self):
+        debugprint('post_bl()')
+        radius = ball_diameter/2+ball_wall_thickness + ball_gap
+        return translate(web_post(),
+                         [-0.5*(radius - post_adj), -0.866*(radius - post_adj), 0]
+                         )
+
+
+    def tb_post_br(self):
+        debugprint('post_br()')
+        radius = ball_diameter/2+ball_wall_thickness + ball_gap
+        return translate(web_post(),
+                         [0.5*(radius - post_adj), -0.866*(radius - post_adj), 0]
+                         )
+
+    def thumb_1x_layout(self, shape, cap=False):
+        debugprint('thumb_1x_layout()')
+
+        shape_list = [
+            self.tl_place(rotate(shape, [0, 0, self._keys[TL].plate_rot_z])),
+            self.mr_place(rotate(shape, [0, 0, self._keys[MR].plate_rot_z])),
+            self.br_place(rotate(shape, [0, 0, self._keys[BR].plate_rot_z])),
+            self.bl_place(rotate(shape, [0, 0, self._keys[BL].plate_rot_z])),
+        ]
+
+        shapes = add(shape_list)
+
+        return shapes
+
+    def thumb_15x_layout(self, shape, cap=False, plate=True):
+        debugprint('thumb_15x_layout()')
+        if plate:
+            if cap:
+                shape = rotate(shape, (0, 0, 90))
+                cap_list = [self.tl_place(rotate(shape, [0, 0, self._keys[TL].plate_rot_z])),
+                            self.tr_place(rotate(shape, [0, 0, self._keys[MR].plate_rot_z]))]
+                return add(cap_list)
+            else:
+                shape_list = [self.tl_place(rotate(shape, [0, 0, self._keys[TL].plate_rot_z]))]
+                if not default_1U_cluster:
+                    shape_list.append(self.mr_place(rotate(shape, [0, 0, self._keys[MR].plate_rot_z])))
+                return union(shape_list)
+        else:
+            if cap:
+                shape = rotate(shape, (0, 0, 90))
+                shape_list = [self.tl_place(shape), self.mr_place(shape)]
+
+                return add(shape_list)
+            else:
+                shape_list = [
+                    self.tl_place(shape),
+                ]
+                if not default_1U_cluster:
+                    shape_list.append(self.mr_place(shape))
+
+                return union(shape_list)
+
+
+    def track_place(self, shape):
+        # pos, rot = self.position_rotation()
+        # shape = rotate(shape, rot)
+        # shape = translate(shape, pos)
+        return shape
 
     def thumb_connectors(self, side="right"):
         print('thumb_connectors()')

@@ -256,10 +256,10 @@ def make_dactyl():
 
     if oled_mount_type is not None and oled_mount_type != "NONE":
         left_wall_x_offset = oled_left_wall_x_offset_override
-        if nrows == 4:
+        if nrows <= 4:
             left_wall_x_row_offsets = [wide, wide, wide, wide]
         elif nrows == 5:
-            left_wall_x_row_offsets = [wide, wide, wide, short, short]
+            left_wall_x_row_offsets = [wide, wide, wide, wide, short]
         elif nrows == 6:
             left_wall_x_row_offsets = [wide, wide, wide, short, short, short]
         # left_wall_x_row_offsets = [22 if row > oled_row else 8 for row in range(lastrow)]
@@ -940,14 +940,16 @@ def make_dactyl():
 
     def left_key_place(shape, row, direction, low_corner=False, side='right'):
         debugprint("left_key_place()")
-        pos = left_key_position(bottom_key(0), direction, low_corner=low_corner, side=side)
+        if row > bottom_key(0):
+            row = bottom_key(0)
+        pos = left_key_position(row, direction, low_corner=low_corner, side=side)
         return translate(shape, pos)
 
     # This is hackish... It just allows the search and replace of key_place in the cluster code
     # to not go big boom
     def left_cluster_key_place(shape, row, direction, low_corner=False, side='right'):
-        if row > bottom_key(ncols - 1):
-            row = bottom_key(ncols - 1)
+        if row > bottom_key(0):
+            row = bottom_key(0)
         return left_key_place(shape, row, direction, low_corner, side)
 
     def wall_locate1(dx, dy):
