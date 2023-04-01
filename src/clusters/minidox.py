@@ -250,7 +250,7 @@ class MinidoxCluster(DefaultCluster):
         shape = union([shape, wall_brace(self.ml_place, -1, 0, self.thumb_post_bl(), self.ml_place, -1, 0, self.thumb_post_tl())])
         shape = union([shape, wall_brace(self.ml_place, -1, 0, self.thumb_post_tl(), self.ml_place, 0, 1, self.thumb_post_tl())])
         # thumb, tweeners
-        shape = union([shape, wall_brace(self.ml_place, 0, 1, self.thumb_post_tr(), self.ml_place, 0, 1, self.thumb_post_tl())])
+        shape = union([shape, wall_brace(self.ml_place, 0.8, 1, self.thumb_post_tr(), self.ml_place, 0, 1, self.thumb_post_tl())])
         shape = union([shape, wall_brace(self.tr_place, 0, -1, self.thumb_post_br(), (lambda sh: key_place(sh, 3, lastrow)), 0, -1, web_post_bl())])
 
         return shape
