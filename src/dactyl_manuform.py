@@ -255,7 +255,9 @@ def make_dactyl():
         else:
             left_wall_x_offset = oled_left_wall_x_offset_override
             short = tbiw_left_wall_x_offset_override
-        if nrows <= 4:
+        if nrows == 3:
+            left_wall_x_row_offsets = [short, wide, wide, wide]
+        elif nrows == 4:
             left_wall_x_row_offsets = [short, short, wide, wide]
         elif nrows == 5:
             left_wall_x_row_offsets = [wide, wide, wide, short, short]
