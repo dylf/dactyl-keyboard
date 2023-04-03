@@ -75,7 +75,10 @@ def get_left_wall_offsets(side="right"):
         else:
             left_wall_x_offset = oled_left_wall_x_offset_override
             short = tbiw_left_wall_x_offset_override - 15  # HACKISH
-        if nrows <= 4:
+
+        if nrows == 3:
+            offsets = [wide, wide, wide, wide]
+        elif nrows == 4:
             offsets = [short, wide, wide, wide]
         elif nrows == 5:
             offsets = [wide, wide, wide, short, short]
