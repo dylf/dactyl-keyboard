@@ -7,7 +7,27 @@ from clusters.cluster_common import *
 
 
 class TrackballWild(DefaultCluster):
-    key_to_thumb_rotation = [] # may no longer be used?
+    key_diameter = 75
+    translation_offset = [
+        0,
+        0,
+        10
+    ]
+    rotation_offset = [
+        0,
+        0,
+        0
+    ]
+    key_translation_offsets = [
+        0,
+        0,
+        10
+    ]
+    key_rotation_offsets = [
+        0,
+        0,
+        0
+    ]
     post_offsets = [
             [14, -8, 3],
             [3, -9, -7],
@@ -68,18 +88,32 @@ class TrackballWild(DefaultCluster):
         for item in parent_locals:
             globals()[item] = parent_locals[item]
 
-    # def position_rotation(self):
-    #     rot = [10, -15, 5]
-    #     pos = self.thumborigin()
-    #     # Changes size based on key diameter around ball, shifting off of the top left cluster key.
-    #     shift = [-.9*self.key_diameter/2+27-42, -.1*self.key_diameter/2+3-20, -5]
-    #     for i in range(len(pos)):
-    #         pos[i] = pos[i] + shift[i] + self.translation_offset[i]
-    #
-    #     for i in range(len(rot)):
-    #         rot[i] = rot[i] + self.rotation_offset[i]
-    #
-    #     return pos, rot
+    # def _key_gen(self):
+    #     self._keys = {}
+    #     for index in range(len(self.key_data)):
+    #         data = self.key_data[index]
+    #         key = KeyFactory.new_key(data['id'], globals())
+    #         key.rot = data['rot']
+    #         t_off = data['pos']
+    #         key.pos = [t_off[0], t_off[1] + self.key_diameter / 2, t_off[2]]
+    #         key.plate_rot_z = data['plate_rot_z']
+    #         adjust_pos, adjust_rot = self.position_rotation()
+    #         key.translate(adjust_pos)
+    #         key.rotate_deg(adjust_rot)
+    #         self._keys[key.get_id()] = key
+
+    def position_rotation(self):
+        rot = [10, -15, 5]
+        pos = self.thumborigin()
+        # Changes size based on key diameter around ball, shifting off of the top left cluster key.
+        shift = [-.9*self.key_diameter/2+27-42, -.1*self.key_diameter/2+3-20, -5]
+        for i in range(len(pos)):
+            pos[i] = pos[i] + shift[i] + self.translation_offset[i]
+
+        for i in range(len(rot)):
+            rot[i] = rot[i] + self.rotation_offset[i]
+
+        return pos, rot
 
 
     def tl_wall(self, shape):
@@ -94,19 +128,19 @@ class TrackballWild(DefaultCluster):
     def bl_wall(self, shape):
         return translate(self.bl_place(shape), self.wall_offsets[3])
 
-    # def _key_gen(self):
-    #     self._keys = {}
-    #     for index in range(len(self.key_data)):
-    #         data = self.key_data[index]
-    #         key = KeyFactory.new_key(data['id'], globals())
-    #         key.rot = data['rot']
-    #         t_off = data['pos']
-    #         key.pos = [t_off[0], t_off[1] + self.key_diameter / 2, t_off[2]]
-    #         key.plate_rot_z = data['plate_rot_z']
-    #         adjust_pos, adjust_rot = self.position_rotation()
-    #         key.translate(adjust_pos)
-    #         key.rotate_deg(adjust_rot)
-    #         self._keys[key.get_id()] = key
+    def _key_gen(self):
+        self._keys = {}
+        for index in range(len(self.key_data)):
+            data = self.key_data[index]
+            key = KeyFactory.new_key(data['id'], globals())
+            key.rot = data['rot']
+            t_off = data['pos']
+            key.pos = [t_off[0], t_off[1] + self.key_diameter / 2, t_off[2]]
+            key.plate_rot_z = data['plate_rot_z']
+            adjust_pos, adjust_rot = self.position_rotation()
+            key.translate(adjust_pos)
+            key.rotate_deg(adjust_rot)
+            self._keys[key.get_id()] = key
 
     #
     # def tl_place(self, shape):
