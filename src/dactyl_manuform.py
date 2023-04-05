@@ -74,7 +74,7 @@ def get_left_wall_offsets(side="right"):
             short = 8
         else:
             left_wall_x_offset = oled_left_wall_x_offset_override
-            short = tbiw_left_wall_x_offset_override - 15  # HACKISH
+            short = tbiw_left_wall_x_offset_override - 10  # HACKISH
 
         if nrows == 3:
             offsets = [wide, wide, wide, wide]
@@ -1330,7 +1330,7 @@ def make_dactyl():
 
 ########### TRACKBALL GENERATION
     def use_btus(cluster):
-        return trackball_in_wall or (cluster is not None and cluster.has_btus())
+        return (cluster is not None and cluster.has_btus())
 
     def trackball_cutout(segments=100, side="right"):
         shape = translate(cylinder(trackball_hole_diameter / 2, trackball_hole_height), (0, 0, 20))
@@ -1348,7 +1348,8 @@ def make_dactyl():
         # cut = translate(box(radius * 4, radius * 4, radius + 10), (0, 0, ((radius + 10) / 2)))
         # tube = difference(tube, [cut])
         # return tube
-        return translate(tube, (0, 0, 20 + 21))
+        # return translate(tube, (0, 0, 20 + 21))
+        return translate(tube, (0, 0, 19))
 
     def trackball_socket(btus=False,segments=100, side="right"):
         # shape = sphere(ball_diameter / 2)
