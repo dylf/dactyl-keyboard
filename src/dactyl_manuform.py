@@ -83,7 +83,7 @@ def get_left_wall_offsets(side="right"):
         elif nrows == 5:
             offsets = [wide, wide, wide, short, short]
         elif nrows == 6:
-            offsets = [wide, wide, wide, short, short, short]
+            offsets = [short, short, wide, wide, wide, wide]
     elif oled_mount_type is not None and oled_mount_type != "NONE":
         left_wall_x_offset = oled_left_wall_x_offset_override
         if nrows <= 4:
@@ -883,15 +883,11 @@ def make_dactyl():
                 y_offset = tbiw_left_wall_lower_y_offset
                 z_offset = tbiw_left_wall_lower_z_offset
                 # RIDICULOUS HACK 1
-            elif row >= 1:
+            elif row >= nrows - 4:
                 y_offset = -26
                 z_offset = 0
                 if row >= 3:
                     z_offset = 3
-                # RIDICULOUS HACK 2
-            # elif row == 3:
-            #     y_offset = -8
-            #     z_offset = 0
             else:
                 y_offset = 0.0
                 z_offset = 0.0
