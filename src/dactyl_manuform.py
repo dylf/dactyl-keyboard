@@ -74,7 +74,7 @@ def get_left_wall_offsets(side="right"):
             short = 8
         else:
             left_wall_x_offset = oled_left_wall_x_offset_override
-            short = tbiw_left_wall_x_offset_override - 10  # HACKISH
+            short = tbiw_left_wall_x_offset_override  # HACKISH
 
         if nrows == 3:
             offsets = [wide, wide, wide, wide]
@@ -886,8 +886,8 @@ def make_dactyl():
             elif row >= nrows - 4:
                 y_offset = -26
                 z_offset = 0
-                if row >= 3:
-                    z_offset = 3
+                if row >= nrows - 2:
+                    z_offset = 0
             else:
                 y_offset = 0.0
                 z_offset = 0.0
@@ -1333,14 +1333,14 @@ def make_dactyl():
         return (cluster is not None and cluster.has_btus())
 
     def trackball_cutout(segments=100, side="right"):
-        shape = translate(cylinder(trackball_hole_diameter / 2, trackball_hole_height), (0, 0, 20))
+        shape = translate(cylinder(trackball_hole_diameter / 2, trackball_hole_height), (0, 0, 0))
         return shape
 
 
     def trackball_mount():
         radius = trackball_hole_diameter / 2
         tube = sphere(radius + 3)
-        return translate(tube, (0, 0, 20))
+        return translate(tube, (0, 0, 0))
 
     def trackball_surface_cutter(add_radius=10):
         radius = (trackball_hole_diameter / 2) + add_radius
@@ -1430,7 +1430,7 @@ def make_dactyl():
 
         # Hackish?  Oh, yes. But it builds with latest cadquery.
         if ENGINE == 'cadquery':
-            sensor = translate(sensor, (0, 0, -14.005))
+            sensor = translate(sensor, (0, 0, -15.005))
 
         sensor = orient_to_trackball(sensor)
 
@@ -2065,12 +2065,12 @@ def make_dactyl():
                 tbprecut, tb, tbcutout, sensor, ball, mount, top_cutter = generate_trackball_in_wall()
                 # shape = union([shape, mount])
                 # HACK HACKETY HACK HACK!
-                spot = key_position([-10, -5, 13.5], 0, cornerrow)
-                # cut_corner = translate(box(10, 10, 10), spot)
-                cut_corner = translate(box(20, 20, 10), (-(mount_width / 2.0) - 0, -(mount_height / 2.0) - 0, -1))
-                cut_corner = rotate(cut_corner, (25, -10, 0))
-                cut_corner = translate(cut_corner, spot)
-                shape = difference(shape,[ top_cutter])
+                # spot = key_position([-10, -5, 13.5], 0, cornerrow)
+                # # cut_corner = translate(box(10, 10, 10), spot)
+                # cut_corner = translate(box(20, 20, 10), (-(mount_width / 2.0) - 0, -(mount_height / 2.0) - 0, -1))
+                # cut_corner = rotate(cut_corner, (25, -10, 0))
+                # cut_corner = translate(cut_corner, spot)
+                # shape = difference(shape,[ top_cutter])
                 # encoder_mount = translate(box(keyswitch_width, hole_keyswitch_height, 20), spot)
                 # encoder_mount = translate(rotate(encoder_mount, (0, 0, -20)), (-37, -4, -15))
                 # shape = difference(shape, [encoder_mount])
