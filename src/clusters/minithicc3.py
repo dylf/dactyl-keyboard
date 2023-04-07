@@ -41,6 +41,13 @@ class Minithicc3(MinidoxCluster):
         for item in parent_locals:
             globals()[item] = parent_locals[item]
 
+    def thumb_rotate(self):
+        x = y = z = 0
+        # if shift_column < 0:
+        #     y = shift_column * 4
+        #     z = shift_column * -10
+        return [x, y, 3]
+
     def tl_place(self, shape):
         shape = rotate(shape, [14, -15, 20])
         shape = translate(shape, [-36, -16, -15])

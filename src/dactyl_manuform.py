@@ -79,7 +79,7 @@ def get_left_wall_offsets(side="right"):
             short = tbiw_left_wall_x_offset_override  # HACKISH
 
         if nrows == 3:
-            offsets = [wide, wide, wide, wide]
+            offsets = [short, wide, wide, wide]
         elif nrows == 4:
             offsets = [short, wide, wide, wide]
         elif nrows == 5:
@@ -829,7 +829,7 @@ def make_dactyl():
                 y_offset = tbiw_left_wall_lower_y_offset
                 z_offset = tbiw_left_wall_lower_z_offset
                 # RIDICULOUS HACK 1
-            elif row >= nrows - 4:
+            elif row >= nrows - 2:
                 y_offset = -26
                 z_offset = 0
                 if row >= nrows - 2:
@@ -1191,6 +1191,56 @@ def make_dactyl():
         return shape
 
 
+    def trrs_mount_point():
+        shape = box(6.2, 14, 5.2)
+        jack = translate(rotate(cylinder(2.6, 5), (90, 0, 0)), (0, 9, 0))
+        jack_entry = translate(rotate(cylinder(4, 5), (90, 0, 0)), (0, 11, 0))
+        shape = rotate(translate(union([shape, jack, jack_entry]), (0, 0, 10)), (0, 0, 75))
+
+        # shape = translate(shape,
+        #               (
+        #                   usb_holder_position[0] + trrs_hole_xoffset,
+        #                   usb_holder_position[1] + trrs_hole_yoffset,
+        #                   trrs_hole_zoffset,
+        #               )
+        #               )
+
+        pos = screw_position(0, 0, 5, 5, 5) # wall_locate2(0, 1)
+        # trans = wall_locate2(1, 1)
+        # pos = [pos[0] + trans[0], pos[1] + trans[1], pos[2]]
+        shape = translate(shape,
+                      (
+                          pos[0] + trrs_hole_xoffset,
+                          pos[1] + trrs_hole_yoffset + screw_offsets[0][1],
+                          trrs_hole_zoffset,
+                      )
+                      )
+        return shape
+
+    def usb_c_shape(width, height, depth):
+        shape = box(width, depth, height)
+        cyl1 = translate(rotate(cylinder(height / 2, depth), (90, 0, 0)), (width / 2, 0, 0))
+        cyl2 = translate(rotate(cylinder(height / 2, depth), (90, 0, 0)), (-width / 2, 0, 0))
+        return union([shape, cyl1, cyl2])
+
+    def usb_c_hole():
+        debugprint('usb_c_hole()')
+        return usb_c_shape(usb_c_width, usb_c_height, 20)
+
+    def usb_c_mount_point():
+        width = usb_c_width * 1.2
+        height = usb_c_height * 1.2
+        front_bit = translate(usb_c_shape(usb_c_width + 2, usb_c_height + 2, wall_thickness / 2), (0, (wall_thickness / 2) + 1, 0))
+        shape = union([front_bit, usb_c_hole()])
+        shape = translate(shape,
+                          (
+                              usb_holder_position[0] + usb_c_xoffset,
+                              usb_holder_position[1] + usb_c_yoffset,
+                              usb_c_zoffset,
+                          )
+                          )
+        return shape
+
     external_start = list(
         # np.array([0, -3, 0])
         np.array([external_holder_width / 2, 0, 0])
@@ -1338,6 +1388,8 @@ def make_dactyl():
         # Hackish?  Oh, yes. But it builds with latest cadquery.
         if ENGINE == 'cadquery':
             sensor = translate(sensor, (0, 0, -15.005))
+
+        sensor = rotate(sensor, (0, 0, 180))
 
         sensor = orient_to_trackball(sensor)
 
@@ -1989,6 +2041,7 @@ def make_dactyl():
                     # shape = difference(shape, [tbcutout])
                     shape = union([shape, tb])
                 else:
+                    shape = difference(shape, [top_cutter])
                     shape = difference(shape, [tbprecut, mount])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_1"))
                     shape = union([shape, tb])
