@@ -311,11 +311,23 @@ def make_dactyl():
         os.mkdir(save_path)
 
 
+    def col(from_column):
+        c = from_column + shift_column  # if not inner_column else from_column - 1
+        if c < 0:
+            c = 0
+        if c > ncols - 1:
+            c = ncols -1
+        return c
+
     def column_offset(column: int) -> list:
-        result = column_offsets[column]
-        # if (pinky_1_5U and column == lastcol):
-        #     result[0] = result[0] + 1
-        return result
+        c = column - shift_column
+
+        if c < 0:
+            c = 0
+        if c > ncols - 1:
+            c = ncols - 1
+
+        return column_offsets[c]
 
 
     # column_style='fixed'
@@ -597,15 +609,31 @@ def make_dactyl():
 
         return shape
 
+    def bottom_key(column):
+        # if column < shift_column:  # attempt to make inner columns fewer keys
+        #     return nrows - 3
+        if all_last_rows:
+            return nrows - 1
+        cluster_columns = 2 + shift_column
+        if column in list(range(cluster_columns)):
+            return nrows - 2
+        # if column == 2:
+        #     if inner_column:
+        #         return nrows - 2
+        if full_last_rows or column < cluster_columns + 2:
+            return nrows - 1
+
+        return nrows - 2
+
+
+    def first_bottom_key():
+        for c in range(ncols - 1):
+            if bottom_key(c) == nrows - 1:
+                return c
+
 
     def valid_key(column, row):
-        if all_last_rows:
-            return True
-
-        if (full_last_rows):
-            return (not (column in [0, 1])) or (not row == lastrow)
-
-        return (column in [2, 3]) or (not row == lastrow)
+        return row <= bottom_key(column)
 
     def x_rot(shape, angle):
         # debugprint('x_rot()')
@@ -622,6 +650,15 @@ def make_dactyl():
         return apply_key_geometry(shape, translate, x_rot, y_rot, column, row)
 
 
+    def cluster_key_place(shape, column, row):
+        debugprint('key_place()')
+        c = col(column)
+        # if c < 0:
+        #     c = 0
+        # if c > ncols - 1:
+        #     c = ncols - 1
+        # c = column if not inner_column else column + 1
+        return apply_key_geometry(shape, translate, x_rot, y_rot, c, row)
     def add_translate(shape, xyz):
         debugprint('add_translate()')
         vals = []
@@ -696,14 +733,17 @@ def make_dactyl():
         return translate(web_post(), ((mount_width / 2.0) + off_w, -(mount_height / 2.0) - off_h, 0))
 
     def get_torow(column):
-        if all_last_rows:
-            return lastrow + 1
-        torow = lastrow
-        if full_last_rows:
-            torow = lastrow + 1
-        if column in [0, 1]:
-            torow = lastrow
-        return torow
+        return bottom_key(column) + 1
+
+    # def get_torow(column):
+    #     if all_last_rows:
+    #         return lastrow + 1
+    #     torow = lastrow
+    #     if full_last_rows:
+    #         torow = lastrow + 1
+    #     if column in [0, 1]:
+    #         torow = lastrow
+    #     return torow
 
 
     def connectors():
@@ -714,9 +754,10 @@ def make_dactyl():
             for row in range(torow):  # need to consider last_row?
                 # for row in range(nrows):  # need to consider last_row?
                 places = []
-                places.append(key_place(web_post_tl(), column + 1, row))
+                next_row = row if row <= bottom_key(column + 1) else bottom_key(column + 1)
+                places.append(key_place(web_post_tl(), column + 1, next_row))
                 places.append(key_place(web_post_tr(), column, row))
-                places.append(key_place(web_post_bl(), column + 1, row))
+                places.append(key_place(web_post_bl(), column + 1, next_row))
                 places.append(key_place(web_post_br(), column, row))
                 hulls.append(triangle_hulls(places))
 
@@ -735,11 +776,13 @@ def make_dactyl():
             torow = get_torow(column)
             # for row in range(nrows-1):  # need to consider last_row?
             for row in range(torow - 1):  # need to consider last_row?
+                next_row = row if row < bottom_key(column + 1) else bottom_key(column + 1) - 1
+
                 places = []
                 places.append(key_place(web_post_br(), column, row))
                 places.append(key_place(web_post_tr(), column, row + 1))
-                places.append(key_place(web_post_bl(), column + 1, row))
-                places.append(key_place(web_post_tl(), column + 1, row + 1))
+                places.append(key_place(web_post_bl(), column + 1, next_row))
+                places.append(key_place(web_post_tl(), column + 1, next_row + 1))
                 hulls.append(triangle_hulls(places))
 
         return union(hulls)
@@ -1069,10 +1112,10 @@ def make_dactyl():
             )
         ])
         shape = union([shape, key_wall_brace(
-            3, lastrow, 0, -1, web_post_bl(), 3, lastrow, 0.5, -1, web_post_br()
+            col(3), bottom_key(col(3)), 0, -1, web_post_bl(), col(3), bottom_key(col(3)), 0, -1, web_post_br()
         )])
         shape = union([shape, key_wall_brace(
-            3, lastrow, 0.5, -1, web_post_br(), 4, torow, 1, -1, web_post_bl()
+            col(3), bottom_key(col(3)), 0, -1, web_post_br(), col(4), bottom_key(col(4)), 0.5, -1, web_post_bl()
         )])
 
         if all_last_rows:
@@ -1383,13 +1426,14 @@ def make_dactyl():
         if cluster is not None and resin is False:
             shape = cluster.get_extras(shape, pos)
 
+        cutout = translate(cutout, (0, 0, 12))
         cutout = orient_to_trackball(cutout)
 
         # Hackish?  Oh, yes. But it builds with latest cadquery.
         if ENGINE == 'cadquery':
             sensor = translate(sensor, (0, 0, -15.005))
 
-        sensor = rotate(sensor, (0, 0, 180))
+        # sensor = rotate(sensor, (0, 0, 180))
 
         sensor = orient_to_trackball(sensor)
 
