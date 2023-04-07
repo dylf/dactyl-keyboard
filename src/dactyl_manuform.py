@@ -1349,7 +1349,7 @@ def make_dactyl():
         # tube = difference(tube, [cut])
         # return tube
         # return translate(tube, (0, 0, 20 + 21))
-        return translate(tube, (0, 0, 19))
+        return translate(tube, (0, 5, 19))
 
     def trackball_socket(btus=False,segments=100, side="right"):
         # shape = sphere(ball_diameter / 2)
@@ -1426,7 +1426,7 @@ def make_dactyl():
         if cluster is not None and resin is False:
             shape = cluster.get_extras(shape, pos)
 
-        cutout = translate(cutout, (0, 0, 12))
+        cutout = translate(cutout, (0, 0, 0))
         cutout = orient_to_trackball(cutout)
 
         # Hackish?  Oh, yes. But it builds with latest cadquery.
@@ -2088,9 +2088,10 @@ def make_dactyl():
                     shape = difference(shape, [top_cutter])
                     shape = difference(shape, [tbprecut, mount])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_1"))
+                    tb = difference(tb, [tbcutout])
                     shape = union([shape, tb])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_2"))
-                    shape = difference(shape, [tbcutout])
+                    # shape = difference(shape, [tbcutout])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_3a"))
                     # export_file(shape=add([shape, sensor]), fname=path.join(save_path, config_name + r"_test_3b"))
                     shape = union([shape, sensor])
