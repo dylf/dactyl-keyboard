@@ -16,6 +16,7 @@ from clusters.minithicc3 import Minithicc3
 from clusters.trackball_orbyl import TrackballOrbyl
 from clusters.trackball_two import TrackballTwo
 from clusters.trackball_three import TrackballThree
+from clusters.trackball_thicc import TrackballThicc
 from clusters.trackball_wilder import TrackballWild
 from clusters.trackball_cj import TrackballCJ
 from clusters.custom_cluster import CustomCluster
@@ -1556,11 +1557,11 @@ def make_dactyl():
 
         shape = box(mount_ext_width, mount_ext_height, oled_mount_depth)
 
-        conn_hole_start = -mount_ext_height / 2.0 + oled_mount_rim
+        conn_hole_start = (-mount_ext_height / 2.0 + oled_mount_rim) - 2
         conn_hole_length = (
                 oled_edge_overlap_end + oled_edge_overlap_connector
                 + oled_edge_overlap_clearance + oled_thickness
-        )
+        ) + 4
         conn_hole = box(oled_mount_width, conn_hole_length + .01, oled_mount_depth)
         conn_hole = translate(conn_hole, (
             0,
@@ -2100,7 +2101,7 @@ def make_dactyl():
                     shape = add([shape, ball])
 
             elif cluster(side).is_tb:
-                tbprecut, tb, tbcutout, sensor, ball = generate_trackball_in_cluster(cluster(side))
+                tbprecut, tb, tbcutout, sensor, ball, mount, top_cutter = generate_trackball_in_cluster(cluster(side))
 
                 shape = difference(shape, [tbprecut])
                 if cluster(side).has_btus():
@@ -2325,6 +2326,8 @@ def make_dactyl():
             clust = TrackballWild(all_merged)
         elif style == TrackballThree.name():
             clust = TrackballThree(all_merged)
+        elif style == TrackballThicc.name():
+            clust = TrackballThicc(all_merged)
         elif style == TrackballTwo.name():
             clust = TrackballTwo(all_merged)
         elif style == TrackballBTU.name():

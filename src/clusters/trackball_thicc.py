@@ -1,10 +1,10 @@
 import json
 import os
 
-from clusters.trackball_orbyl import TrackballOrbyl
+from clusters.minithicc3 import Minithicc3
 
 
-class TrackballThree(TrackballOrbyl):
+class TrackballThicc(Minithicc3):
     key_diameter = 75
     translation_offset = [
         0,
@@ -63,7 +63,7 @@ class TrackballThree(TrackballOrbyl):
 
     @staticmethod
     def name():
-        return "TRACKBALL_THREE"
+        return "TRACKBALL_THICC"
 
     def get_config(self):
         with open(os.path.join("src", "clusters", "json", "TRACKBALL_THREE.json"), mode='r') as fid:
@@ -112,36 +112,60 @@ class TrackballThree(TrackballOrbyl):
         shape = translate(shape, pos)
         return shape
 
-    def tl_place(self, shape):
-        shape = rotate(shape, [0, 0, 0])
-        t_off = self.key_translation_offsets[0]
-        shape = rotate(shape, self.key_rotation_offsets[0])
-        shape = translate(shape, (t_off[0], t_off[1] + self.key_diameter / 2, t_off[2]))
-        shape = rotate(shape, [0,0,-80])
-        shape = self.track_place(shape)
+    # def tl_place(self, shape):
+    #     shape = rotate(shape, [0, 0, 0])
+    #     t_off = self.key_translation_offsets[0]
+    #     shape = rotate(shape, self.key_rotation_offsets[0])
+    #     shape = translate(shape, (t_off[0], t_off[1] + self.key_diameter / 2, t_off[2]))
+    #     shape = rotate(shape, [0,0,-80])
+    #     shape = self.track_place(shape)
+    #
+    #     return shape
+    #
+    # def mr_place(self, shape):
+    #     shape = rotate(shape, [0, 0, 0])
+    #     shape = rotate(shape, self.key_rotation_offsets[1])
+    #     t_off = self.key_translation_offsets[1]
+    #     shape = translate(shape, (t_off[0], t_off[1] + self.key_diameter/2, t_off[2]))
+    #     shape = rotate(shape, [0,0,-118])
+    #     shape = self.track_place(shape)
+    #
+    #     return shape
+    #
+    # def br_place(self, shape):
+    #     shape = rotate(shape, [0, 0, 180])
+    #     shape = rotate(shape, self.key_rotation_offsets[2])
+    #     t_off = self.key_translation_offsets[2]
+    #     shape = translate(shape, (t_off[0], t_off[1]+self.key_diameter/2, t_off[2]))
+    #     shape = rotate(shape, [0,0,-180])
+    #     shape = self.track_place(shape)
+    #
+    #     return shape
 
-        return shape
+    def thumb_rotate(self):
+        x = y = z = 0
+        # if shift_column < 0:
+        #     y = shift_column * 4
+        #     z = shift_column * -10
+        return [x, y, 3]
 
     def mr_place(self, shape):
-        shape = rotate(shape, [0, 0, 0])
-        shape = rotate(shape, self.key_rotation_offsets[1])
-        t_off = self.key_translation_offsets[1]
-        shape = translate(shape, (t_off[0], t_off[1] + self.key_diameter/2, t_off[2]))
-        shape = rotate(shape, [0,0,-118])
-        shape = self.track_place(shape)
+        shape = rotate(shape, [14, -15, 20])
+        shape = translate(shape, [-36, -16, -15])
+        shape = self.thumb_place(shape)
+        return shape
 
+    def tl_place(self, shape):
+        shape = rotate(shape, [17, -15, 10])
+        shape = translate(shape, [-14, -10, -9])
+        shape = self.thumb_place(shape)
         return shape
 
     def br_place(self, shape):
-        shape = rotate(shape, [0, 0, 180])
-        shape = rotate(shape, self.key_rotation_offsets[2])
-        t_off = self.key_translation_offsets[2]
-        shape = translate(shape, (t_off[0], t_off[1]+self.key_diameter/2, t_off[2]))
-        shape = rotate(shape, [0,0,-180])
-        shape = self.track_place(shape)
-
+        shape = rotate(shape, [10, -15, 30])
+        shape = translate(shape, [-56, -26, -21])
+        shape = self.thumb_place(shape)
         return shape
-
     # def bl_place(self, shape):
     #     debugprint('thumb_bl_place()')
     #     shape = rotate(shape, [0, 0, 180])
