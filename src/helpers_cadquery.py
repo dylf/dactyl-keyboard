@@ -233,3 +233,90 @@ def export_dxf(shape, fname):
     print("EXPORTING TO {}".format(fname))
     cq.exporters.export(w=shape, fname=fname + ".dxf",
                         exportType='DXF')
+
+def blockerize(shape):
+    #####
+    # Inputs
+    ######
+    lbumps = 40  # number of bumps long
+    wbumps = 40  # number of bumps wide
+    thin = True  # True for thin, False for thick
+
+    #
+    # Lego Brick Constants-- these make a Lego brick a Lego :)
+    #
+    pitch = 8.0
+    clearance = 1
+    bumpDiam = 4.85
+    bumpHeight = 1.8
+    if thin:
+        height = 3.2
+    else:
+        height = 9.6
+
+    t = (pitch - (2 * clearance) - bumpDiam) / 2.0
+    postDiam = 6.5  # pitch  t  # works out to 6.5
+    total_length = lbumps * pitch - 2.0 * clearance
+    total_width = wbumps * pitch - 2.0 * clearance
+
+    # make the base
+    # s = cq.Workplane("XY").box(total_length, total_width, height)
+
+    # shell inwards not outwards
+    s = shape.faces("<Z").shell(-2.5 * t)
+
+    # make the bumps on the top
+    s = (s.faces(">Z").workplane().
+         rarray(pitch, pitch, lbumps, wbumps, True).circle(bumpDiam / 2.0)
+         .extrude(bumpHeight))
+
+    # add posts on the bottom. posts are different diameter depending on geometry
+    # solid studs for 1 bump, tubes for multiple, none for 1x1
+    tmp = s.faces("<Z").workplane(invert=True)
+
+    if lbumps > 1 and wbumps > 1:
+        tmp = (tmp.rarray(pitch, pitch, lbumps - 1, wbumps - 1, center=True).
+               circle(postDiam / 2.0).circle(bumpDiam / 2.0).extrude(height - t))
+    elif lbumps > 1:
+        tmp = (tmp.rarray(pitch, pitch, lbumps - 1, 1, center=True).
+               circle(t).extrude(height - t))
+    elif wbumps > 1:
+        tmp = (tmp.rarray(pitch, pitch, 1, wbumps - 1, center=True).
+               circle(t).extrude(height - t))
+    else:
+        tmp = s
+
+    return intersect(shape, tmp)
+
+# generate a cutter to exact size/shape of an M3 4mm x 4mm brass insert
+# size is scaled a bit for non-resin prints, so heat-set works
+def insert_cutter(radii=(2.35, 2.0), heights=(2.8, 1.5), scale_by=1):
+    if len(radii) != len(heights):
+        raise Exception("radii and heights collections must have equal length")
+
+    top_radius = 4.7 / 2
+    top_height = 2.8
+    medium_radius = 4.0 / 2
+    medium_height = 1.5
+    # medium2_radius = 5.1 / 2
+    # medium2_height = 0.8
+    # bottom_radius = 4.85 / 2
+    # bottom_height = 1.6
+
+    total_height = sum(heights) + 0.3  # add 0.3 for a titch extra
+
+    half_height = total_height / 2
+    offset = half_height
+    cyl = None
+    for i in range(len(radii)):
+        radius = radii[i] * scale_by
+        height = heights[i]
+        offset -= height / 2
+        new_cyl = cq.Workplane('XY').cylinder(height, radius).translate((0, 0, offset))
+        if cyl is None:
+            cyl = new_cyl
+        else:
+            cyl = cyl.union(new_cyl)
+        offset -= height / 2
+
+    return cyl
