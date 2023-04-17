@@ -20,7 +20,7 @@ def sphere(radius):
 
 
 def cone(r1, r2, height):
-    return sl.cylinder(r1=r1, r2=r2, h=height)  # , center=True)
+    return sl.cylinder(r1=r1, r2=r2, h=height, center=True)  # , center=True)
 
 
 def rotate(shape, angle):
