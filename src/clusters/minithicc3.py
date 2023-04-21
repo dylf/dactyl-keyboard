@@ -40,6 +40,12 @@ class Minithicc3(MinidoxCluster):
         for item in parent_locals:
             globals()[item] = parent_locals[item]
 
+    # def thumborigin(self):
+    #     # debugprint('thumborigin()')
+    #     origin = super().thumborigin()
+    #     origin[0] -= 3
+    #     return origin
+
     def thumb_rotate(self):
         x = y = z = 0
         # if shift_column < 0:
