@@ -54,6 +54,7 @@
     0,
     0
   ],
+  "encoder_in_wall": false,
   "other_thumb": "DEFAULT",
   "ball_side": "right",
   "trackball_modular": false,

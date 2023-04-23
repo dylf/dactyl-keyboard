@@ -13,16 +13,35 @@ shape_config = {
     'ENGINE': 'solid',  # 'solid' = solid python / OpenSCAD, 'cadquery' = cadquery / OpenCascade
     # 'ENGINE': 'cadquery',  # 'solid' = solid python / OpenSCAD, 'cadquery' = cadquery / OpenCascade
 
+    ########################
+    ## Local Setup Params ##
+    ########################
+    'save_dir': '.',
+    'config_name': "DM",
+
+    'save_name': "",
+
+    ########################
+    ## Wylderbuilds Setup ##
+    ########################
+    "logo_file": None,
+    "logo_offsets": [-10, -10, -1],
+    "branch": "",
+    'overrides': "",
+    'resin': False,
+    "magnet_bottom": False,
+
+    ###################################
+    ## todo: In progress
+    ## Layouts will specify a pre-defined
+    ## layout for left and right sides
+    ####################################
+    "layouts": None,
 
     ######################
     ## Shape parameters ##
     ######################
 
-    'save_dir': '.',
-    'config_name':  "DM",
-    'overrides': "",
-    'save_name': "",
-    "logo_file": None,
     'show_caps': True,
     'show_pcbs': False, #only runs if caps are shown, easist place to initially inject geometry
 
@@ -40,10 +59,10 @@ shape_config = {
 
     'column_style_gt5':  "orthographic",
     'column_style':  "standard",  # options include :standard, :orthographic, and :fixed
-
+    "shift_column": 0,  # shifts the thumb cluster thumbwards (negative) or pinky-wards (postitive) by X columns
     'thumb_offsets':  [6, -3, 7],
-    'full_last_rows': False,  # standard dactyl manuform with all bottom rows on outside
-    'all_last_rows': False,  # force bottom rows across keyboard, push cluster further out
+    'full_last_rows': False,  # Creates full-bottom-row models
+    'all_last_rows': False,  # Creates whole-matrix models
     'keyboard_z_offset':  (
         11  # controls overall height# original=9 with centercol=3# use 16 for centercol=2
     ),
@@ -135,14 +154,14 @@ shape_config = {
     ##############################
     # EXPERIMENTAL PARAMETERS
     ##############################
-    'pinky_1_5U': False,  # LEAVE AS FALSE, CURRENTLY BROKEN
+    'pinky_1_5U': False,
     'first_1_5U_row': 0,
     'last_1_5U_row': 5,
     ##############################
 
 
     'extra_width':  2.5,  # extra space between the base of keys# original= 2
-    'extra_height':  1.0,  # original= 0.5
+    'extra_height':  0.5,  # reverted to original= 0.5, was upped to 1.0 but Flex PCB expects 0.5
 
     'wall_z_offset':  15,  # length of the first downward_sloping part of the wall
     'wall_x_offset':  5,  # offset in the x and/or y direction for the first downward_sloping part of the wall (negative)
@@ -223,6 +242,8 @@ shape_config = {
     'oled_center_row': 1.25, # if not None, this will override the oled_mount_location_xyz and oled_mount_rotation_xyz settings
     'oled_translation_offset': (0, 0, 4), # Z offset tweaks are expected depending on curvature and OLED mount choice.
     'oled_rotation_offset': (0, 0, 0),
+    'oled_horizontal': False,  # Default orientation is vertical on OLED mount, this sets horizontal which is similar
+                               # to the fat left wall of the trackball_in_wall option.
 
     'oled_configurations': {
         'UNDERCUT':{
@@ -322,17 +343,20 @@ shape_config = {
     # connector options are
     # 'RJ9_USB_WALL' = Standard internal plate with RJ9 opening and square cutout for connection.
     # 'USB_WALL' = Standard internal plate with a square cutout for connection, no RJ9.
+    # 'USB-C-WALL' = Simple hole for usb-c connector.
     # 'RJ9_USB_TEENSY' = Teensy holder
     # 'USB_TEENSY' = Teensy holder, no RJ9
     # 'EXTERNAL' = square cutout for a holder such as the one from lolligagger.
     # 'BLACKPILL_EXTERNAL' = larger square cutout for lolligagger type holder modified for the blackpill.
+
     # 'NONE' = No openings in the back.
     'controller_mount_type':  'EXTERNAL',
-
+    'controller_side': 'both',  # usually on both sides, but set this to have the holder/mount only one one side
+                                # eg. both, right, or left
     'external_holder_height':  12.5,
     'external_holder_width':  28.75,
     'external_holder_xoffset': -5.0,
-    'external_holder_yoffset': -4.5, #Tweak this value to get the right undercut for the tray engagement.
+    'external_holder_yoffset': -4.5,  #Tweak this value to get the right undercut for the tray engagement.
 
     # Offset is from the top inner corner of the top inner key.
 
@@ -341,6 +365,21 @@ shape_config = {
     "blackpill_holder_width": 32.0,
     "blackpill_holder_xoffset": -6.5,
 
+    ##### USB-C MOUNT # uses external mount point location
+    "usb_c_width": 9.5,
+    "usb_c_height": 3.5,
+    "usb_c_xoffset": -3,  # offsets from the external mount position
+    "usb_c_yoffset": 0,
+    "usb_c_zoffset": 5,
+
+    ##### TRRS MOUNT POINT
+    "trrs_hole": False,   # this will include a hole for a TRRS jack mount on both sides
+    "trrs_hole_xoffset": -18,  # These are offset from the external mount position
+    "trrs_hole_yoffset": -8,
+    "trrs_hole_zoffset": -4,
+
+    ##### ENCODER MOUNT POINT
+    "encoder_in_wall": False,
 
     ###################################
     ## Bottom Plate Dimensions
@@ -405,12 +444,6 @@ shape_config = {
         [0, 0, 0],
         [0, 0, 0],
     ],
-
-    ###################################
-    ## LOGO OFFSETS (IF LOGO FILE)
-    ####################################
-
-    "logo_offsets": [-10, -10, -1],
 }
 
     ####################################

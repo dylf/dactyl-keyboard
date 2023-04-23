@@ -6,6 +6,8 @@ import sys
 import json
 import os
 import importlib
+import git
+import time
 from clusters.default_cluster import DefaultCluster
 from clusters.carbonfet import CarbonfetCluster
 from clusters.mini import MiniCluster
@@ -27,21 +29,29 @@ from os import path
 import subprocess
 
 
-def get_git_branch():
-
-    try:
-        output = str(
-            subprocess.check_output(
-                ['git', 'branch'], cwd=path.abspath('.'), universal_newlines=True
-            )
-        )
-        branch = [a for a in output.split('\n') if a.find('*') >= 0][0]
-        return branch[branch.find('*') + 2:]
-    except subprocess.CalledProcessError:
-        return None
-    except FileNotFoundError:
-        log("No git repository found.", "ERROR")
-        return None
+def get_git_info():
+    repo = git.Repo(search_parent_directories=True)
+    sha = repo.head.object.hexsha
+    active_branch = repo.active_branch.name
+    return {
+        "branch": active_branch,
+        "sha": sha,
+        "datetime": time.ctime(time.time()),
+        "dirty": repo.is_dirty()
+    }
+    # try:
+    #     output = str(
+    #         subprocess.check_output(
+    #             ['git', 'branch'], cwd=path.abspath('.'), universal_newlines=True
+    #         )
+    #     )
+    #     branch = [a for a in output.split('\n') if a.find('*') >= 0][0]
+    #     return branch[branch.find('*') + 2:]
+    # except subprocess.CalledProcessError:
+    #     return None
+    # except FileNotFoundError:
+    #     log("No git repository found.", "ERROR")
+    #     return None
 
 def deg2rad(degrees: float) -> float:
     return degrees * pi / 180
@@ -77,12 +87,12 @@ def get_left_wall_offsets(side="right"):
             short = 8
         else:
             left_wall_x_offset = oled_left_wall_x_offset_override
-            short = tbiw_left_wall_x_offset_override  # HACKISH
+            short = tbiw_left_wall_x_offset_override  - 5# HACKISH
 
         if nrows == 3:
             offsets = [short, wide, wide, wide]
         elif nrows == 4:
-            offsets = [short, wide, wide, wide]
+            offsets = [short, short, wide, wide]
         elif nrows == 5:
             offsets = [wide, wide, wide, short, short]
         elif nrows == 6:
@@ -126,7 +136,8 @@ def make_dactyl():
 
     overrides_name = ""
 
-    local_branch = get_git_branch()
+    git_data = get_git_info()
+    local_branch = git_data["branch"]
         ## CHECK FOR CONFIG FILE AND WRITE TO ANY VARIABLES IN FILE.
     opts, args = getopt.getopt(sys.argv[1:], "", ["config=", "save_path=", "overrides="])
     for opt, arg in opts:
@@ -1261,6 +1272,22 @@ def make_dactyl():
                       )
         return shape
 
+    def encoder_wall_mount(shape):
+        pos, rot = oled_position_rotation()
+        pos[0] -= 5
+        pos[1] -= 34
+        pos[2] -= 7
+        rot[0] = 0
+        # enconder_spot = key_position([-10, -5, 13.5], 0, cornerrow)
+        ec11_mount = import_file(path.join(parts_path, "ec11_mount"))
+        ec11_mount = translate(rotate(ec11_mount, rot), pos)
+        encoder_cut = box(12, 12, 10)
+        encoder_cut = translate(rotate(encoder_cut, rot), pos)
+        shape = difference(shape, [encoder_cut])
+        shape = union([shape, ec11_mount])
+        # encoder_mount = translate(rotate(encoder_mount, (0, 0, 20)), (-27, -4, -15))
+        return shape
+
     def usb_c_shape(width, height, depth):
         shape = box(width, depth, height)
         cyl1 = translate(rotate(cylinder(height / 2, depth), (90, 0, 0)), (width / 2, 0, 0))
@@ -1340,7 +1367,7 @@ def make_dactyl():
 
     def trackball_mount():
         radius = trackball_hole_diameter / 2
-        tube = sphere(radius + 3)
+        tube = sphere(radius + 2)
         return translate(tube, (0, 0, 0))
 
     def trackball_surface_cutter(add_radius=10):
@@ -2096,15 +2123,15 @@ def make_dactyl():
                 tbprecut, tb, tbcutout, sensor, ball, mount, top_cutter = generate_trackball_in_wall()
                 # shape = union([shape, mount])
                 # HACK HACKETY HACK HACK!
-                # spot = key_position([-10, -5, 13.5], 0, cornerrow)
                 # # cut_corner = translate(box(10, 10, 10), spot)
                 # cut_corner = translate(box(20, 20, 10), (-(mount_width / 2.0) - 0, -(mount_height / 2.0) - 0, -1))
                 # cut_corner = rotate(cut_corner, (25, -10, 0))
                 # cut_corner = translate(cut_corner, spot)
                 # shape = difference(shape,[ top_cutter])
-                # encoder_mount = translate(box(keyswitch_width, hole_keyswitch_height, 20), spot)
-                # encoder_mount = translate(rotate(encoder_mount, (0, 0, -20)), (-37, -4, -15))
-                # shape = difference(shape, [encoder_mount])
+
+                if encoder_in_wall:
+                    shape = encoder_wall_mount(shape)
+
                 if use_btus(cluster(side)):
                     cutter = union([tbprecut, tbcutout])
                     shape = difference(shape, [cutter])
