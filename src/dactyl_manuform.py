@@ -99,6 +99,7 @@ def get_left_wall_offsets(side="right"):
             offsets = [short, short, wide, wide, wide, wide]
     elif oled_mount_type is not None and oled_mount_type != "NONE":
         left_wall_x_offset = oled_left_wall_x_offset_override
+        wide = oled_left_wall_x_offset_override
         if nrows <= 4:
             offsets = [wide, wide, wide, wide]
         elif nrows == 5:
@@ -1272,16 +1273,27 @@ def make_dactyl():
                       )
         return shape
 
-    def encoder_wall_mount(shape):
+    def encoder_wall_mount(shape, side='right'):
         pos, rot = oled_position_rotation()
-        pos[0] -= 5
-        pos[1] -= 34
-        pos[2] -= 7
-        rot[0] = 0
+
+        # todo very hackish, needs more deterministic solution
+        if side == 'right':
+            pos[0] -= 5
+            pos[1] -= 34
+            pos[2] -= 7.5
+            rot[0] = 0
+        else:
+            pos[0] += 2
+            pos[1] -= 34
+            pos[2] -= 8.5
+            rot[0] = 0
+            rot[1] -= 4.5
+            rot[2] = -8
+
         # enconder_spot = key_position([-10, -5, 13.5], 0, cornerrow)
         ec11_mount = import_file(path.join(parts_path, "ec11_mount"))
         ec11_mount = translate(rotate(ec11_mount, rot), pos)
-        encoder_cut = box(12, 12, 10)
+        encoder_cut = box(12, 12, 20)
         encoder_cut = translate(rotate(encoder_cut, rot), pos)
         shape = difference(shape, [encoder_cut])
         shape = union([shape, ec11_mount])
@@ -1910,7 +1922,7 @@ def make_dactyl():
                     shape,
                     translate(sphere(top_radius), (0, 0, mag_offset / 2)),
                 ))
-        elif not resin:
+        else:
             shape = union((
                 shape,
                 translate(sphere(top_radius), (0, 0,  (new_height / 2))),
@@ -2103,20 +2115,27 @@ def make_dactyl():
         if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL']:
             shape = union([shape, rj9_holder()])
 
+        oled_yes = False
         if oled_mount_type == "UNDERCUT":
             hole, frame = oled_undercut_mount_frame(side=side)
             shape = difference(shape, [hole])
             shape = union([shape, frame])
+            oled_yes = True
 
         elif oled_mount_type == "SLIDING":
             hole, frame = oled_sliding_mount_frame(side=side)
             shape = difference(shape, [hole])
             shape = union([shape, frame])
+            oled_yes = True
 
         elif oled_mount_type == "CLIP":
             hole, frame = oled_clip_mount_frame(side=side)
             shape = difference(shape, [hole])
             shape = union([shape, frame])
+            oled_yes = True
+
+        if oled_yes and encoder_in_wall:
+            shape = encoder_wall_mount(shape, side)
 
         if not quickly:
             if trackball_in_wall and (side == ball_side or ball_side == 'both'):
@@ -2129,8 +2148,7 @@ def make_dactyl():
                 # cut_corner = translate(cut_corner, spot)
                 # shape = difference(shape,[ top_cutter])
 
-                if encoder_in_wall:
-                    shape = encoder_wall_mount(shape)
+
 
                 if use_btus(cluster(side)):
                     cutter = union([tbprecut, tbcutout])
@@ -2183,7 +2201,7 @@ def make_dactyl():
         if side == "left":
             shape = mirror(shape, 'YZ')
 
-        return shape
+        return shape, walls_shape
 
     def wrist_rest(base, plate, side="right"):
         rest = import_file(path.join(parts_path, "dactyl_wrist_rest_v3_" + side))
@@ -2193,11 +2211,11 @@ def make_dactyl():
         return rest
 
     # NEEDS TO BE SPECIAL FOR CADQUERY
-    def baseplate(wedge_angle=None, side='right'):
+    def baseplate(shape, wedge_angle=None, side='right'):
         global logo_file
         if ENGINE == 'cadquery':
             # shape = mod_r
-            shape = union([case_walls(side=side), *screw_insert_outers(side=side)])
+            shape = union([shape, *screw_insert_outers(side=side)])
             # tool = translate(screw_insert_screw_holes(side=side), [0, 0, -10])
             if magnet_bottom:
                 tool = screw_insert_all_shapes(screw_hole_diameter / 2., screw_hole_diameter / 2., 2.1, side=side)
@@ -2251,8 +2269,12 @@ def make_dactyl():
                     logo = import_file(logo_file)
                     if side == "left":
                         logo = mirror(logo, "YZ")
-
-                    logo = translate(logo, logo_offsets)
+                    off = logo_offsets.copy()
+                    if ncols <= 6:
+                        off[0] -= 12 * (7 - ncols)
+                    if nrows <= 5:
+                        off[1] += 15 * (6 - ncols)
+                    logo = translate(logo, off)
 
                     inner_shape = union([inner_shape, logo])
 
@@ -2299,13 +2321,13 @@ def make_dactyl():
 
 
     def run():
-        mod_r = model_side(side="right")
+        mod_r, walls_r = model_side(side="right")
         export_file(shape=mod_r, fname=path.join(save_path, config_name + r"_right"))
 
         if right_side_only:
             print(">>>>>  RIGHT SIDE ONLY: Only rendering a the right side.")
             return
-        base = baseplate(side='right')
+        base = baseplate(walls_r, side='right')
         export_file(shape=base, fname=path.join(save_path, config_name + r"_right_plate"))
         if quickly:
             print(">>>>>  QUICK RENDER: Only rendering a the right side and bottom plate.")
@@ -2318,10 +2340,10 @@ def make_dactyl():
 
         # if symmetry == "asymmetric":
 
-        mod_l = model_side(side="left")
+        mod_l, walls_l = model_side(side="left")
         export_file(shape=mod_l, fname=path.join(save_path, config_name + r"_left"))
 
-        base_l = mirror(baseplate(side='left'), 'YZ')
+        base_l = mirror(baseplate(walls_l, side='left'), 'YZ')
         export_file(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
         export_dxf(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
 
@@ -2332,14 +2354,9 @@ def make_dactyl():
         #     export_file(shape=lbase, fname=path.join(save_path, config_name + r"_left_plate"))
         #     export_dxf(shape=lbase, fname=path.join(save_path, config_name + r"_left_plate"))
 
-        if ENGINE == 'cadquery':
-            import freecad_that as freecad
-            freecad.generate_freecad_script(path.abspath(save_path), [
-                config_name + r"_right",
-                config_name + r"_left",
-                config_name + r"_right_plate",
-                config_name + r"_left_plate"
-            ], config_name)
+        if ENGINE == 'cadquery' and overrides_name not in [None, '']:
+            import build_report as report
+            report.write_build_report(path.abspath(save_path), overrides_name, git_data)
 
         if oled_mount_type == 'UNDERCUT':
             export_file(shape=oled_undercut_mount_frame()[1],
