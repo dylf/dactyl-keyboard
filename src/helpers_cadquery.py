@@ -287,3 +287,36 @@ def blockerize(shape):
         tmp = s
 
     return intersect(shape, tmp)
+
+# generate a cutter to exact size/shape of an M3 4mm x 4mm brass insert
+# size is scaled a bit for non-resin prints, so heat-set works
+def insert_cutter(radii=(2.35, 2.0), heights=(2.8, 1.5), scale_by=1):
+    if len(radii) != len(heights):
+        raise Exception("radii and heights collections must have equal length")
+
+    top_radius = 4.7 / 2
+    top_height = 2.8
+    medium_radius = 4.0 / 2
+    medium_height = 1.5
+    # medium2_radius = 5.1 / 2
+    # medium2_height = 0.8
+    # bottom_radius = 4.85 / 2
+    # bottom_height = 1.6
+
+    total_height = sum(heights) + 0.3  # add 0.3 for a titch extra
+
+    half_height = total_height / 2
+    offset = half_height
+    cyl = None
+    for i in range(len(radii)):
+        radius = radii[i] * scale_by
+        height = heights[i]
+        offset -= height / 2
+        new_cyl = cq.Workplane('XY').cylinder(height, radius).translate((0, 0, offset))
+        if cyl is None:
+            cyl = new_cyl
+        else:
+            cyl = cyl.union(new_cyl)
+        offset -= height / 2
+
+    return cyl

@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 from numpy import pi
 import os.path as path
@@ -6,6 +8,8 @@ import sys
 import json
 import os
 import importlib
+import git
+import time
 from clusters.default_cluster import DefaultCluster
 from clusters.carbonfet import CarbonfetCluster
 from clusters.mini import MiniCluster
@@ -24,21 +28,29 @@ from os import path
 import subprocess
 
 
-def get_git_branch():
-
-    try:
-        output = str(
-            subprocess.check_output(
-                ['git', 'branch'], cwd=path.abspath('.'), universal_newlines=True
-            )
-        )
-        branch = [a for a in output.split('\n') if a.find('*') >= 0][0]
-        return branch[branch.find('*') + 2:]
-    except subprocess.CalledProcessError:
-        return None
-    except FileNotFoundError:
-        log("No git repository found.", "ERROR")
-        return None
+def get_git_info():
+    repo = git.Repo(search_parent_directories=True)
+    sha = repo.head.object.hexsha
+    active_branch = repo.active_branch.name
+    return {
+        "branch": active_branch,
+        "sha": sha,
+        "datetime": time.ctime(time.time()),
+        "dirty": repo.is_dirty()
+    }
+    # try:
+    #     output = str(
+    #         subprocess.check_output(
+    #             ['git', 'branch'], cwd=path.abspath('.'), universal_newlines=True
+    #         )
+    #     )
+    #     branch = [a for a in output.split('\n') if a.find('*') >= 0][0]
+    #     return branch[branch.find('*') + 2:]
+    # except subprocess.CalledProcessError:
+    #     return None
+    # except FileNotFoundError:
+    #     log("No git repository found.", "ERROR")
+    #     return None
 
 def deg2rad(degrees: float) -> float:
     return degrees * pi / 180
@@ -90,7 +102,8 @@ def make_dactyl():
 
     overrides_name = ""
 
-    local_branch = get_git_branch()
+    git_data = get_git_info()
+    local_branch = git_data["branch"]
         ## CHECK FOR CONFIG FILE AND WRITE TO ANY VARIABLES IN FILE.
     opts, args = getopt.getopt(sys.argv[1:], "", ["config=", "save_path=", "overrides="])
     for opt, arg in opts:
@@ -542,8 +555,8 @@ def make_dactyl():
                 column_x_delta_actual = column_x_delta - 1.5
                 column_angle = beta * (centercol - column - 0.27)
         if row == 0:
-            shape = translate_fn(shape, [0, 6, 2.1])
-            shape = rotate_x_fn(shape, 0.3)
+            shape = translate_fn(shape, [0, 5, 2.1])
+            shape = rotate_x_fn(shape, 0.25)
 
         if column_style == "orthographic":
             column_z_delta = column_radius * (1 - np.cos(column_angle))
@@ -1479,11 +1492,11 @@ def make_dactyl():
 
         shape = box(mount_ext_width, mount_ext_height, oled_mount_depth)
 
-        conn_hole_start = -mount_ext_height / 2.0 + oled_mount_rim
+        conn_hole_start = (-mount_ext_height / 2.0 + oled_mount_rim) - 2
         conn_hole_length = (
                 oled_edge_overlap_end + oled_edge_overlap_connector
                 + oled_edge_overlap_clearance + oled_thickness
-        )
+        ) + 4
         conn_hole = box(oled_mount_width, conn_hole_length + .01, oled_mount_depth)
         conn_hole = translate(conn_hole, (
             0,
@@ -1760,16 +1773,44 @@ def make_dactyl():
 
         return shape
 
+    def brass_insert_hole(radii=(2.4, 2.05), heights=(2.8, 1.5), scale_by=1):
+        if len(radii) != len(heights):
+            raise Exception("radii and heights collections must have equal length")
+
+        total_height = sum(heights) + 0.3  # add 0.3 for a titch extra
+
+        half_height = total_height / 2
+        offset = half_height
+        cyl = None
+        for i in range(len(radii)):
+            radius = radii[i] * scale_by
+            height = heights[i]
+            offset -= height / 2
+            new_cyl = translate(cylinder(radius, height), (0, 0, offset))
+            if cyl is None:
+                cyl = new_cyl
+            else:
+                cyl = union([cyl, new_cyl])
+            offset -= height / 2
+        cyl = translate(rotate(cyl, (0, 180, 0)), (0, 0, -0.01))
+        return cyl, sum(heights)
+
 
     def screw_insert_shape(bottom_radius, top_radius, height, hole=False):
         debugprint('screw_insert_shape()')
         mag_offset = 0
-        if bottom_radius == top_radius:
-            shape = translate(cylinder(radius=bottom_radius, height=height),
-                             (0, 0, mag_offset - (height / 2))  # offset magnet by 1 mm in case
-                             )
+        new_height = height
+        if hole:
+            scale = 1.0 if magnet_bottom else 0.9
+            shape, new_height = brass_insert_hole(scale_by=scale)
+            new_height -= 1
         else:
-            shape = translate(cone(r1=bottom_radius, r2=top_radius, height=height), (0, 0, -height / 2))
+            if bottom_radius == top_radius:
+                shape = translate(cylinder(radius=bottom_radius, height=new_height),
+                                 (0, 0, mag_offset - (new_height / 2))  # offset magnet by 1 mm in case
+                                 )
+            else:
+                shape = translate(cone(r1=bottom_radius, r2=top_radius, height=new_height), (0, 0, -new_height / 2))
 
         if magnet_bottom:
             if not hole:
@@ -1780,19 +1821,19 @@ def make_dactyl():
         else:
             shape = union((
                 shape,
-                translate(sphere(top_radius), (0, 0,  (height / 2))),
+                translate(sphere(top_radius), (0, 0,  (new_height / 2))),
             ))
         return shape
 
     def screw_insert(column, row, bottom_radius, top_radius, height, side='right', hole=False):
         debugprint('screw_insert()')
-        position = screw_position(column, row, bottom_radius, top_radius, height, side)
+        position = screw_position(column, row, side)
         shape = screw_insert_shape(bottom_radius, top_radius, height, hole=hole)
         shape = translate(shape, [position[0], position[1], height / 2])
 
         return shape
 
-    def screw_position(column, row, bottom_radius, top_radius, height, side='right'):
+    def screw_position(column, row,  side='right'):
         debugprint('screw_position()')
         shift_right = column == lastcol
         shift_left = column == 0
@@ -1848,11 +1889,10 @@ def make_dactyl():
 
         return position
 
-    def screw_insert_thumb(bottom_radius, top_radius, height, side='right', hole=False):
+    def screw_insert_thumb(bottom_radius, top_radius, top_height, hole=False, side="right"):
         position = cluster(side).screw_positions()
-
-        shape = screw_insert_shape(bottom_radius, top_radius, height, hole=hole)
-        shape = translate(shape, [position[0], position[1], height / 2])
+        shape = screw_insert_shape(bottom_radius, top_radius, top_height, hole=hole)
+        shape = translate(shape, [position[0], position[1], top_height / 2])
         return shape
 
 
