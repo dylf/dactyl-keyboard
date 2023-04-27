@@ -1273,27 +1273,28 @@ def make_dactyl():
                       )
         return shape
 
+    # todo mounts account for walls or walls account for mounts
     def encoder_wall_mount(shape, side='right'):
         pos, rot = oled_position_rotation()
 
-        # todo very hackish, needs more deterministic solution
+        # hackity hack hack
         if side == 'right':
             pos[0] -= 5
             pos[1] -= 34
             pos[2] -= 7.5
             rot[0] = 0
         else:
-            pos[0] += 2
+            pos[0] += 1
             pos[1] -= 34
-            pos[2] -= 8.5
+            pos[2] -= 7.5
             rot[0] = 0
-            rot[1] -= 4.5
-            rot[2] = -8
+            rot[1] -= 3
+            # rot[2] = -8
 
         # enconder_spot = key_position([-10, -5, 13.5], 0, cornerrow)
-        ec11_mount = import_file(path.join(parts_path, "ec11_mount"))
+        ec11_mount = import_file(path.join(parts_path, "ec11_mount_2"))
         ec11_mount = translate(rotate(ec11_mount, rot), pos)
-        encoder_cut = box(12, 12, 20)
+        encoder_cut = box(10.5, 10.5, 20)
         encoder_cut = translate(rotate(encoder_cut, rot), pos)
         shape = difference(shape, [encoder_cut])
         shape = union([shape, ec11_mount])
@@ -1354,7 +1355,7 @@ def make_dactyl():
     def get_logo(side="right"):
         offset = [
             external_start[0] + external_holder_xoffset,
-            external_start[1] + external_holder_yoffset + 3.5,
+            external_start[1] + external_holder_yoffset + 3,
             external_holder_height + 7,
         ]
 
@@ -2123,7 +2124,7 @@ def make_dactyl():
 
         s2 = difference(s2, [union(screw_insert_holes(side=side))])
 
-        if logo_file not in ["", None]:
+        if ENGINE == "cadquery" and logo_file not in ["", None]:
             s2 = union([s2, get_logo(side)])
 
         shape = union([shape, s2])
