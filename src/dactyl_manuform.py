@@ -1351,6 +1351,18 @@ def make_dactyl():
                           )
         return shape
 
+    def get_logo(side="right"):
+        offset = [
+            external_start[0] + external_holder_xoffset,
+            external_start[1] + external_holder_yoffset + 3.5,
+            external_holder_height + 7,
+        ]
+
+        z = 0 if side == "left" else 180
+        logo = import_file(logo_file)
+        logo = rotate(logo, (90, 0, z))
+        logo = translate(logo, offset)
+        return logo
 
     def external_mount_hole():
         print('external_mount_hole()')
@@ -1905,7 +1917,7 @@ def make_dactyl():
         mag_offset = 0
         new_height = height
         if hole:
-            scale = 1.0 if magnet_bottom else 0.9
+            scale = 1.0 if resin else 0.9
             shape, new_height = brass_insert_hole(scale_by=scale)
             new_height -= 1
         else:
@@ -1925,7 +1937,7 @@ def make_dactyl():
         else:
             shape = union((
                 shape,
-                translate(sphere(top_radius), (0, 0,  (new_height / 2))),
+                translate(sphere(top_radius), (0, 0,  (mag_offset / 2))),
             ))
         return shape
 
@@ -2110,6 +2122,10 @@ def make_dactyl():
                 0  # do nothing, only here to expressly state inaction.
 
         s2 = difference(s2, [union(screw_insert_holes(side=side))])
+
+        if logo_file not in ["", None]:
+            s2 = union([s2, get_logo(side)])
+
         shape = union([shape, s2])
 
         if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL']:
@@ -2265,18 +2281,7 @@ def make_dactyl():
                 inner_shape = translate(inner_shape, (0, 0, -base_rim_thickness))
                 if block_bottoms:
                     inner_shape = blockerize(inner_shape)
-                if logo_file not in ["", None]:
-                    logo = import_file(logo_file)
-                    if side == "left":
-                        logo = mirror(logo, "YZ")
-                    off = logo_offsets.copy()
-                    if ncols <= 6:
-                        off[0] -= 12 * (7 - ncols)
-                    if nrows <= 5:
-                        off[1] += 15 * (6 - ncols)
-                    logo = translate(logo, off)
 
-                    inner_shape = union([inner_shape, logo])
 
                 holes = []
                 for i in range(len(base_wires)):
