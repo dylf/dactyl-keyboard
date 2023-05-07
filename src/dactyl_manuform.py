@@ -1890,7 +1890,7 @@ def make_dactyl():
 
         return shape
 
-    def brass_insert_hole(radii=(2.4, 2.05), heights=(2.8, 1.5), scale_by=1):
+    def brass_insert_hole(radii=(2.45, 2.4), heights=(2, 2), scale_by=1):
         if len(radii) != len(heights):
             raise Exception("radii and heights collections must have equal length")
 
@@ -1918,7 +1918,7 @@ def make_dactyl():
         mag_offset = 0
         new_height = height
         if hole:
-            scale = 1.0 if resin else 0.9
+            scale = 1.0 if resin else 0.95
             shape, new_height = brass_insert_hole(scale_by=scale)
             new_height -= 1
         else:
