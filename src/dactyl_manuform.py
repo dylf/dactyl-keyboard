@@ -1352,16 +1352,15 @@ def make_dactyl():
                           )
         return shape
 
-    def get_logo(side="right"):
+    def get_logo():
         offset = [
             external_start[0] + external_holder_xoffset,
-            external_start[1] + external_holder_yoffset + 3,
+            external_start[1] + external_holder_yoffset + 4.8,
             external_holder_height + 7,
         ]
 
-        z = 0 if side == "left" else 180
         logo = import_file(logo_file)
-        logo = rotate(logo, (90, 0, z))
+        logo = rotate(logo, (90, 0, 180))
         logo = translate(logo, offset)
         return logo
 
@@ -1890,7 +1889,7 @@ def make_dactyl():
 
         return shape
 
-    def brass_insert_hole(radii=(2.45, 2.4), heights=(2, 2), scale_by=1):
+    def brass_insert_hole(radii=(2.45, 2.4), heights=(3, 1.5), scale_by=1):
         if len(radii) != len(heights):
             raise Exception("radii and heights collections must have equal length")
 
@@ -1938,7 +1937,7 @@ def make_dactyl():
         else:
             shape = union((
                 shape,
-                translate(sphere(top_radius), (0, 0,  (mag_offset / 2))),
+                translate(sphere(top_radius), (0, 0,  (new_height / 2))),
             ))
         return shape
 
@@ -2124,8 +2123,8 @@ def make_dactyl():
 
         s2 = difference(s2, [union(screw_insert_holes(side=side))])
 
-        if ENGINE == "cadquery" and logo_file not in ["", None]:
-            s2 = union([s2, get_logo(side)])
+        if side == "right" and logo_file not in ["", None]:
+            s2 = union([s2, get_logo()])
 
         shape = union([shape, s2])
 
@@ -2180,6 +2179,7 @@ def make_dactyl():
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_1"))
                     tb = difference(tb, [tbcutout])
                     shape = union([shape, tb])
+                    shape = difference(shape, [tbcutout])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_2"))
                     # shape = difference(shape, [tbcutout])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_3a"))
@@ -2282,7 +2282,22 @@ def make_dactyl():
                 inner_shape = translate(inner_shape, (0, 0, -base_rim_thickness))
                 if block_bottoms:
                     inner_shape = blockerize(inner_shape)
+                if logo_file not in ["", None]:
+                    logo_offset = [
+                        -10,
+                        -10,
+                        -0.5
+                    ]
+                    logo = import_file(logo_file)
+                    if side == "left":
+                        logo = mirror(logo, "YZ")
+                    if ncols <= 6:
+                        logo_offset[0] -= 12 * (7 - ncols)
+                    if nrows <= 5:
+                        logo_offset[1] += 15 * (6 - ncols)
+                    logo = translate(logo, logo_offset)
 
+                    inner_shape = union([inner_shape, logo])
 
                 holes = []
                 for i in range(len(base_wires)):
