@@ -1,0 +1,72 @@
+{
+   "tb_socket_translation_offset": [
+      0,
+      0,
+      0
+    ],
+    "tb_socket_rotation_offset": [
+      0,
+      0,
+      10
+    ],
+  "tbiw_translational_offset": [
+      -5,
+      -27,
+      -5
+    ],
+    "tbiw_rotation_offset": [
+      45,
+      10,
+      -5
+    ],
+    "trackball_in_wall": true,
+  "tbiw_ball_center_row": 0.2,
+    "tbiw_oled_center_row": 0.75,
+  "tbiw_oled_translation_offset": [
+    0,
+    -6,
+    -8
+  ],
+  "tbiw_oled_rotation_offset": [
+    -8,
+    -8,
+     2
+  ],
+    "screw_offsets": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      2,
+      -30,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      -28,
+      5,
+      0
+    ],
+    [
+      1,
+      8,
+      0
+    ],
+    [
+      0,
+      -10,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ]
+  ]
+}
