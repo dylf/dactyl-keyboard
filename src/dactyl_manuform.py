@@ -6,6 +6,8 @@ import sys
 import json
 import os
 import importlib
+import git
+import time
 from clusters.default_cluster import DefaultCluster
 from clusters.carbonfet import CarbonfetCluster
 from clusters.mini import MiniCluster
@@ -24,21 +26,29 @@ from os import path
 import subprocess
 
 
-def get_git_branch():
-
-    try:
-        output = str(
-            subprocess.check_output(
-                ['git', 'branch'], cwd=path.abspath('.'), universal_newlines=True
-            )
-        )
-        branch = [a for a in output.split('\n') if a.find('*') >= 0][0]
-        return branch[branch.find('*') + 2:]
-    except subprocess.CalledProcessError:
-        return None
-    except FileNotFoundError:
-        log("No git repository found.", "ERROR")
-        return None
+def get_git_info():
+    repo = git.Repo(search_parent_directories=True)
+    sha = repo.head.object.hexsha
+    active_branch = repo.active_branch.name
+    return {
+        "branch": active_branch,
+        "sha": sha,
+        "datetime": time.ctime(time.time()),
+        "dirty": repo.is_dirty()
+    }
+    # try:
+    #     output = str(
+    #         subprocess.check_output(
+    #             ['git', 'branch'], cwd=path.abspath('.'), universal_newlines=True
+    #         )
+    #     )
+    #     branch = [a for a in output.split('\n') if a.find('*') >= 0][0]
+    #     return branch[branch.find('*') + 2:]
+    # except subprocess.CalledProcessError:
+    #     return None
+    # except FileNotFoundError:
+    #     log("No git repository found.", "ERROR")
+    #     return None
 
 def deg2rad(degrees: float) -> float:
     return degrees * pi / 180
@@ -74,13 +84,13 @@ def get_left_wall_offsets(side="right"):
             short = 8
         else:
             left_wall_x_offset = oled_left_wall_x_offset_override
-            short = tbiw_left_wall_x_offset_override - 15  # HACKISH
+            short = oled_left_wall_x_offset_override  # HACKISH
         if nrows <= 4:
             offsets = [short, wide, wide, wide]
         elif nrows == 5:
             offsets = [wide, wide, wide, short, short]
         elif nrows == 6:
-            offsets = [wide, wide, wide, short, short, short]
+            offsets = [short, short, short, short, wide, wide]
     elif oled_mount_type is not None and oled_mount_type != "NONE":
         left_wall_x_offset = oled_left_wall_x_offset_override
         if nrows <= 4:
@@ -120,7 +130,8 @@ def make_dactyl():
 
     overrides_name = ""
 
-    local_branch = get_git_branch()
+    git_data = get_git_info()
+    local_branch = git_data["branch"]
         ## CHECK FOR CONFIG FILE AND WRITE TO ANY VARIABLES IN FILE.
     opts, args = getopt.getopt(sys.argv[1:], "", ["config=", "save_path=", "overrides="])
     for opt, arg in opts:
@@ -880,15 +891,11 @@ def make_dactyl():
                 y_offset = tbiw_left_wall_lower_y_offset
                 z_offset = tbiw_left_wall_lower_z_offset
                 # RIDICULOUS HACK 1
-            elif row >= 1:
+            elif row >= nrows - 2:
                 y_offset = -26
                 z_offset = 0
-                if row >= 3:
-                    z_offset = 3
-                # RIDICULOUS HACK 2
-            # elif row == 3:
-            #     y_offset = -8
-            #     z_offset = 0
+                if row >= nrows - 2:
+                    z_offset = 0
             else:
                 y_offset = 0.0
                 z_offset = 0.0
@@ -1249,7 +1256,7 @@ def make_dactyl():
         #               )
         #               )
 
-        pos = screw_position(0, 0, 5, 5, 5) # wall_locate2(0, 1)
+        pos = screw_position(0, 0) # wall_locate2(0, 1)
         # trans = wall_locate2(1, 1)
         # pos = [pos[0] + trans[0], pos[1] + trans[1], pos[2]]
         shape = translate(shape,
@@ -1259,6 +1266,34 @@ def make_dactyl():
                           trrs_hole_zoffset,
                       )
                       )
+        return shape
+
+    # todo mounts account for walls or walls account for mounts
+    def encoder_wall_mount(shape, side='right'):
+        pos, rot = oled_position_rotation()
+
+        # hackity hack hack
+        if side == 'right':
+            pos[0] -= 5
+            pos[1] -= 34
+            pos[2] -= 7.5
+            rot[0] = 0
+        else:
+            pos[0] += 1
+            pos[1] -= 34
+            pos[2] -= 7.5
+            rot[0] = 0
+            rot[1] -= 3
+            # rot[2] = -8
+
+        # enconder_spot = key_position([-10, -5, 13.5], 0, cornerrow)
+        ec11_mount = import_file(path.join(parts_path, "ec11_mount_2"))
+        ec11_mount = translate(rotate(ec11_mount, rot), pos)
+        encoder_cut = box(10.5, 10.5, 20)
+        encoder_cut = translate(rotate(encoder_cut, rot), pos)
+        shape = difference(shape, [encoder_cut])
+        shape = union([shape, ec11_mount])
+        # encoder_mount = translate(rotate(encoder_mount, (0, 0, 20)), (-27, -4, -15))
         return shape
 
     def usb_c_shape(width, height, depth):
@@ -1312,6 +1347,17 @@ def make_dactyl():
                           )
         return shape
 
+    def get_logo():
+        offset = [
+            external_start[0] + external_holder_xoffset,
+            external_start[1] + external_holder_yoffset + 4.8,
+            external_holder_height + 7,
+        ]
+
+        logo = import_file(logo_file)
+        logo = rotate(logo, (90, 0, 180))
+        logo = translate(logo, offset)
+        return logo
 
     def external_mount_hole():
         print('external_mount_hole()')
@@ -1331,25 +1377,17 @@ def make_dactyl():
 
 ########### TRACKBALL GENERATION
     def use_btus(cluster):
-        return trackball_in_wall or (cluster is not None and cluster.has_btus())
+        return (cluster is not None and cluster.has_btus())
 
     def trackball_cutout(segments=100, side="right"):
-        shape = translate(cylinder(trackball_hole_diameter / 2, trackball_hole_height), (0, 0, 10))
+        shape = translate(cylinder(trackball_hole_diameter / 2, trackball_hole_height), (0, 0, 0))
         return shape
 
 
-    # def trackball_mount():
-    #     radius = trackball_hole_diameter / 2
-    #     tube = cylinder(radius + 2, (radius + 40))
-    #     return tube
-
     def trackball_mount():
         radius = trackball_hole_diameter / 2
-        tube = sphere(radius + 3)
-        # cut = translate(box(radius * 4, radius * 4, radius + 10), (0, 0, ((radius + 10) / 2)))
-        # tube = difference(tube, [cut])
-        # return tube
-        return translate(tube, (0, 0, 20))
+        tube = sphere(radius + 2)
+        return translate(tube, (0, 0, 0))
 
     def trackball_surface_cutter(add_radius=10):
         radius = (trackball_hole_diameter / 2) + add_radius
@@ -1401,6 +1439,8 @@ def make_dactyl():
     def trackball_ball(segments=100, side="right"):
         shape = sphere(ball_diameter / 2)
         return shape
+
+
 
     def generate_trackball(pos, rot, cluster):
         tb_t_offset = tb_socket_translation_offset
@@ -1844,7 +1884,7 @@ def make_dactyl():
 
         return shape
 
-    def brass_insert_hole(radii=(2.4, 2.05), heights=(2.8, 1.5), scale_by=1):
+    def brass_insert_hole(radii=(2.45, 2.4), heights=(3, 1.5), scale_by=1):
         if len(radii) != len(heights):
             raise Exception("radii and heights collections must have equal length")
 
@@ -1872,7 +1912,7 @@ def make_dactyl():
         mag_offset = 0
         new_height = height
         if hole:
-            scale = 1.0 if magnet_bottom else 0.9
+            scale = 1.0 if resin else 0.95
             shape, new_height = brass_insert_hole(scale_by=scale)
             new_height -= 1
         else:
@@ -1889,7 +1929,7 @@ def make_dactyl():
                     shape,
                     translate(sphere(top_radius), (0, 0, mag_offset / 2)),
                 ))
-        elif not resin:
+        else:
             shape = union((
                 shape,
                 translate(sphere(top_radius), (0, 0,  (new_height / 2))),
@@ -2077,25 +2117,36 @@ def make_dactyl():
                 0  # do nothing, only here to expressly state inaction.
 
         s2 = difference(s2, [union(screw_insert_holes(side=side))])
+
+        if side == "right" and logo_file not in ["", None]:
+            s2 = union([s2, get_logo()])
+
         shape = union([shape, s2])
 
         if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL']:
             shape = union([shape, rj9_holder()])
 
+        oled_yes = False
         if oled_mount_type == "UNDERCUT":
             hole, frame = oled_undercut_mount_frame(side=side)
             shape = difference(shape, [hole])
             shape = union([shape, frame])
+            oled_yes = True
 
         elif oled_mount_type == "SLIDING":
             hole, frame = oled_sliding_mount_frame(side=side)
             shape = difference(shape, [hole])
             shape = union([shape, frame])
+            oled_yes = True
 
         elif oled_mount_type == "CLIP":
             hole, frame = oled_clip_mount_frame(side=side)
             shape = difference(shape, [hole])
             shape = union([shape, frame])
+            oled_yes = True
+
+        if oled_yes and encoder_in_wall:
+            shape = encoder_wall_mount(shape, side)
 
         if not quickly:
             if trackball_in_wall and (side == ball_side or ball_side == 'both'):
@@ -2124,6 +2175,7 @@ def make_dactyl():
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_1"))
                     tb = difference(tb, [tbcutout])
                     shape = union([shape, tb])
+                    shape = difference(shape, [tbcutout])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_2"))
                     # shape = difference(shape, [tbcutout])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_3a"))
@@ -2162,7 +2214,7 @@ def make_dactyl():
         if side == "left":
             shape = mirror(shape, 'YZ')
 
-        return shape
+        return shape, walls_shape
 
     def wrist_rest(base, plate, side="right"):
         rest = import_file(path.join(parts_path, "dactyl_wrist_rest_v3_" + side))
@@ -2172,11 +2224,11 @@ def make_dactyl():
         return rest
 
     # NEEDS TO BE SPECIAL FOR CADQUERY
-    def baseplate(wedge_angle=None, side='right'):
+    def baseplate(shape, wedge_angle=None, side='right'):
         global logo_file
         if ENGINE == 'cadquery':
             # shape = mod_r
-            shape = union([case_walls(side=side), *screw_insert_outers(side=side)])
+            shape = union([shape, *screw_insert_outers(side=side)])
             # tool = translate(screw_insert_screw_holes(side=side), [0, 0, -10])
             if magnet_bottom:
                 tool = screw_insert_all_shapes(screw_hole_diameter / 2., screw_hole_diameter / 2., 2.1, side=side)
@@ -2224,17 +2276,22 @@ def make_dactyl():
                 inner_shape = cq.Workplane('XY').add(
                     cq.Solid.extrudeLinear(inner_wire, [], cq.Vector(0, 0, base_thickness)))
                 inner_shape = translate(inner_shape, (0, 0, -base_rim_thickness))
-
+                if block_bottoms:
+                    inner_shape = blockerize(inner_shape)
                 if logo_file not in ["", None]:
+                    logo_offset = [
+                        -10,
+                        -10,
+                        -0.5
+                    ]
                     logo = import_file(logo_file)
                     if side == "left":
                         logo = mirror(logo, "YZ")
-                    off = logo_offsets.copy()
                     if ncols <= 6:
-                        off[0] -= 15 * (7 - ncols)
+                        logo_offset[0] -= 12 * (7 - ncols)
                     if nrows <= 5:
-                        off[1] += 15 * (6 - ncols)
-                    logo = translate(logo, off)
+                        logo_offset[1] += 15 * (6 - ncols)
+                    logo = translate(logo, logo_offset)
 
                     inner_shape = union([inner_shape, logo])
 
@@ -2281,13 +2338,13 @@ def make_dactyl():
 
 
     def run():
-        mod_r = model_side(side="right")
+        mod_r, walls_r = model_side(side="right")
         export_file(shape=mod_r, fname=path.join(save_path, config_name + r"_right"))
 
         if right_side_only:
             print(">>>>>  RIGHT SIDE ONLY: Only rendering a the right side.")
             return
-        base = baseplate(side='right')
+        base = baseplate(walls_r, side='right')
         export_file(shape=base, fname=path.join(save_path, config_name + r"_right_plate"))
         if quickly:
             print(">>>>>  QUICK RENDER: Only rendering a the right side and bottom plate.")
@@ -2300,10 +2357,10 @@ def make_dactyl():
 
         # if symmetry == "asymmetric":
 
-        mod_l = model_side(side="left")
+        mod_l, walls_l = model_side(side="left")
         export_file(shape=mod_l, fname=path.join(save_path, config_name + r"_left"))
 
-        base_l = mirror(baseplate(side='left'), 'YZ')
+        base_l = mirror(baseplate(walls_l, side='left'), 'YZ')
         export_file(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
         export_dxf(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
 
