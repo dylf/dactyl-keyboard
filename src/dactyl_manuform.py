@@ -1424,7 +1424,7 @@ def make_dactyl():
         else:
             sens_file = path.join(parts_path, r"trackball_sensor_mount")
 
-        senscut_file = path.join(parts_path, r"trackball_sensor_cutter")
+        senscut_file = path.join(parts_path, r"trackball_sensor_cutter_short")
 
         # shape = import_file(tb_file)
         # # shape = difference(shape, [import_file(senscut_file)])
@@ -1435,7 +1435,7 @@ def make_dactyl():
         sensor = import_file(sens_file)
         cutter = import_file(tbcut_file)
         if not btus:
-            cutter = union([cutter, import_file(senscut_file)])
+            cutter = union([cutter, translate(import_file(senscut_file), (0, 0, -40))])
 
         # return shape, cutter
         return shape, cutter, sensor
