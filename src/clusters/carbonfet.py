@@ -34,8 +34,8 @@ class CarbonfetCluster(DefaultCluster):
 
     def tl_place(self, shape):
         shape = rotate(shape, [10, -24, 10])
-        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-13, -9.8, 4])
+        shape = self.thumb_place(shape)
         return shape
 
     def tl_wall(self, shape):
@@ -43,33 +43,33 @@ class CarbonfetCluster(DefaultCluster):
 
     def tr_place(self, shape):
         shape = rotate(shape, [6, -25, 10])
-        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-7.5, -29.5, 0])
+        shape = self.thumb_place(shape)
         return shape
 
 
     def ml_place(self, shape):
         shape = rotate(shape, [8, -31, 14])
-        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-30.5, -17, -6])
+        shape = self.thumb_place(shape)
         return shape
 
     def mr_place(self, shape):
         shape = rotate(shape, [4, -31, 14])
-        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-22.2, -41, -10.3])
+        shape = self.thumb_place(shape)
         return shape
 
     def br_place(self, shape):
         shape = rotate(shape, [2, -37, 18])
-        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-37, -46.4, -22])
+        shape = self.thumb_place(shape)
         return shape
 
     def bl_place(self, shape):
         shape = rotate(shape, [6, -37, 18])
-        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-47, -23, -19])
+        shape = self.thumb_place(shape)
         return shape
 
     def thumb_1x_layout(self, shape, cap=False):
@@ -332,10 +332,12 @@ class CarbonfetCluster(DefaultCluster):
         # clunky bit on the top left thumb connection  (normal connectors don't work well)
         shape = bottom_hull(
             [
+                left_wall_cluster_join_location(web_post()),
                 left_key_place(translate(web_post(), wall_locate2(-1, 0)), cornerrow, -1, low_corner=True, side=side),
                 left_key_place(translate(web_post(), wall_locate3(-1, 0)), cornerrow, -1, low_corner=True, side=side),
-                self.bl_place(translate(self.thumb_post_tr(), wall_locate2(-0.3, 1))),
-                self.bl_place(translate(self.thumb_post_tr(), wall_locate3(-0.3, 1))),
+                left_wall_cluster_join_location(web_post()),
+                # self.bl_place(translate(self.thumb_post_tr(), wall_locate2(-0.3, 1))),
+                # self.bl_place(translate(self.thumb_post_tr(), wall_locate3(-0.3, 1))),
             ]
         )
 

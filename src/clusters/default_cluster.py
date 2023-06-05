@@ -60,7 +60,7 @@ class DefaultCluster(object):
         # if shift_column < 0:
         #     y = shift_column * 4
         #     z = shift_column * -10
-        return [x, y, z]
+        return [x, y, 8]
 
     def thumb_place(self, shape):
         shape = translate(shape, self.thumborigin())

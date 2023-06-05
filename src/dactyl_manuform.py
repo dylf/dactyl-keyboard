@@ -94,7 +94,7 @@ def get_left_wall_offsets(side="right"):
         elif nrows == 4:
             offsets = [short, short, wide, wide]
         elif nrows == 5:
-            offsets = [wide, wide, wide, short, short]
+            offsets = [short, short, short, wide, wide]
         elif nrows == 6:
             offsets = [short, short, wide, wide, wide, wide]
     elif oled_mount_type is not None and oled_mount_type != "NONE":
