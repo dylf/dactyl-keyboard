@@ -1356,7 +1356,7 @@ def make_dactyl():
         offset = [
             external_start[0] + external_holder_xoffset,
             external_start[1] + external_holder_yoffset + 4.8,
-            external_holder_height + 7,
+            external_holder_height + 8,
         ]
 
         logo = import_file(logo_file)
