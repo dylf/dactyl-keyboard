@@ -554,9 +554,9 @@ def make_dactyl():
             if row >= first_1_5U_row and row <= last_1_5U_row:
                 column_x_delta_actual = column_x_delta - 1.5
                 column_angle = beta * (centercol - column - 0.27)
-        if row == 0:
-            shape = translate_fn(shape, [0, 5, 2.1])
-            shape = rotate_x_fn(shape, 0.25)
+        # if row == 0:
+        #     shape = translate_fn(shape, [0, 5, 2.1])
+        #     shape = rotate_x_fn(shape, 0.25)
 
         if column_style == "orthographic":
             column_z_delta = column_radius * (1 - np.cos(column_angle))

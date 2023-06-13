@@ -40,7 +40,7 @@ class DefaultCluster(object):
 
     def thumborigin(self):
         # debugprint('thumborigin()')
-        origin = key_position([mount_width / 2, -(mount_height / 2), 0], 1, cornerrow)
+        origin, rot = key_position([mount_width / 2, -(mount_height / 2), 0], 1, cornerrow)
 
         for i in range(len(origin)):
             origin[i] = origin[i] + self.thumb_offsets[i]
