@@ -78,21 +78,25 @@ def get_left_wall_offsets(side="right"):
     ]
     wide = 22 if not oled_horizontal else tbiw_left_wall_x_offset_override
     short = 8 if not oled_horizontal else tbiw_left_wall_x_offset_override
-    if trackball_in_wall and side == ball_side:
+    if trackball_in_wall and (side == ball_side or ball_side == "both"):
         wide = tbiw_left_wall_x_offset_override
         if oled_mount_type == None:
             short = 8
         else:
             left_wall_x_offset = oled_left_wall_x_offset_override
-            short = oled_left_wall_x_offset_override  # HACKISH
-        if nrows <= 4:
+            short = tbiw_left_wall_x_offset_override  - 5# HACKISH
+
+        if nrows == 3:
             offsets = [short, wide, wide, wide]
+        elif nrows == 4:
+            offsets = [short, short, wide, wide]
         elif nrows == 5:
             offsets = [short, short, short, wide, wide]
         elif nrows == 6:
-            offsets = [short, short, short, short, wide, wide]
+            offsets = [short, short, wide, wide, wide, wide]
     elif oled_mount_type is not None and oled_mount_type != "NONE":
         left_wall_x_offset = oled_left_wall_x_offset_override
+        wide = oled_left_wall_x_offset_override
         if nrows <= 4:
             offsets = [wide, wide, wide, wide]
         elif nrows == 5:
@@ -1387,7 +1391,7 @@ def make_dactyl():
     def trackball_mount():
         radius = trackball_hole_diameter / 2
         tube = sphere(radius + 2)
-        return translate(tube, (0, 0, 0))
+        return translate(tube, (0, 0, 10))
 
     def trackball_surface_cutter(add_radius=10):
         radius = (trackball_hole_diameter / 2) + add_radius

@@ -1,4 +1,4 @@
-import solid as sl
+import solid2 as sl
 from subprocess import run
 
 debug_trace = False
@@ -12,7 +12,7 @@ def box(width, height, depth):
 
 
 def cylinder(radius, height, segments=100):
-    return sl.cylinder(r=radius, h=height, segments=segments, center=True)
+    return sl.cylinder(r=radius, h=height)
 
 
 def sphere(radius):

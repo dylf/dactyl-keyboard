@@ -40,18 +40,12 @@ class Minithicc3(MinidoxCluster):
         for item in parent_locals:
             globals()[item] = parent_locals[item]
 
-    # def thumborigin(self):
-    #     # debugprint('thumborigin()')
-    #     origin = super().thumborigin()
-    #     origin[0] -= 3
-    #     return origin
-
     def thumb_rotate(self):
         x = y = z = 0
         # if shift_column < 0:
         #     y = shift_column * 4
         #     z = shift_column * -10
-        return [x, y, 5]
+        return [x, y, 3]
 
     def tl_place(self, shape):
         shape = rotate(shape, [14, -15, 20])
@@ -306,8 +300,8 @@ class Minithicc3(MinidoxCluster):
             [
                 left_cluster_key_place(translate(web_post(), wall_locate2(-1, 0)), cornerrow, -1, low_corner=True, side=side),
                 left_cluster_key_place(translate(web_post(), wall_locate3(-1, 0)), cornerrow, -1, low_corner=True, side=side),
-                self.bl_place(translate(self.thumb_post_tr(), wall_locate2(-0.3, 1))),
-                self.bl_place(translate(self.thumb_post_tr(), wall_locate3(-0.3, 1))),
+                self.bl_place(translate(self.thumb_post_tr(), wall_locate2(-1.5, 1))),
+                self.bl_place(translate(self.thumb_post_tr(), wall_locate3(-1.0, 1))),
             ]
         )])
 
@@ -432,7 +426,7 @@ class Minithicc3(MinidoxCluster):
     def screw_positions(self):
         position = self.thumborigin()
         position = list(np.array(position) + np.array([-33, -38, -16]))
-        position[1] = position[1] - 4
+        # position[1] = position[1] - 2
         position[2] = 0
 
         return position

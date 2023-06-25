@@ -1,0 +1,109 @@
+{
+  "tb_socket_translation_offset": [
+    0,
+    -1,
+    -5
+  ],
+  "tb_socket_rotation_offset": [
+    0,
+    0,
+    0
+  ],
+  "tbiw_translational_offset": [
+    -7,
+    -30,
+    -6.5
+  ],
+  "tbiw_rotation_offset": [
+    42,
+    -5,
+    0
+  ],
+  "extra_width": 2.25,
+  "oled_mount_width": 12.5,
+  "oled_mount_height": 25.0,
+  "oled_mount_rim": 2.5,
+  "oled_mount_depth": 8.0,
+  "oled_mount_cut_depth": 20.0,
+  "oled_thickness": 4.2,
+  "oled_edge_overlap_end": 6.5,
+  "oled_edge_overlap_connector": 5.5,
+  "oled_edge_overlap_thickness": 2.5,
+  "oled_edge_overlap_clearance": 2.5,
+  "oled_edge_chamfer": 2.0,
+  "external_holder_xoffset": -3.0,
+  "tbiw_ball_center_row": 0.2,
+  "pcb_file": "file:options/flex_pcb.json",
+  "tbiw_left_wall_x_offset_override": 36.0,
+  "tbiw_left_wall_z_offset_override": 6.0,
+  "tbiw_left_wall_lower_y_offset": -12.0,
+  "tbiw_left_wall_lower_z_offset": 14.0,
+  "oled_left_wall_x_offset_override": 32.0,
+  "oled_left_wall_z_offset_override": 6.0,
+  "oled_left_wall_lower_y_offset": -12.0,
+  "oled_left_wall_lower_z_offset": 14.0,
+  "left_wall_z_offset_override": 6.0,
+  "left_wall_lower_y_offset": -12.0,
+  "left_wall_lower_z_offset": 14.0,
+  "tbiw_oled_center_row": 0.75,
+  "trackball_in_wall": true,
+  "oled_center_row": 0.75,
+  "tbiw_oled_translation_offset": [
+    0,
+    -4,
+    -4
+  ],
+  "tbiw_oled_rotation_offset": [
+    -2,
+    -8,
+    2
+  ],
+  "oled_translation_offset": [
+    -3,
+    -6,
+    -2
+  ],
+  "oled_rotation_offset": [
+    -8,
+    2,
+    5
+  ],
+  "all_last_rows": false,
+  "screw_offsets": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      -4,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      6,
+      0
+    ],
+    [
+      0,
+      -5,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ]
+  ]
+}
