@@ -111,9 +111,9 @@ def make_dactyl():
     right_cluster = None
     left_cluster = None
 
-    left_wall_x_offset = 8
+    left_wall_x_offset = 7
     left_wall_x_row_offsets = [
-        8, 8, 8, 8, 8, 8, 8, 8
+        left_wall_x_offset, left_wall_x_offset, left_wall_x_offset, left_wall_x_offset, left_wall_x_offset, left_wall_x_offset, left_wall_x_offset, left_wall_x_offset
     ]
     left_wall_z_offset = 3
     left_wall_lower_y_offset = 0
@@ -183,8 +183,12 @@ def make_dactyl():
 
     if save_name not in ['', None]:
         config_name = save_name
+        r_config_name = save_name
+        l_config_name = save_name
     elif overrides_name is not None:
-        config_name = overrides_name + "_" + str(nrows) + "x" + str(ncols) + "_" + thumb_style
+        config_name = overrides_name + "_" + str(nrows) + "x" + str(ncols)
+        r_config_name = config_name + "_" + thumb_style
+        l_config_name = config_name + "_" + other_thumb
 
     ENGINE = data["ENGINE"]
     # Really rough setup.  Check for ENGINE, set it not present from configuration.
