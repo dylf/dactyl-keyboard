@@ -444,6 +444,9 @@ shape_config = {
         [0, 0, 0],
         [0, 0, 0],
     ],
+
+    ## allows override of thumb screw position on thumb cluster, normally defined in cluster-specific JSON
+    "thumb_screw_position_override": None,
 }
 
     ####################################

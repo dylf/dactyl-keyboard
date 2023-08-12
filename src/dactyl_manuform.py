@@ -1056,6 +1056,7 @@ def make_dactyl():
         if all_last_rows:
             torow = lastrow + 1
         pos = left_key_position(torow - 1, -1, low_corner=True)
+        # pos = left_key_position(torow - 1, -2, low_corner=True)
         if shape is not None:
             return translate(shape, pos)
         return pos
@@ -2006,7 +2007,10 @@ def make_dactyl():
         return position
 
     def screw_insert_thumb(bottom_radius, top_radius, top_height, hole=False, side="right"):
-        position = cluster(side).screw_positions()
+        if thumb_screw_position_override is not None:
+            position = thumb_screw_position_override
+        else:
+            position = cluster(side).screw_positions()
         shape = screw_insert_shape(bottom_radius, top_radius, top_height, hole=hole)
         shape = translate(shape, [position[0], position[1], top_height / 2])
         return shape
