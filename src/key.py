@@ -7,6 +7,7 @@ SIZES = {
     "ALPS": {"w": 15.5, "h": 12.8, "d": 10}
 }
 
+KEY_NONE = None
 
 class Key(Part):
     type = "MX"
@@ -261,16 +262,20 @@ class Key(Part):
         return plate
 
 
-KEYS_BY_ID = {}
+KEYS_BY_ID = {
+    "none": Key("none", None)
+}
 
 class KeyFactory(object):
     @staticmethod
     def get_key_by_id(key_id: str) -> Key:
+        if key_id not in KEYS_BY_ID.keys():
+            return KEYS_BY_ID["none"]
         return KEYS_BY_ID[key_id]
 
     @classmethod
     def get_key_by_row_col(cls, row, col) -> Key:
-        return KEYS_BY_ID[cls.get_rc_id(row, col)]
+        return cls.get_key_by_id(cls.get_rc_id(row, col))
 
     @staticmethod
     def get_rc_id(row, col):
@@ -278,7 +283,7 @@ class KeyFactory(object):
 
     @staticmethod
     def clear_keys():
-        globals()["KEYS_BY_ID"] = {}
+        globals()["KEYS_BY_ID"] = {"none": Key("none", None)}
 
     @classmethod
     def new_key(cls, key_id: str, parent_locals, key_type="MX", hole_type="NOTCH"):
