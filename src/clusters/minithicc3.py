@@ -94,6 +94,7 @@ class Minithicc3(MinidoxCluster):
         debugprint('thumb_1x_layout()')
         return union([
             self.tr_place(rotate(shape, [0, 0, self.thumb_plate_tr_rotation])),
+            self.tl_place(rotate(shape, [0, 0, self.thumb_plate_tl_rotation])),
             self.ml_place(rotate(shape, [0, 0, self.thumb_plate_ml_rotation])),
         ])
 
@@ -125,7 +126,7 @@ class Minithicc3(MinidoxCluster):
     #         ])
 
     def thumbcaps(self, side='right'):
-        t1 = self.thumb_1x_layout(sa_cap(Usize=1.5,rot=90), cap=True)
+        t1 = self.thumb_1x_layout(sa_cap(Usize=1,rot=90), cap=True)
         if not default_1U_cluster:
             t1.add(self.thumb_15x_layout(sa_cap(Usize=1.5), cap=True))
         return t1
@@ -300,8 +301,8 @@ class Minithicc3(MinidoxCluster):
             [
                 left_key_place(translate(web_post(), wall_locate2(-1, 0)), lastrow, -1, low_corner=True, side=side),
                 left_key_place(translate(web_post(), wall_locate3(-1, 0)), lastrow, -1, low_corner=True, side=side),
-                self.bl_place(translate(self.thumb_post_tr(), wall_locate2(-1.5, 1))),
-                self.bl_place(translate(self.thumb_post_tr(), wall_locate3(-1.0, 1))),
+                self.bl_place(translate(self.thumb_post_tr(), wall_locate2(-1.4, 1.2))),
+                self.bl_place(translate(self.thumb_post_tr(), wall_locate3(-0.8, 0.23))),
             ]
         )])
 

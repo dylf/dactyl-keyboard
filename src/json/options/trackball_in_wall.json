@@ -11,13 +11,13 @@
   ],
   "tbiw_translational_offset": [
     -5,
-    -27,
-    -8
+    -22,
+    -6
   ],
   "tbiw_rotation_offset": [
-    45,
+    40,
     10,
-    -12
+    -25
   ],
   "tbiw_left_wall_x_offset_override": 36.0,
   "tbiw_left_wall_z_offset_override": 6.0,
