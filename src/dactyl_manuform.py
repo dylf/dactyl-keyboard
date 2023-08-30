@@ -151,8 +151,12 @@ def make_dactyl():
 
     if save_name not in ['', None]:
         config_name = save_name
+        r_config_name = save_name
+        l_config_name = save_name
     elif overrides_name is not None:
-        config_name = overrides_name + "_" + str(nrows) + "x" + str(ncols) + "_" + thumb_style
+        config_name = overrides_name + "_" + str(nrows) + "x" + str(ncols)
+        r_config_name = config_name + "_" + thumb_style
+        l_config_name = config_name + "_" + other_thumb
 
     ENGINE = data["ENGINE"]
     # Really rough setup.  Check for ENGINE, set it not present from configuration.
@@ -1207,6 +1211,34 @@ def make_dactyl():
                       )
         return shape
 
+    # todo mounts account for walls or walls account for mounts
+    def encoder_wall_mount(shape, side='right'):
+        pos, rot = oled_position_rotation()
+
+        # hackity hack hack
+        if side == 'right':
+            pos[0] -= 5
+            pos[1] -= 34
+            pos[2] -= 7.5
+            rot[0] = 0
+        else:
+            pos[0] -= 3
+            pos[1] -= 31
+            pos[2] -= 7
+            rot[0] = 0
+            rot[1] -= 0
+            rot[2] = -5
+
+        # enconder_spot = key_position([-10, -5, 13.5], 0, cornerrow)
+        ec11_mount = import_file(path.join(parts_path, "ec11_mount_2"))
+        ec11_mount = translate(rotate(ec11_mount, rot), pos)
+        encoder_cut = box(10.5, 10.5, 20)
+        encoder_cut = translate(rotate(encoder_cut, rot), pos)
+        shape = difference(shape, [encoder_cut])
+        shape = union([shape, ec11_mount])
+        # encoder_mount = translate(rotate(encoder_mount, (0, 0, 20)), (-27, -4, -15))
+        return shape
+
     def usb_c_shape(width, height, depth):
         shape = box(width, depth, height)
         cyl1 = translate(rotate(cylinder(height / 2, depth), (90, 0, 0)), (width / 2, 0, 0))
@@ -1258,6 +1290,17 @@ def make_dactyl():
                           )
         return shape
 
+    def get_logo():
+        offset = [
+            external_start[0] + external_holder_xoffset,
+            external_start[1] + external_holder_yoffset + 4.8,
+            external_holder_height + 9,
+        ]
+
+        logo = import_file(logo_file)
+        logo = rotate(logo, (90, 0, 180))
+        logo = translate(logo, offset)
+        return logo
 
     def external_mount_hole():
         print('external_mount_hole()')
@@ -1773,11 +1816,11 @@ def make_dactyl():
 
         return shape
 
-    def brass_insert_hole(radii=(2.45, 2.4), heights=(2, 2), scale_by=1):
+    def brass_insert_hole(radii=(2.45, 2.45), heights=(3, 1.5), scale_by=1):
         if len(radii) != len(heights):
             raise Exception("radii and heights collections must have equal length")
 
-        total_height = sum(heights) + 0.3  # add 0.3 for a titch extra
+        total_height = sum(heights) + 0.2  # add 0.3 for a titch extra
 
         half_height = total_height / 2
         offset = half_height
@@ -2006,6 +2049,10 @@ def make_dactyl():
                 0  # do nothing, only here to expressly state inaction.
 
         s2 = difference(s2, [union(screw_insert_holes(side=side))])
+
+        if side == "right" and logo_file not in ["", None]:
+            s2 = union([s2, get_logo()])
+
         shape = union([shape, s2])
 
         if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL']:
@@ -2188,17 +2235,17 @@ def make_dactyl():
 
     def run():
         mod_r, walls_r = model_side(side="right")
-        export_file(shape=mod_r, fname=path.join(save_path, config_name + r"_right"))
+        export_file(shape=mod_r, fname=path.join(save_path, r_config_name + r"_right"))
 
         if right_side_only:
             print(">>>>>  RIGHT SIDE ONLY: Only rendering a the right side.")
             return
         base = baseplate(walls_r, side='right')
-        export_file(shape=base, fname=path.join(save_path, config_name + r"_right_plate"))
+        export_file(shape=base, fname=path.join(save_path, r_config_name + r"_right_plate"))
         if quickly:
             print(">>>>>  QUICK RENDER: Only rendering a the right side and bottom plate.")
             return
-        export_dxf(shape=base, fname=path.join(save_path, config_name + r"_right_plate"))
+        export_dxf(shape=base, fname=path.join(save_path, r_config_name + r"_right_plate"))
 
         # rest = wrist_rest(mod_r, base, side="right")
         #
@@ -2207,11 +2254,11 @@ def make_dactyl():
         # if symmetry == "asymmetric":
 
         mod_l, walls_l = model_side(side="left")
-        export_file(shape=mod_l, fname=path.join(save_path, config_name + r"_left"))
+        export_file(shape=mod_l, fname=path.join(save_path, l_config_name + r"_left"))
 
         base_l = mirror(baseplate(walls_l, side='left'), 'YZ')
-        export_file(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
-        export_dxf(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
+        export_file(shape=base_l, fname=path.join(save_path, l_config_name + r"_left_plate"))
+        export_dxf(shape=base_l, fname=path.join(save_path, l_config_name + r"_left_plate"))
 
         # else:
         #     export_file(shape=mirror(mod_r, 'YZ'), fname=path.join(save_path, config_name + r"_left"))

@@ -40,8 +40,16 @@ class DefaultCluster(object):
 
     def thumborigin(self):
         # debugprint('thumborigin()')
-        origin, rot = key_position([mount_width / 2, -(mount_height / 2), 0], 1, cornerrow)
-
+        origin = key_position([mount_width / 2, -(mount_height / 2), 0], 1, cornerrow)
+        _thumb_offsets = self.thumb_offsets.copy()
+        if shift_column != 0:
+            _thumb_offsets[0] = self.thumb_offsets[0] + (shift_column * (mount_width + 6))
+            # if shift_column < 0:  # raise cluster up when moving inward
+            #     _thumb_offsets[1] = self.thumb_offsets[1] - (shift_column * 3)
+            #     _thumb_offsets[2] = self.thumb_offsets[2] - (shift_column * 8)
+            #     if shift_column <= -2:
+            #         # y = shift_column * 15
+            #         _thumb_offsets[1] = self.thumb_offsets[1] - (shift_column * 15)
         for i in range(len(origin)):
             origin[i] = origin[i] + self.thumb_offsets[i]
 
