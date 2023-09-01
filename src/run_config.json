@@ -170,18 +170,13 @@
     0,
     0
   ],
-  "logo_offsets": [
-    -10,
-    -10,
-    -1
-  ],
   "web_thickness": 4.0,
   "post_size": 0.1,
   "post_adj": 0,
   "screws_offset": "INSIDE",
   "magnet_bottom": false,
   "block_bottoms": false,
-  "screw_insert_height": 4.5,
+  "screw_insert_height": 4.2,
   "screw_insert_bottom_radius": 2.05,
   "screw_insert_top_radius": 1.95,
   "wire_post_height": 7,
@@ -204,6 +199,7 @@
   "trrs_hole_xoffset": 6,
   "trrs_hole_yoffset": -1.5,
   "trrs_hole_zoffset": 3,
+  "encoder_in_wall": false,
   "screw_hole_diameter": 3.3,
   "base_thickness": 3.0,
   "base_offset": 3.0,
@@ -294,12 +290,12 @@
       0
     ],
     [
-      0,
+      2,
       0,
       0
     ],
     [
-      0,
+      2,
       0,
       0
     ],

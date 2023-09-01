@@ -8,6 +8,8 @@ import sys
 import json
 import os
 import importlib
+import git
+import time
 from clusters.default_cluster import DefaultCluster
 from clusters.carbonfet import CarbonfetCluster
 from clusters.mini import MiniCluster
@@ -26,21 +28,29 @@ from os import path
 import subprocess
 
 
-def get_git_branch():
-
-    try:
-        output = str(
-            subprocess.check_output(
-                ['git', 'branch'], cwd=path.abspath('.'), universal_newlines=True
-            )
-        )
-        branch = [a for a in output.split('\n') if a.find('*') >= 0][0]
-        return branch[branch.find('*') + 2:]
-    except subprocess.CalledProcessError:
-        return None
-    except FileNotFoundError:
-        log("No git repository found.", "ERROR")
-        return None
+def get_git_info():
+    repo = git.Repo(search_parent_directories=True)
+    sha = repo.head.object.hexsha
+    active_branch = repo.active_branch.name
+    return {
+        "branch": active_branch,
+        "sha": sha,
+        "datetime": time.ctime(time.time()),
+        "dirty": repo.is_dirty()
+    }
+    # try:
+    #     output = str(
+    #         subprocess.check_output(
+    #             ['git', 'branch'], cwd=path.abspath('.'), universal_newlines=True
+    #         )
+    #     )
+    #     branch = [a for a in output.split('\n') if a.find('*') >= 0][0]
+    #     return branch[branch.find('*') + 2:]
+    # except subprocess.CalledProcessError:
+    #     return None
+    # except FileNotFoundError:
+    #     log("No git repository found.", "ERROR")
+    #     return None
 
 def deg2rad(degrees: float) -> float:
     return degrees * pi / 180
@@ -70,9 +80,9 @@ def make_dactyl():
     right_cluster = None
     left_cluster = None
 
-    left_wall_x_offset = 8
+    left_wall_x_offset = 5
     left_wall_x_row_offsets = [
-        8, 8, 8, 8, 8, 8, 8, 8
+        5, 5, 5, 5, 5, 5, 5, 5
     ]
     left_wall_z_offset = 3
     left_wall_lower_y_offset = 0
@@ -98,7 +108,8 @@ def make_dactyl():
 
     overrides_name = ""
 
-    local_branch = get_git_branch()
+    git_data = get_git_info()
+    local_branch = git_data["branch"]
         ## CHECK FOR CONFIG FILE AND WRITE TO ANY VARIABLES IN FILE.
     opts, args = getopt.getopt(sys.argv[1:], "", ["config=", "save_path=", "overrides="])
     for opt, arg in opts:
@@ -146,8 +157,12 @@ def make_dactyl():
 
     if save_name not in ['', None]:
         config_name = save_name
+        r_config_name = save_name
+        l_config_name = save_name
     elif overrides_name is not None:
-        config_name = overrides_name + "_" + str(nrows) + "x" + str(ncols) + "_" + thumb_style
+        config_name = overrides_name + "_" + str(nrows) + "x" + str(ncols)
+        r_config_name = config_name + "_" + thumb_style
+        l_config_name = config_name + "_" + other_thumb
 
     ENGINE = data["ENGINE"]
     # Really rough setup.  Check for ENGINE, set it not present from configuration.
@@ -259,7 +274,7 @@ def make_dactyl():
         if nrows <= 4:
             left_wall_x_row_offsets = [wide, wide, wide, wide]
         elif nrows == 5:
-            left_wall_x_row_offsets = [wide, wide, wide, wide, short]
+            left_wall_x_row_offsets = [wide, wide, wide, short, short]
         elif nrows == 6:
             left_wall_x_row_offsets = [wide, wide, wide, short, short, short]
         # left_wall_x_row_offsets = [22 if row > oled_row else 8 for row in range(lastrow)]
@@ -414,6 +429,9 @@ def make_dactyl():
                         mount_thickness
                     )
                 ])
+            plate_walls = box(mount_width + 4, mount_height + 4, 5)
+            plate_walls = difference(plate_walls, [box(mount_width + 0.5, mount_height + 0.5, 6)])
+            plate_walls = translate(plate_walls, (0, 0, 5))
 
             undercut = translate(undercut, (0.0, 0.0, -clip_thickness + mount_thickness / 2.0))
 
@@ -421,6 +439,7 @@ def make_dactyl():
                 undercut = undercut.faces("+Z").chamfer(undercut_transition, clip_undercut)
 
             plate = difference(plate, [undercut])
+            plate = union([plate, plate_walls])
 
         # if plate_file is not None:
         #     socket = import_file(plate_file)
@@ -959,8 +978,12 @@ def make_dactyl():
 
     def wall_locate2(dx, dy):
         debugprint("wall_locate2()")
-        return [dx * wall_x_offset, dy * wall_y_offset, -wall_z_offset]
+        return [dx * (wall_x_offset - 1), dy * (wall_y_offset - 1), 2]
 
+
+    def wall_locate2b(dx, dy):
+        debugprint("wall_locate2()")
+        return [dx * wall_x_offset, dy * wall_y_offset, -wall_z_offset]
 
     def wall_locate3(dx, dy, back=False):
         debugprint("wall_locate3()")
@@ -1179,6 +1202,49 @@ def make_dactyl():
             ])
         )
 
+
+    rj9_start = list(
+        np.array([0, -3, 0])
+        + np.array(
+            key_position(
+                list(np.array(wall_locate3(0, 1)) + np.array([0, (mount_height / 2), 0])),
+                0,
+                0,
+            )
+        )
+    )
+
+    rj9_position = (rj9_start[0], rj9_start[1], 11)
+
+
+    def rj9_cube():
+        debugprint('rj9_cube()')
+        shape = box(14.78, 13, 22.38)
+
+        return shape
+
+
+    def rj9_space():
+        debugprint('rj9_space()')
+        return translate(rj9_cube(), rj9_position)
+
+
+    def rj9_holder():
+        print('rj9_holder()')
+        shape = union([translate(box(10.78, 9, 18.38), (0, 2, 0)), translate(box(10.78, 13, 5), (0, 0, 5))])
+        shape = difference(rj9_cube(), [shape])
+        shape = translate(shape, rj9_position)
+
+        return shape
+
+
+    usb_holder_position = key_position(
+        list(np.array(wall_locate2(0, 1)) + np.array([0, (mount_height / 2), 0])), 1, 0
+    )
+    usb_holder_size = [6.5, 10.0, 13.6]
+    usb_holder_thickness = 4
+
+
     def usb_holder():
         print('usb_holder()')
         shape = box(
@@ -1223,7 +1289,7 @@ def make_dactyl():
         #               )
         #               )
 
-        pos = screw_position(0, 0, 5, 5, 5) # wall_locate2(0, 1)
+        pos = screw_position(0, 0) # wall_locate2(0, 1)
         # trans = wall_locate2(1, 1)
         # pos = [pos[0] + trans[0], pos[1] + trans[1], pos[2]]
         shape = translate(shape,
@@ -1233,6 +1299,34 @@ def make_dactyl():
                           trrs_hole_zoffset,
                       )
                       )
+        return shape
+
+    # todo mounts account for walls or walls account for mounts
+    def encoder_wall_mount(shape, side='right'):
+        pos, rot = oled_position_rotation()
+
+        # hackity hack hack
+        if side == 'right':
+            pos[0] -= 5
+            pos[1] -= 34
+            pos[2] -= 7.5
+            rot[0] = 0
+        else:
+            pos[0] -= 3
+            pos[1] -= 31
+            pos[2] -= 7
+            rot[0] = 0
+            rot[1] -= 0
+            rot[2] = -5
+
+        # enconder_spot = key_position([-10, -5, 13.5], 0, cornerrow)
+        ec11_mount = import_file(path.join(parts_path, "ec11_mount_2"))
+        ec11_mount = translate(rotate(ec11_mount, rot), pos)
+        encoder_cut = box(10.5, 10.5, 20)
+        encoder_cut = translate(rotate(encoder_cut, rot), pos)
+        shape = difference(shape, [encoder_cut])
+        shape = union([shape, ec11_mount])
+        # encoder_mount = translate(rotate(encoder_mount, (0, 0, 20)), (-27, -4, -15))
         return shape
 
     def usb_c_shape(width, height, depth):
@@ -1259,6 +1353,18 @@ def make_dactyl():
                           )
         return shape
 
+    external_start = list(
+        # np.array([0, -3, 0])
+        np.array([external_holder_width / 2, 0, 0])
+        + np.array(
+            key_position(
+                list(np.array(wall_locate3(0, 1)) + np.array([0, (mount_height / 2), 0])),
+                0,
+                0,
+            )
+        )
+    )
+
     def blackpill_mount_hole():
         print('blackpill_external_mount_hole()')
         shape = box(blackpill_holder_width, 20.0, external_holder_height + .1)
@@ -1274,6 +1380,17 @@ def make_dactyl():
                           )
         return shape
 
+    def get_logo():
+        offset = [
+            external_start[0] + external_holder_xoffset,
+            external_start[1] + external_holder_yoffset + 4.8,
+            external_holder_height + 7,
+        ]
+
+        logo = import_file(logo_file)
+        logo = rotate(logo, (90, 0, 180))
+        logo = translate(logo, offset)
+        return logo
 
     def external_mount_hole():
         print('external_mount_hole()')
@@ -1508,11 +1625,11 @@ def make_dactyl():
 
         shape = box(mount_ext_width, mount_ext_height, oled_mount_depth)
 
-        conn_hole_start = -mount_ext_height / 2.0 + oled_mount_rim
+        conn_hole_start = (-mount_ext_height / 2.0 + oled_mount_rim) - 2
         conn_hole_length = (
                 oled_edge_overlap_end + oled_edge_overlap_connector
                 + oled_edge_overlap_clearance + oled_thickness
-        )
+        ) + 4
         conn_hole = box(oled_mount_width, conn_hole_length + .01, oled_mount_depth)
         conn_hole = translate(conn_hole, (
             0,
@@ -1789,16 +1906,44 @@ def make_dactyl():
 
         return shape
 
+    def brass_insert_hole(radii=(2.55, 2.55), heights=(3, 1), scale_by=1):
+        if len(radii) != len(heights):
+            raise Exception("radii and heights collections must have equal length")
+
+        total_height = sum(heights) + 0.2  # add 0.3 for a titch extra
+
+        half_height = total_height / 2
+        offset = half_height
+        cyl = None
+        for i in range(len(radii)):
+            radius = radii[i] * scale_by
+            height = heights[i]
+            offset -= height / 2
+            new_cyl = translate(cylinder(radius, height), (0, 0, offset))
+            if cyl is None:
+                cyl = new_cyl
+            else:
+                cyl = union([cyl, new_cyl])
+            offset -= height / 2
+        cyl = translate(rotate(cyl, (0, 180, 0)), (0, 0, -0.01))
+        return cyl, sum(heights)
+
 
     def screw_insert_shape(bottom_radius, top_radius, height, hole=False):
         debugprint('screw_insert_shape()')
         mag_offset = 0
-        if bottom_radius == top_radius:
-            shape = translate(cylinder(radius=bottom_radius, height=height),
-                             (0, 0, mag_offset - (height / 2))  # offset magnet by 1 mm in case
-                             )
+        new_height = height
+        if hole:
+            scale = 1.0 if resin else 0.95
+            shape, new_height = brass_insert_hole(scale_by=scale)
+            new_height -= 1
         else:
-            shape = translate(cone(r1=bottom_radius, r2=top_radius, height=height), (0, 0, -height / 2))
+            if bottom_radius == top_radius:
+                shape = translate(cylinder(radius=bottom_radius, height=new_height),
+                                 (0, 0, mag_offset - (new_height / 2))  # offset magnet by 1 mm in case
+                                 )
+            else:
+                shape = translate(cone(r1=bottom_radius, r2=top_radius, height=new_height), (0, 0, -new_height / 2))
 
         if magnet_bottom:
             if not hole:
@@ -1809,19 +1954,19 @@ def make_dactyl():
         else:
             shape = union((
                 shape,
-                translate(sphere(top_radius), (0, 0,  (height / 2))),
+                translate(sphere(top_radius), (0, 0,  (new_height / 2))),
             ))
         return shape
 
     def screw_insert(column, row, bottom_radius, top_radius, height, side='right', hole=False):
         debugprint('screw_insert()')
-        position = screw_position(column, row, bottom_radius, top_radius, height, side)
+        position = screw_position(column, row, side)
         shape = screw_insert_shape(bottom_radius, top_radius, height, hole=hole)
         shape = translate(shape, [position[0], position[1], height / 2])
 
         return shape
 
-    def screw_position(column, row, bottom_radius, top_radius, height, side='right'):
+    def screw_position(column, row,  side='right'):
         debugprint('screw_position()')
         shift_right = column == lastcol
         shift_left = column == 0
@@ -1877,11 +2022,10 @@ def make_dactyl():
 
         return position
 
-    def screw_insert_thumb(bottom_radius, top_radius, height, side='right', hole=False):
+    def screw_insert_thumb(bottom_radius, top_radius, top_height, hole=False, side="right"):
         position = cluster(side).screw_positions()
-
-        shape = screw_insert_shape(bottom_radius, top_radius, height, hole=hole)
-        shape = translate(shape, [position[0], position[1], height / 2])
+        shape = screw_insert_shape(bottom_radius, top_radius, top_height, hole=hole)
+        shape = translate(shape, [position[0], position[1], top_height / 2])
         return shape
 
 
@@ -1995,6 +2139,10 @@ def make_dactyl():
                 0  # do nothing, only here to expressly state inaction.
 
         s2 = difference(s2, [union(screw_insert_holes(side=side))])
+
+        if side == "right" and logo_file not in ["", None]:
+            s2 = union([s2, get_logo()])
+
         shape = union([shape, s2])
 
         if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL']:
@@ -2009,6 +2157,8 @@ def make_dactyl():
             hole, frame = oled_sliding_mount_frame(side=side)
             shape = difference(shape, [hole])
             shape = union([shape, frame])
+            if encoder_in_wall:
+                shape = encoder_wall_mount(shape, side)
 
         elif oled_mount_type == "CLIP":
             hole, frame = oled_clip_mount_frame(side=side)
@@ -2125,11 +2275,19 @@ def make_dactyl():
                 if block_bottoms:
                     inner_shape = blockerize(inner_shape)
                 if logo_file not in ["", None]:
+                    logo_offset = [
+                        -10,
+                        -10,
+                        -0.5
+                    ]
                     logo = import_file(logo_file)
                     if side == "left":
                         logo = mirror(logo, "YZ")
-
-                    logo = translate(logo, logo_offsets)
+                    if ncols <= 6:
+                        logo_offset[0] -= 12 * (7 - ncols)
+                    if nrows <= 5:
+                        logo_offset[1] += 15 * (6 - ncols)
+                    logo = translate(logo, logo_offset)
 
                     inner_shape = union([inner_shape, logo])
 
@@ -2177,17 +2335,17 @@ def make_dactyl():
 
     def run():
         mod_r, walls_r = model_side(side="right")
-        export_file(shape=mod_r, fname=path.join(save_path, config_name + r"_right"))
+        export_file(shape=mod_r, fname=path.join(save_path, r_config_name + r"_right"))
 
         if right_side_only:
             print(">>>>>  RIGHT SIDE ONLY: Only rendering a the right side.")
             return
         base = baseplate(walls_r, side='right')
-        export_file(shape=base, fname=path.join(save_path, config_name + r"_right_plate"))
+        export_file(shape=base, fname=path.join(save_path, r_config_name + r"_right_plate"))
         if quickly:
             print(">>>>>  QUICK RENDER: Only rendering a the right side and bottom plate.")
             return
-        export_dxf(shape=base, fname=path.join(save_path, config_name + r"_right_plate"))
+        export_dxf(shape=base, fname=path.join(save_path, r_config_name + r"_right_plate"))
 
         # rest = wrist_rest(mod_r, base, side="right")
         #
@@ -2196,11 +2354,11 @@ def make_dactyl():
         # if symmetry == "asymmetric":
 
         mod_l, walls_l = model_side(side="left")
-        export_file(shape=mod_l, fname=path.join(save_path, config_name + r"_left"))
+        export_file(shape=mod_l, fname=path.join(save_path, l_config_name + r"_left"))
 
         base_l = mirror(baseplate(walls_l, side='left'), 'YZ')
-        export_file(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
-        export_dxf(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
+        export_file(shape=base_l, fname=path.join(save_path, l_config_name + r"_left_plate"))
+        export_dxf(shape=base_l, fname=path.join(save_path, l_config_name + r"_left_plate"))
 
         # else:
         #     export_file(shape=mirror(mod_r, 'YZ'), fname=path.join(save_path, config_name + r"_left"))
@@ -2209,14 +2367,9 @@ def make_dactyl():
         #     export_file(shape=lbase, fname=path.join(save_path, config_name + r"_left_plate"))
         #     export_dxf(shape=lbase, fname=path.join(save_path, config_name + r"_left_plate"))
 
-        if ENGINE == 'cadquery':
-            import freecad_that as freecad
-            freecad.generate_freecad_script(path.abspath(save_path), [
-                config_name + r"_right",
-                config_name + r"_left",
-                config_name + r"_right_plate",
-                config_name + r"_left_plate"
-            ], config_name)
+        if ENGINE == 'cadquery' and overrides_name not in [None, '']:
+            import build_report as report
+            report.write_build_report(path.abspath(save_path), overrides_name, git_data)
 
         if oled_mount_type == 'UNDERCUT':
             export_file(shape=oled_undercut_mount_frame()[1],
