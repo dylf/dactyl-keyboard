@@ -81,7 +81,7 @@ def get_left_wall_offsets(side="right"):
     ]
     wide = 22 if not oled_horizontal else tbiw_left_wall_x_offset_override
     short = 8 if not oled_horizontal else tbiw_left_wall_x_offset_override
-    if trackball_in_wall and side == ball_side:
+    if trackball_in_wall and side == ball_side or ball_side == "both":
         wide = tbiw_left_wall_x_offset_override
         if oled_mount_type == None:
             short = 8
