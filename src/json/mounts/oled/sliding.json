@@ -15,6 +15,16 @@
     0.0,
     -3.0
   ],
+  "oled_translation_offset": [
+    0,
+    0,
+    4
+  ],
+  "oled_rotation_offset": [
+    0,
+    0,
+    0
+  ],
   "oled_left_wall_x_offset_override": 24.0,
   "oled_left_wall_z_offset_override": 0.0,
   "oled_left_wall_lower_y_offset": 12.0,
