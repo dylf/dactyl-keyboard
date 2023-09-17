@@ -25,6 +25,9 @@ class Key(Part):
             for item in parent_locals:
                 globals()[item] = parent_locals[item]
 
+    def __str__(self):
+        return f'K-{self.get_id()}'
+
     def tr(self, add_x=0, add_y=0):
         offset = rotate_deg([(mount_width / 2.0) + add_x, (mount_height / 2) + add_y, 0], self._rot)
         return add_translate(self._pos, offset)
@@ -40,6 +43,26 @@ class Key(Part):
     def bl(self, add_x=0, add_y=0):
         offset = rotate_deg([-(mount_width / 2.0) - add_x, -(mount_height / 2) - add_y, 0], self._rot)
         return add_translate(self._pos, offset)
+
+    def top_edge(self):
+        return [self.tl(), self.tr()]
+
+    def bottom_edge(self):
+        return [self.bl(), self.br()]
+
+    def inner_edge(self, side="right"):
+        if side == "right":
+            return [self.tl(), self.bl()]
+
+        return [self.tr(), self.br()]
+
+    def outer_edge(self, side="right"):
+        if side == "left":
+            return self.inner_edge(side="right")
+        return self.inner_edge(side="left")
+
+    def is_none(self):
+        return self._id == "none"
 
     def closest_corner(self, rel_pos):
         dist = 99999999999.0
@@ -262,16 +285,26 @@ class Key(Part):
         return plate
 
 
-KEYS_BY_ID = {
-    "none": Key("none", None)
-}
-
 class KeyFactory(object):
+
+    NONE_KEY = Key("none", None)
+
+    KEYS_BY_ID = {
+        "none": NONE_KEY
+    }
+
+    MAX_ROW = -1
+    MAX_COL = -1
+
+    MATRIX = None
+    ROWS = None
+    WALL_KEYS = None
+
     @staticmethod
     def get_key_by_id(key_id: str) -> Key:
-        if key_id not in KEYS_BY_ID.keys():
-            return KEYS_BY_ID["none"]
-        return KEYS_BY_ID[key_id]
+        if key_id not in KeyFactory.KEYS_BY_ID.keys():
+            return KeyFactory.KEYS_BY_ID["none"]
+        return KeyFactory.KEYS_BY_ID[key_id]
 
     @classmethod
     def get_key_by_row_col(cls, row, col) -> Key:
@@ -281,20 +314,94 @@ class KeyFactory(object):
     def get_rc_id(row, col):
         return "r" + str(row) + "c" + str(col)
 
+    @classmethod
+    def build_matrix(cls):
+        if len(cls.KEYS_BY_ID) <= 1:
+            raise Exception("No keys present to build matrix.")
+
+        cls.MATRIX = []
+        top_wall = [cls.KEYS_BY_ID["none"] for x in range(cls.MAX_COL + 1)]
+        bottom_wall = [cls.KEYS_BY_ID["none"] for x in range(cls.MAX_COL + 1)]
+        inner_wall = [cls.KEYS_BY_ID["none"] for x in range(cls.MAX_ROW + 1)]
+        outer_wall = [cls.KEYS_BY_ID["none"] for x in range(cls.MAX_ROW + 1)]
+        all_rows = [[] for x in range(0, cls.MAX_COL + 1)]
+
+        for col in range(cls.MAX_COL + 1):
+            column_keys = []
+            for row in range(cls.MAX_ROW + 1):
+                key = cls.get_key_by_row_col(row, col)
+                column_keys.append(key)
+                all_rows[col].append(key)
+
+                if key.get_id() != "none":
+                    if top_wall[col].get_id() == "none":
+                        top_wall[col] = key
+                    if inner_wall[row].get_id() == "none":
+                        inner_wall[row] = key
+                    bottom_wall[col] = key
+                    outer_wall[row] = key
+
+            cls.MATRIX.append(column_keys)
+
+        cls.WALL_KEYS = {
+            "top": top_wall,
+            "bottom": bottom_wall,
+            "inner": inner_wall,
+            "outer": outer_wall
+        }
+
+        cls.ROWS = all_rows
+
+        print("KeyFactory: Matrix built.")
+
+    @classmethod
+    def get_column(cls, col) -> [Key]:
+        return cls.MATRIX[col]
+
+    @classmethod
+    def get_row(cls, row) -> [Key]:
+        return cls.ROWS[row]
+
+    @classmethod
+    def inner_keys(cls):
+        return cls.WALL_KEYS["inner"]
+
+    @classmethod
+    def outer_keys(cls):
+        return cls.WALL_KEYS["outer"]
+
+    @classmethod
+    def top_keys(cls):
+        return cls.WALL_KEYS["top"]
+
+    @classmethod
+    def bottom_keys(cls):
+        return cls.WALL_KEYS["bottom"]
+
     @staticmethod
     def clear_keys():
-        globals()["KEYS_BY_ID"] = {"none": Key("none", None)}
+        KeyFactory.KEYS_BY_ID = {"none": Key("none", None)}
+        KeyFactory.MAX_ROW = -1
+        KeyFactory.MAX_COL = -1
+        KeyFactory.MATRIX = None
+        KeyFactory.ROWS = None
+        KeyFactory.WALL_KEYS = None
 
     @classmethod
     def new_key(cls, key_id: str, parent_locals, key_type="MX", hole_type="NOTCH"):
         key = Key(key_id, parent_locals, key_type=key_type, hole_type=hole_type)
-        if key_id in KEYS_BY_ID:
+        if key_id in cls.KEYS_BY_ID:
             print("WARNING: key_id already in keys list", key_id)
         else:
-            KEYS_BY_ID[key_id] = key
+            cls.KEYS_BY_ID[key_id] = key
         return key
 
     @classmethod
     def new_key_by_row_column(cls, row: int, col: int, parent_locals, key_type="MX", hole_type="NOTCH"):
+        if row > cls.MAX_ROW:
+            cls.MAX_ROW = row
+        if col > cls.MAX_COL:
+            cls.MAX_COL = col
+
         return cls.new_key(cls.get_rc_id(row, col), parent_locals, key_type=key_type, hole_type=hole_type)
 
