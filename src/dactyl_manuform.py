@@ -691,15 +691,17 @@ def make_dactyl():
         return translate(box(w, h, d), point)
 
     def _offset_all(points, w=1, h=1, d=1):
-        if len(points) != 4:
+        if len(points) > 4:
             raise Exception("Points list must have 4 elements")
-        return triangle_hulls([
-            _offset(points[0], w=w, h=h, d=d),
-            _offset(points[1], w=w, h=h, d=d),
-            _offset(points[2], w=w, h=h, d=d),
-            _offset(points[3], w=w, h=h, d=d),
-            _offset(points[0], w=w, h=h, d=d)
-        ])
+        process = points.copy()
+        process.append(points[0])
+        return tess_hull([_offset(pnt, w=w, h=h, d=d) for pnt in process])
+        #     _offset(points[0], w=w, h=h, d=d),
+        #     _offset(points[1], w=w, h=h, d=d),
+        #     _offset(points[2], w=w, h=h, d=d),
+        #     _offset(points[3], w=w, h=h, d=d),
+        #     _offset(points[0], w=w, h=h, d=d)
+        # ])
 
     def single_column(col):
         # holes = []
@@ -740,6 +742,99 @@ def make_dactyl():
 
         return shape
 
+    of = (1, 1, -bottom_z_offset)
+    wof = (of[0] + 1, of[1] + 1, of[2] + 5)
+
+    def _side_join(keyfunc1, keyfunc2):
+        return _offset_all([keyfunc1(of), keyfunc1(wof), keyfunc2(wof), keyfunc2(of)])
+
+    def left_key_wall(key):
+        return _side_join(key.tl, key.bl)
+
+    def bottom_key_wall(key):
+        return _side_join(key.bl, key.br)
+
+    def right_key_wall(key):
+        return _side_join(key.tr, key.br)
+
+    def top_key_wall(key):
+        return _side_join(key.tl, key.tr)
+
+    def get_walls(side="right"):
+
+        all_wall_keys = KeyFactory.WALL_KEYS
+        
+        rendered_walls = []
+        processed = []
+
+        for key in all_wall_keys:
+            if key in processed:
+                continue
+            
+            for wall in key.walls:
+                r = None
+                match wall:
+                    case "left":
+                        r = left_key_wall(key)
+                    case "right":
+                        r = right_key_wall(key)
+                    case "top":
+                        r = top_key_wall(key)
+                    case "bottom":
+                        r = bottom_key_wall(key)
+                    case _:
+                        raise Exception("No handler for wall type: " + wall)
+                
+                rendered_walls.append(r)
+            
+            neighbors = { k: v for (k, v) in key.neighbors.items() if v in all_wall_keys }
+
+            for k in neighbors.keys():
+                j = []
+                n = neighbors[k]
+
+                match k:
+                    case "t":
+                        if "left" in n.walls and "left" in key.walls:
+                            j.append(_side_join(key.tl, n.bl))
+                        if "right" in n.walls and "right" in key.walls:
+                            j.append(_side_join(key.tr, n.br))
+                    case "tr":
+                        if "bottom" in n.walls and "right" in key.walls:
+                            j.append(_side_join(key.tr, n.bl))
+                    case "r":
+                        if "top" in n.walls and "top" in key.walls:
+                            j.append(_side_join(key.tr, n.tl))
+                        if "bottom" in n.walls and "bottom" in key.walls:
+                            j.append(_side_join(key.br, n.bl))
+                    case "br":
+                        if "right" in n.walls and "bottom" in key.walls:
+                            j.append(_side_join(key.br, n.tl))
+                    case "b":
+                        if "left" in n.walls and "left" in key.walls:
+                            j.append(_side_join(key.bl, n.tl))
+                        if "right" in n.walls and "right" in key.walls:
+                            j.append(_side_join(key.br, n.tr))
+                    case "bl":
+                        if "left" in n.walls and "bottom" in key.walls:
+                            j.append(_side_join(key.bl, n.tr))
+                    case "l":
+                        if "top" in n.walls and "top" in key.walls:
+                            j.append(_side_join(key.tl, n.tr))
+                        if "bottom" in n.walls and "bottom" in key.walls:
+                            j.append(_side_join(key.bl, n.br))
+                    case "tl":
+                        if "bottom" in n.walls and "left" in key.walls:
+                            j.append(_side_join(key.tl, n.br))
+                    case _:
+                        raise Exception("Cannot handle neighbor type: " + k)    
+
+                rendered_walls.extend(j)
+
+            processed.append(key)
+
+        return rendered_walls
+
 
     def case_bottom(side="right"):
         debugprint('case_bottom()')
@@ -770,38 +865,8 @@ def make_dactyl():
                         col.append(_offset_all([l.tr(of), l.br(of), key.bl(of), key.tl(of)]))
                         if not tl.is_none() and not l.is_none() and not top.is_none():
                             col.append(_offset_all([top.bl(of), tl.br(of), l.tr(of), key.tl(of)]))
-
-
-                    walls = KeyFactory.get_wall_sequence()
-                    last_key = KeyFactory.NONE_KEY
-                    pts = []
-                    wof = (of[0] + 1, of[1] + 1, of[2] + 5)
-                    for key in walls:
-                        if key.has_wall("left"):
-                            if not last_key.is_none() and last_key.has_wall("left"):
-                                col.append(_offset_all([last_key.bl(of), last_key.bl(wof), key.tl(wof), key.tl(of)]))
-
-                            col.append(_offset_all([key.tl(of), key.tl(wof), key.bl(wof), key.bl(of)]))
-
-                        if key.has_wall("bottom"):
-                            if not last_key.is_none() and last_key.has_wall("bottom"):
-                                col.append(_offset_all([last_key.br(of), last_key.br(wof), key.bl(wof), key.bl(of)]))
-
-                            col.append(_offset_all([key.bl(of), key.bl(wof), key.br(wof), key.br(of)]))
-
-                        if key.has_wall("right"):
-                            if not last_key.is_none() and last_key.has_wall("right"):
-                                col.append(_offset_all([last_key.tr(of), last_key.tr(wof), key.br(wof), key.br(of)]))
-
-                            col.append(_offset_all([key.br(of), key.br(wof), key.tr(wof), key.tr(of)]))
-
-                        if key.has_wall("top"):
-                            if not last_key.is_none() and last_key.has_wall("top"):
-                                col.append(_offset_all([last_key.tl(of), last_key.tl(wof), key.tr(wof), key.tr(of)]))
-
-                            col.append(_offset_all([key.tr(of), key.tr(wof), key.tl(wof), key.tl(of)]))
-
-                        last_key = key
+                    elif not tl.is_none() and not top.is_none():
+                        col.append(_offset_all([top.bl(of), tl.br(of), key.tl(of), key.tl(of)]))
 
                 last_row_key = key
 
@@ -809,7 +874,19 @@ def make_dactyl():
 
             column_bottoms.append(union(col))
 
+        column_bottoms.append(union(col))
+        column_bottoms.append(union(get_walls(side)))
         shape = union(column_bottoms)
+
+        # cutter = tess_hull([shape])
+
+
+
+        # bottom_box = translate(union([box(50, 50, 15), box(50, 50, 15)]), (0, 0, -5))
+        bottom_box = translate(rotate(cylinder(25, 7), (0, 5, 0)), (-10, 0, -5))
+        bottom_box = difference(bottom_box, [shape])
+
+        shape = union([shape, bottom_box])
 
         return shape
 
@@ -2177,7 +2254,7 @@ def make_dactyl():
         bottom = case_bottom(side)
         s2 = union([walls_shape, bottom])
 
-        cshape = single_column(2)
+        # cshape = single_column(2)
         export_file(shape=bottom, fname=path.join(save_path, r_config_name + r"_case_bottom"))
 
         # s2 = union([s2, *screw_insert_outers(side=side)])
@@ -2480,11 +2557,6 @@ def make_dactyl():
             r.append(c)
 
         KeyFactory.build_matrix()
-
-        print(f"Top keys: {[str(key) for key in KeyFactory.top_keys()]}")
-        print(f"Bottom keys: {[str(key) for key in KeyFactory.bottom_keys()]}")
-        print(f"Inner keys: {[str(key) for key in KeyFactory.inner_keys()]}")
-        print(f"Outer keys: {[str(key) for key in KeyFactory.outer_keys()]}")
         # return KeyFactory.MATRIX
 
     key_placements(side="right")

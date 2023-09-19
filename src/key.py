@@ -347,16 +347,16 @@ class KeyFactory(object):
         bottom_wall = [cls.KEYS_BY_ID["none"] for x in range(cls.MAX_COL + 1)]
         inner_wall = [cls.KEYS_BY_ID["none"] for x in range(cls.MAX_ROW + 1)]
         outer_wall = [cls.KEYS_BY_ID["none"] for x in range(cls.MAX_ROW + 1)]
-        all_rows = [[] for x in range(0, cls.MAX_COL + 1)]
+        all_rows = [[] for x in range(0, cls.MAX_ROW + 1)]
 
         for col in range(cls.MAX_COL + 1):
             column_keys = []
             for row in range(cls.MAX_ROW + 1):
                 key = cls.get_key_by_row_col(row, col)
-                column_keys.append(key)
-                all_rows[col].append(key)
 
                 if key.get_id() != "none":
+                    column_keys.append(key)
+                    all_rows[row].append(key)
                     if top_wall[col].get_id() == "none":
                         top_wall[col] = key
                     if inner_wall[row].get_id() == "none":
@@ -366,25 +366,25 @@ class KeyFactory(object):
 
             cls.MATRIX.append(column_keys)
 
-        cls.WALL_KEYS = {
-            "top": top_wall,
-            "bottom": bottom_wall,
-            "left": inner_wall,
-            "right": outer_wall
-        }
-
+        wall_keys = []
         for key in top_wall:
             key.add_wall("top")
-
-        for key in bottom_wall:
-            key.add_wall("bottom")
-
+            if key not in wall_keys:
+                wall_keys.append(key)
         for key in inner_wall:
             key.add_wall("left")
-
+            if key not in wall_keys:
+                wall_keys.append(key)
+        for key in bottom_wall:
+            key.add_wall("bottom")
+            if key not in wall_keys:
+                wall_keys.append(key)
         for key in outer_wall:
             key.add_wall("right")
+            if key not in wall_keys:
+                wall_keys.append(key)
 
+        cls.WALL_KEYS = wall_keys
         cls.ROWS = all_rows
 
         for col in range(len(cls.MATRIX)):
@@ -408,10 +408,11 @@ class KeyFactory(object):
 
                 if col > 0:
                     last_column = cls.MATRIX[col - 1]
-                    left = last_column[row]
-                    if not left.is_none():
-                        key.add_neighbor(left, "l")
-                        left.add_neighbor(key, "r")
+                    if len(last_column) > row:
+                        left = last_column[row]
+                        if not left.is_none():
+                            key.add_neighbor(left, "l")
+                            left.add_neighbor(key, "r")
 
                     if len(last_column) > row + 1:
                         bl = last_column[row + 1]
@@ -420,19 +421,6 @@ class KeyFactory(object):
                             bl.add_neighbor(key, "tr")
 
         print("KeyFactory: Matrix built.")
-
-    @classmethod
-    def get_wall_sequence(cls):
-        sequence = cls.WALL_KEYS["left"].copy()
-        sequence.extend(cls.WALL_KEYS["bottom"])
-        arr = cls.WALL_KEYS["right"].copy()
-        arr.reverse()
-        sequence.extend(arr)
-        arr = cls.WALL_KEYS["top"].copy()
-        arr.reverse()
-        sequence.extend(arr)
-
-        return sequence
 
     @classmethod
     def get_column(cls, col) -> [Key]:
