@@ -1,18 +1,20 @@
-import solid as sl
+import solid2 as sl
 from subprocess import run
 
 debug_trace = False
 
+
 def debugprint(info):
     if debug_trace:
         print(info)
+
 
 def box(width, height, depth):
     return sl.cube([width, height, depth], center=True)
 
 
 def cylinder(radius, height, segments=100):
-    return sl.cylinder(r=radius, h=height, segments=segments, center=True)
+    return sl.cylinder(r=radius, h=height, center=True)
 
 
 def sphere(radius):

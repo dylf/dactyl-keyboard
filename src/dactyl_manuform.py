@@ -89,7 +89,7 @@ def make_dactyl():
     left_wall_lower_z_offset = 0
 
     symmetry = None
-    column_style = None
+    column_style = "orthographic"
     save_path = path.join(r".", "things")
 
     matrix = {
@@ -548,70 +548,6 @@ def make_dactyl():
 
         return shape
 
-
-    #########################
-    ## Placement Functions ##
-    #########################
-    def get_key_placement(
-            position,
-            column,
-            row,
-            column_style=column_style,
-    ):
-        debugprint('get_key_placement()')
-        xrot = 0
-        yrot = 0
-
-        column_angle = beta * (centercol - column)
-        column_x_delta_actual = column_x_delta
-        if (pinky_1_5U and column == lastcol):
-            if row >= first_1_5U_row and row <= last_1_5U_row:
-                column_x_delta_actual = column_x_delta - 1.5
-                column_angle = beta * (centercol - column - 0.27)
-
-        if column_style == "orthographic":
-            column_z_delta = column_radius * (1 - np.cos(column_angle))
-            position = add_translate(position, [0, 0, -row_radius])
-            position = rotate_around_x(position, alpha * (centerrow - row))
-            xrot += alpha * (centerrow - row)
-            position = add_translate(position, [0, 0, row_radius])
-            position = rotate_around_y(position, column_angle)
-            yrot += column_angle
-            position = add_translate(
-                position, [-(column - centercol) * column_x_delta_actual, 0, column_z_delta]
-            )
-            position = add_translate(position, column_offset(column))
-
-        elif column_style == "fixed":
-            position = rotate_around_y(position, fixed_angles[column])
-            yrot += fixed_angles[column]
-            position = add_translate(position, [fixed_x[column], 0, fixed_z[column]])
-            position = add_translate(position, [0, 0, -(row_radius + fixed_z[column])])
-            position = rotate_around_x(position, alpha * (centerrow - row))
-            xrot += alpha * (centerrow - row)
-            position = add_translate(position, [0, 0, row_radius + fixed_z[column]])
-            position = rotate_around_y(position, fixed_tenting)
-            yrot += fixed_tenting
-            position = add_translate(position, [0, column_offset(column)[1], 0])
-
-        else:
-            position = add_translate(position, [0, 0, -row_radius])
-            position = rotate_around_x(position, alpha * (centerrow - row))
-            xrot += alpha * (centerrow - row)
-            position = add_translate(position, [0, 0, row_radius])
-            position = add_translate(position, [0, 0, -column_radius])
-            position = rotate_around_y(position, column_angle)
-            yrot += column_angle
-            position = add_translate(position, [0, 0, column_radius])
-            position = add_translate(position, column_offset(column))
-
-        position = rotate_around_y(position, tenting_angle)
-        yrot += tenting_angle
-        position = add_translate(position, [0, 0, keyboard_z_offset])
-
-        return [position, to_degrees([xrot, yrot, 0])]
-
-
     def apply_key_geometry(
             shape,
             translate_fn,
@@ -751,28 +687,68 @@ def make_dactyl():
 
         return shape
 
-    def bottom_hull(side="right"):
-        debugprint('bottom_hull()')
+    def _offset(point, w=1, h=1, d=1):
+        return translate(box(w, h, d), point)
 
-        def _offset(point):
-            return translate(box(1, 1, 1), add_translate(point, (0, 0, -wall_z_offset)))
+    def _offset_all(points, w=1, h=1, d=1):
+        if len(points) != 4:
+            raise Exception("Points list must have 4 elements")
+        return triangle_hulls([
+            _offset(points[0], w=w, h=h, d=d),
+            _offset(points[1], w=w, h=h, d=d),
+            _offset(points[2], w=w, h=h, d=d),
+            _offset(points[3], w=w, h=h, d=d),
+            _offset(points[0], w=w, h=h, d=d)
+        ])
 
-        def _offset_all(points):
-            if len(points) != 4:
-                raise Exception("Points list must have 4 elements")
-            return triangle_hulls([
-                _offset(points[0]),
-                _offset(points[1]),
-                _offset(points[2]),
-                _offset(points[3]),
-                _offset(points[0]),
-            ])
+    def single_column(col):
+        # holes = []
+        column = KeyFactory.MATRIX[col]
+        col = []
+        of = (-plate_rim, -plate_rim, 2)
+        of2 = (3, 3, 2)
+        rail1 = (3, 3, 0)
+        # rail2 = (3, 3, 1)
+        for row in range(nrows):
+            key = column[row]
+            if not key.is_none():
+                # col.append(key.render(plate_file))
+                # col.append(_offset_all([key.tr(of), key.tl(of), key.bl(of), key.br(of)]))
+                col.append(_offset_all([key.tr(of2), key.tl(of2), key.tl(of), key.tr(of)]))
+                col.append(_offset_all([key.tr(of2), key.br(of2), key.br(of), key.tr(of)]))
+                col.append(_offset_all([key.tl(of2), key.bl(of2), key.bl(of), key.tl(of)]))
 
+
+                col.append(_offset_all([key.tl(of2), key.bl(of2), key.bl(of), key.tl(of)]))
+
+                # rails
+                col.append(_offset_all([key.tr(of2), key.tr(rail1), key.br(rail1), key.br(of2)]))
+                col.append(_offset_all([key.tl(of2), key.tl(rail1), key.bl(rail1), key.bl(of2)]))
+
+                top = key.get_neighbor("t")
+
+                if not top.is_none():
+                    col.append(_offset_all([top.bl(of2), key.tl(of2), key.tr(of2), top.br(of2)]))
+                    col.append(_offset_all([top.bl(of), key.tl(of2), key.tr(of2), top.br(of)]))
+                # if not l.is_none():
+                #     col.append(_offset_all([l.tr(of), l.br(of), key.bl(of), key.tl(of)]))
+                #     if not tl.is_none() and not l.is_none() and not top.is_none():
+                #         col.append(_offset_all([top.bl(of), tl.br(of), l.tr(of), key.tl(of)]))
+        if not key.is_none():
+            col.append(_offset_all([key.bl(of), key.bl(of2), key.br(of2), key.br(of)]))
+        shape = union(col)
+
+        return shape
+
+
+    def case_bottom(side="right"):
+        debugprint('case_bottom()')
         # hole = single_plate()
         column_bottoms = []
         # for row in range(nrows):
         last_column = None
 
+        of = (1, 1, -bottom_z_offset)
         for c in range(ncols):
             col = []
             column = KeyFactory.get_column(c)
@@ -781,32 +757,51 @@ def make_dactyl():
             for row in range(len(column)):
                 key = column[row]
                 if not key.is_none():
-                    col.append(_offset_all([key.tr(), key.tl(), key.bl(), key.br()]))
-                    prev_key = KeyFactory.NONE_KEY
+                    col.append(_offset_all([key.tr(of), key.tl(of), key.bl(of), key.br(of)]))
 
-                    if last_column is not None:
+                    tl = key.get_neighbor("tl")
+                    l = key.get_neighbor("l")
+                    top = key.get_neighbor("t")
 
-                        if row < len(last_column):
-                            prev_key = last_column[row]
-                        else:
-                            prev_key = last_column[len(last_column) - 1]
+                    if not top.is_none():
+                        col.append(_offset_all([top.bl(of), key.tl(of), key.tr(of), top.br(of)]))
 
-                        if not prev_key.is_none():
-                            col.append(_offset_all([prev_key.tr(), prev_key.br(), key.bl(), key.tl()]))
+                    if not l.is_none():
+                        col.append(_offset_all([l.tr(of), l.br(of), key.bl(of), key.tl(of)]))
+                        if not tl.is_none() and not l.is_none() and not top.is_none():
+                            col.append(_offset_all([top.bl(of), tl.br(of), l.tr(of), key.tl(of)]))
 
-                        if len(last_column) > len(column) and row == len(column) - 1:
-                            prev_key = prev_column[row + 1]
-                            col.append(_offset_all([prev_key.tr(), prev_key.br(), key.bl(), key.tl()]))
 
-                    if not last_row_key.is_none():
-                        col.append(_offset_all([last_row_key.bl(), key.tl(), key.tr(), last_row_key.br()]))
+                    walls = KeyFactory.get_wall_sequence()
+                    last_key = KeyFactory.NONE_KEY
+                    pts = []
+                    wof = (of[0] + 1, of[1] + 1, of[2] + 5)
+                    for key in walls:
+                        if key.has_wall("left"):
+                            if not last_key.is_none() and last_key.has_wall("left"):
+                                col.append(_offset_all([last_key.bl(of), last_key.bl(wof), key.tl(wof), key.tl(of)]))
 
-                        if last_column is not None:
-                            if row > 0:
-                                prev_row_key = last_column[row - 1]
+                            col.append(_offset_all([key.tl(of), key.tl(wof), key.bl(wof), key.bl(of)]))
 
-                                if not prev_key.is_none() and not prev_row_key.is_none():
-                                    col.append(_offset_all([last_row_key.tl(), key.tr(), prev_key.br(), prev_row_key.bl()]))
+                        if key.has_wall("bottom"):
+                            if not last_key.is_none() and last_key.has_wall("bottom"):
+                                col.append(_offset_all([last_key.br(of), last_key.br(wof), key.bl(wof), key.bl(of)]))
+
+                            col.append(_offset_all([key.bl(of), key.bl(wof), key.br(wof), key.br(of)]))
+
+                        if key.has_wall("right"):
+                            if not last_key.is_none() and last_key.has_wall("right"):
+                                col.append(_offset_all([last_key.tr(of), last_key.tr(wof), key.br(wof), key.br(of)]))
+
+                            col.append(_offset_all([key.br(of), key.br(wof), key.tr(wof), key.tr(of)]))
+
+                        if key.has_wall("top"):
+                            if not last_key.is_none() and last_key.has_wall("top"):
+                                col.append(_offset_all([last_key.tl(of), last_key.tl(wof), key.tr(wof), key.tr(of)]))
+
+                            col.append(_offset_all([key.tr(of), key.tr(wof), key.tl(wof), key.tl(of)]))
+
+                        last_key = key
 
                 last_row_key = key
 
@@ -2179,8 +2174,11 @@ def make_dactyl():
         if debug_exports:
             export_file(shape=walls_shape, fname=path.join(r".", "things", r"debug_walls_shape"))
 
-        bottom = bottom_hull(side)
+        bottom = case_bottom(side)
         s2 = union([walls_shape, bottom])
+
+        cshape = single_column(2)
+        export_file(shape=bottom, fname=path.join(save_path, r_config_name + r"_case_bottom"))
 
         # s2 = union([s2, *screw_insert_outers(side=side)])
         #
@@ -2273,7 +2271,7 @@ def make_dactyl():
                     shape = add([shape, ball])
 
         block = translate(box(400, 400, 40), (0, 0, -20))
-        shape = difference(shape, [block])
+        # shape = difference(shape, [block])
 
         if show_caps:
             shape = add([shape, cluster(side).thumbcaps(side=side)])

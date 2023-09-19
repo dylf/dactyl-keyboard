@@ -9,6 +9,7 @@ SIZES = {
 
 KEY_NONE = None
 
+
 class Key(Part):
     type = "MX"
     hole = "NOTCH"
@@ -21,6 +22,8 @@ class Key(Part):
         self.w = SIZES[key_type]["w"]
         self.h = SIZES[key_type]["h"]
         self.d = SIZES[key_type]["d"]
+        self.neighbors = {}
+        self.walls = []
         if parent_locals is not None:
             for item in parent_locals:
                 globals()[item] = parent_locals[item]
@@ -28,21 +31,93 @@ class Key(Part):
     def __str__(self):
         return f'K-{self.get_id()}'
 
-    def tr(self, add_x=0, add_y=0):
-        offset = rotate_deg([(mount_width / 2.0) + add_x, (mount_height / 2) + add_y, 0], self._rot)
+    def tr(self, off=(0, 0, 0)):
+        offset = rotate_deg([(mount_width / 2.0) + off[0], (mount_height / 2) + off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
-    def tl(self, add_x=0, add_y=0):
-        offset = rotate_deg([-(mount_width / 2.0) - add_x, (mount_height / 2) + add_y, 0], self._rot)
+    def tl(self, off=(0, 0, 0)):
+        offset = rotate_deg([-(mount_width / 2.0) - off[0], (mount_height / 2) + off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
-    def br(self, add_x=0, add_y=0):
-        offset = rotate_deg([(mount_width / 2.0) + add_x, -(mount_height / 2) - add_y, 0], self._rot)
+    def br(self, off=(0, 0, 0)):
+        offset = rotate_deg([(mount_width / 2.0) + off[0], -(mount_height / 2) - off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
-    def bl(self, add_x=0, add_y=0):
-        offset = rotate_deg([-(mount_width / 2.0) - add_x, -(mount_height / 2) - add_y, 0], self._rot)
+    def bl(self, off=(0, 0, 0)):
+        offset = rotate_deg([-(mount_width / 2.0) - off[0], -(mount_height / 2) - off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
+
+    def is_wall_key(self):
+        return len(self.walls) > 0
+
+    def has_wall(self, wall):
+        if wall not in ["top", "left", "right", "bottom"]:
+            raise Exception("wall must be top, left, right, or bottom")
+
+        return wall in self.walls
+
+    def get_walls(self):
+        return self.walls.copy()
+
+    def add_wall(self, wall):
+        if wall not in ["top", "left", "right", "bottom"]:
+            raise Exception("wall must be top, left, right, or bottom")
+
+        if wall in self.walls:
+            return
+
+        self.walls.append(wall)
+
+    def is_corner(self):
+        if "left" in self.walls and "top" in self.walls:
+            return True
+
+        if "left" in self.walls and "bottom" in self.walls:
+            return True
+
+        if "right" in self.walls and "top" in self.walls:
+            return True
+
+        if "right" in self.walls and "bottom" in self.walls:
+            return True
+
+        return False
+
+    def add_neighbor(self, neighbor, side):
+        if side not in ["t", "r", "l", "b", "tr", "br", "tl", "bl"]:
+            raise Exception("side value out of range")
+        if neighbor.is_none():
+            raise Exception("neighbor cannot be NONE key")
+
+        self.neighbors[side] = neighbor
+
+    def get_neighbor(self, side):
+        if side not in ["t", "r", "l", "b", "tr", "br", "tl", "bl"]:
+            raise Exception("side value out of range")
+        if side in self.neighbors.keys():
+            return self.neighbors[side]
+        return KeyFactory.NONE_KEY
+
+    def _get_neighbors(self, ids):
+        found = []
+        for id in ids:
+            key = self.get_neighbor(id)
+            if key is not None and not key.is_none():
+                found.append(key)
+
+        return found
+
+    def get_left_neighbors(self):
+        return self._get_neighbors(["tl", "l", "bl"])
+
+    def get_right_neighbors(self):
+        return self._get_neighbors(["tr", "r", "br"])
+
+    def get_top_neighbors(self):
+        return self._get_neighbors(["tl", "t", "tr"])
+
+    def get_bottom_neighbors(self):
+        return self._get_neighbors(["bl", "b", "br"])
 
     def top_edge(self):
         return [self.tl(), self.tr()]
@@ -99,6 +174,8 @@ class Key(Part):
         yrot = 0
         position = [0, 0, 0]
 
+        use_alpha = alpha + ((nrows - row) * 0.1)
+        # row_radius = ((mount_height + extra_height) / 2) / (np.sin(use_alpha / 2)) + cap_top_height
         column_angle = beta * (centercol - column)
         column_x_delta_actual = column_x_delta
         if (pinky_1_5U and column == lastcol):
@@ -151,30 +228,7 @@ class Key(Part):
         return [self.pos, self.rot]
 
     def render(self, plate_file, side="right"):
-        if plate_style == "MXLEDBIT":
-            pcb_width = 19
-            pcb_length = 19
-            pcb_height = 1.6
-
-            # degrees = np.degrees(alpha / 2)
-            # frame = box(pcb_width + 2, pcb_length + 2, pcb_height * 2)
-            # cutout = union([box(pcb_width - 1, pcb_length - 1, pcb_height * 4),
-            #                 translate(box(pcb_width + 0.2, pcb_height + 0.2, pcb_height * 2), (0, 0, -(pcb_height / 2)))])
-            # # # frame = difference(frame, [box(pcb_width - 1, pcb_length - 1, pcb_height * 4)])
-            # frame = difference(frame, [cutout])
-            # connector = translate(rotate(box(pcb_width + 2, extra_height * 2, pcb_height * 2), (degrees, 0, 0)), (0, (pcb_length / 2), 0))
-            # frame = union([frame, connector])
-
-            degrees = np.degrees(alpha / 2)
-            frame = box(21, 21, 3)
-            # # frame = difference(frame, [box(pcb_width - 1, pcb_length - 1, pcb_height * 4)])
-            frame = difference(frame, [box(18.5, 18.5, 5)])
-            frame = difference(frame, [box(19.5, 19.5, 2.5)])
-            connector = translate(rotate(box(21, 4, 2.5), (degrees, 0, 0)), (0, 11.5, 0))
-            plate = translate(union([frame, connector]), (0, 0, -5))
-            # return frame
-
-        elif plate_style in ['NUB', 'HS_NUB']:
+        if plate_style in ['NUB', 'HS_NUB']:
             tb_border = (mount_height - keyswitch_height) / 2
             top_wall = box(mount_width, tb_border, plate_thickness)
             top_wall = translate(top_wall, (0, (tb_border / 2) + (keyswitch_height / 2), plate_thickness / 2))
@@ -242,37 +296,6 @@ class Key(Part):
                 undercut = undercut.faces("+Z").chamfer(undercut_transition, clip_undercut)
 
             plate = difference(plate, [undercut])
-
-        # if plate_file is not None:
-        #     socket = import_file(plate_file)
-        #
-        #     socket = translate(socket, [0, 0, plate_thickness + plate_offset])
-        #     plate = union([plate, socket])
-
-        if plate_holes:
-            half_width = plate_holes_width / 2.
-            half_height = plate_holes_height / 2.
-            x_off = plate_holes_xy_offset[0]
-            y_off = plate_holes_xy_offset[1]
-            holes = [
-                translate(
-                    cylinder(radius=plate_holes_diameter / 2, height=plate_holes_depth + .01),
-                    (x_off + half_width, y_off + half_height, plate_holes_depth / 2 - .01)
-                ),
-                translate(
-                    cylinder(radius=plate_holes_diameter / 2, height=plate_holes_depth + .01),
-                    (x_off - half_width, y_off + half_height, plate_holes_depth / 2 - .01)
-                ),
-                translate(
-                    cylinder(radius=plate_holes_diameter / 2, height=plate_holes_depth + .01),
-                    (x_off - half_width, y_off - half_height, plate_holes_depth / 2 - .01)
-                ),
-                translate(
-                    cylinder(radius=plate_holes_diameter / 2, height=plate_holes_depth + .01),
-                    (x_off + half_width, y_off - half_height, plate_holes_depth / 2 - .01)
-                ),
-            ]
-            plate = difference(plate, holes)
 
         if side == "left":
             plate = mirror(plate, 'YZ')
@@ -346,13 +369,70 @@ class KeyFactory(object):
         cls.WALL_KEYS = {
             "top": top_wall,
             "bottom": bottom_wall,
-            "inner": inner_wall,
-            "outer": outer_wall
+            "left": inner_wall,
+            "right": outer_wall
         }
+
+        for key in top_wall:
+            key.add_wall("top")
+
+        for key in bottom_wall:
+            key.add_wall("bottom")
+
+        for key in inner_wall:
+            key.add_wall("left")
+
+        for key in outer_wall:
+            key.add_wall("right")
 
         cls.ROWS = all_rows
 
+        for col in range(len(cls.MATRIX)):
+            column = cls.MATRIX[col]
+            for row in range(len(column)):
+                key = cls.MATRIX[col][row]
+                if key.is_none():
+                    continue
+
+                if row > 0:
+                    top = cls.MATRIX[col][row - 1]
+                    if not top.is_none():
+                        key.add_neighbor(top, "t")
+                        top.add_neighbor(key, "b")
+
+                    if col > 0:
+                        tl = cls.MATRIX[col - 1][row - 1]
+                        if not tl.is_none():
+                            key.add_neighbor(tl, "tl")
+                            tl.add_neighbor(key, "br")
+
+                if col > 0:
+                    last_column = cls.MATRIX[col - 1]
+                    left = last_column[row]
+                    if not left.is_none():
+                        key.add_neighbor(left, "l")
+                        left.add_neighbor(key, "r")
+
+                    if len(last_column) > row + 1:
+                        bl = last_column[row + 1]
+                        if not bl.is_none():
+                            key.add_neighbor(bl, "bl")
+                            bl.add_neighbor(key, "tr")
+
         print("KeyFactory: Matrix built.")
+
+    @classmethod
+    def get_wall_sequence(cls):
+        sequence = cls.WALL_KEYS["left"].copy()
+        sequence.extend(cls.WALL_KEYS["bottom"])
+        arr = cls.WALL_KEYS["right"].copy()
+        arr.reverse()
+        sequence.extend(arr)
+        arr = cls.WALL_KEYS["top"].copy()
+        arr.reverse()
+        sequence.extend(arr)
+
+        return sequence
 
     @classmethod
     def get_column(cls, col) -> [Key]:
@@ -364,11 +444,11 @@ class KeyFactory(object):
 
     @classmethod
     def inner_keys(cls):
-        return cls.WALL_KEYS["inner"]
+        return cls.WALL_KEYS["right"]
 
     @classmethod
     def outer_keys(cls):
-        return cls.WALL_KEYS["outer"]
+        return cls.WALL_KEYS["left"]
 
     @classmethod
     def top_keys(cls):
