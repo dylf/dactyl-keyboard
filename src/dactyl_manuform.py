@@ -742,27 +742,44 @@ def make_dactyl():
 
         return shape
 
-    of = (1, 1, -bottom_z_offset)
-    wof = (of[0] + 1, of[1] + 1, of[2] + 5)
+    bottom_start_offset = (1, 1, -bottom_z_offset)
+    bottom_end_offset = (bottom_start_offset[0] + 1, bottom_start_offset[1] + 1, bottom_start_offset[2] + 5)
 
-    def _side_join(keyfunc1, keyfunc2):
+    rim_start_offset = (0, 0, 0)
+    rim_end_offset = (1, 1, 0)
+    ridge_start_offset = rim_end_offset
+    ridge_end_offset = (2, 2, 5)
+    # ridge2_start_offset =
+    # rim_end_offset = (1, 1, 0)
+    top_start_offset = (3, 3, 0)
+    top_end_offset = bottom_start_offset
+
+    wall_offsets = [
+        (0, 0, 3.85),
+        (1, 1, 3.85),
+        (2, 2, 5),
+        (3, 3, 3.85),
+        bottom_end_offset
+    ]
+
+    def _side_join(keyfunc1, keyfunc2, of=bottom_start_offset, wof=bottom_end_offset):
         return _offset_all([keyfunc1(of), keyfunc1(wof), keyfunc2(wof), keyfunc2(of)])
+    #
+    # def left_bottom_wall(key):
+    #     return _side_join(key.tl, key.bl)
+    #
+    # def bottom_bottom_wall(key):
+    #     return _side_join(key.bl, key.br)
+    #
+    # def right_bottom_wall(key):
+    #     return _side_join(key.tr, key.br)
+    #
+    # def top_bottom_wall(key):
+    #     return _side_join(key.tl, key.tr)
 
-    def left_key_wall(key):
-        return _side_join(key.tl, key.bl)
+    def get_walls(side="right", of=bottom_start_offset, wof=bottom_end_offset):
 
-    def bottom_key_wall(key):
-        return _side_join(key.bl, key.br)
-
-    def right_key_wall(key):
-        return _side_join(key.tr, key.br)
-
-    def top_key_wall(key):
-        return _side_join(key.tl, key.tr)
-
-    def get_walls(side="right"):
-
-        all_wall_keys = KeyFactory.WALL_KEYS
+        all_wall_keys = KeyFactory.WALL_KEYS.copy()
         
         rendered_walls = []
         processed = []
@@ -775,13 +792,13 @@ def make_dactyl():
                 r = None
                 match wall:
                     case "left":
-                        r = left_key_wall(key)
+                        r = _side_join(key.tl, key.bl, of=of, wof=wof)
                     case "right":
-                        r = right_key_wall(key)
+                        r = _side_join(key.tr, key.br, of=of, wof=wof)
                     case "top":
-                        r = top_key_wall(key)
+                        r = _side_join(key.tl, key.tr, of=of, wof=wof)
                     case "bottom":
-                        r = bottom_key_wall(key)
+                        r = _side_join(key.bl, key.br, of=of, wof=wof)
                     case _:
                         raise Exception("No handler for wall type: " + wall)
                 
@@ -796,36 +813,36 @@ def make_dactyl():
                 match k:
                     case "t":
                         if "left" in n.walls and "left" in key.walls:
-                            j.append(_side_join(key.tl, n.bl))
+                            j.append(_side_join(key.tl, n.bl, of=of, wof=wof))
                         if "right" in n.walls and "right" in key.walls:
-                            j.append(_side_join(key.tr, n.br))
+                            j.append(_side_join(key.tr, n.br, of=of, wof=wof))
                     case "tr":
                         if "bottom" in n.walls and "right" in key.walls:
-                            j.append(_side_join(key.tr, n.bl))
+                            j.append(_side_join(key.tr, n.bl, of=of, wof=wof))
                     case "r":
                         if "top" in n.walls and "top" in key.walls:
-                            j.append(_side_join(key.tr, n.tl))
+                            j.append(_side_join(key.tr, n.tl, of=of, wof=wof))
                         if "bottom" in n.walls and "bottom" in key.walls:
-                            j.append(_side_join(key.br, n.bl))
+                            j.append(_side_join(key.br, n.bl, of=of, wof=wof))
                     case "br":
                         if "right" in n.walls and "bottom" in key.walls:
-                            j.append(_side_join(key.br, n.tl))
+                            j.append(_side_join(key.br, n.tl, of=of, wof=wof))
                     case "b":
                         if "left" in n.walls and "left" in key.walls:
-                            j.append(_side_join(key.bl, n.tl))
+                            j.append(_side_join(key.bl, n.tl, of=of, wof=wof))
                         if "right" in n.walls and "right" in key.walls:
-                            j.append(_side_join(key.br, n.tr))
+                            j.append(_side_join(key.br, n.tr, of=of, wof=wof))
                     case "bl":
                         if "left" in n.walls and "bottom" in key.walls:
-                            j.append(_side_join(key.bl, n.tr))
+                            j.append(_side_join(key.bl, n.tr, of=of, wof=wof))
                     case "l":
                         if "top" in n.walls and "top" in key.walls:
-                            j.append(_side_join(key.tl, n.tr))
+                            j.append(_side_join(key.tl, n.tr, of=of, wof=wof))
                         if "bottom" in n.walls and "bottom" in key.walls:
-                            j.append(_side_join(key.bl, n.br))
+                            j.append(_side_join(key.bl, n.br, of=of, wof=wof))
                     case "tl":
                         if "bottom" in n.walls and "left" in key.walls:
-                            j.append(_side_join(key.tl, n.br))
+                            j.append(_side_join(key.tl, n.br, of=of, wof=wof))
                     case _:
                         raise Exception("Cannot handle neighbor type: " + k)    
 
@@ -883,7 +900,7 @@ def make_dactyl():
 
 
         # bottom_box = translate(union([box(50, 50, 15), box(50, 50, 15)]), (0, 0, -5))
-        bottom_box = translate(rotate(cylinder(25, 7), (0, 5, 0)), (-10, 0, -5))
+        bottom_box = translate(rotate(cylinder(25, 7), (0, 5, 0)), (-10, 0, 7))
         bottom_box = difference(bottom_box, [shape])
 
         shape = union([shape, bottom_box])
@@ -1325,22 +1342,33 @@ def make_dactyl():
     store_bottom_pts = False
     bottom_pts = []
 
-    def case_walls(side='right'):
-        print('case_walls()')
-        nonlocal store_bottom_pts
-        store_bottom_pts = True
-        result = (
-            union([
-                back_wall(),
-                left_wall(side=side),
-                right_wall(),
-                front_wall(),
-                cluster(side=side).walls(side=side),
-                cluster(side=side).connection(side=side),
-            ])
-        )
-        store_bottom_pts = False
-        return result
+    def case_walls(side="right"):
+        wall_layers = []
+
+        for i in range(len(wall_offsets) - 1):
+            start = wall_offsets[i]
+            end = wall_offsets[i + 1]
+
+            wall_layers.append(get_walls(side, of=start, wof=end))
+
+        return union(wall_layers)
+
+    # def case_walls(side='right'):
+    #     print('case_walls()')
+    #     nonlocal store_bottom_pts
+    #     store_bottom_pts = True
+    #     result = (
+    #         union([
+    #             back_wall(),
+    #             left_wall(side=side),
+    #             right_wall(),
+    #             front_wall(),
+    #             cluster(side=side).walls(side=side),
+    #             cluster(side=side).connection(side=side),
+    #         ])
+    #     )
+    #     store_bottom_pts = False
+    #     return result
 
 
     rj9_start = list(
