@@ -2,7 +2,6 @@ from clusters.minidox import MinidoxCluster
 import os
 import json
 
-
 class Minithicc3(MinidoxCluster):
 
     @staticmethod
@@ -126,9 +125,9 @@ class Minithicc3(MinidoxCluster):
     #         ])
 
     def thumbcaps(self, side='right'):
-        t1 = self.thumb_1x_layout(sa_cap(Usize=1,rot=90), cap=True)
+        t1 = self.thumb_1x_layout(sa_cap(Usize=1, rot=90), cap=True)
         if not default_1U_cluster:
-            t1.add(self.thumb_15x_layout(sa_cap(Usize=1.5), cap=True))
+            t1.add(self.thumb_15x_layout(sa_cap(Usize=1), cap=True))
         return t1
 
     def thumb(self, side="right"):
@@ -199,25 +198,36 @@ class Minithicc3(MinidoxCluster):
             triangle_hulls(
                 [
                     self.tl_place(self.thumb_post_tl()),
-                    key_place(web_post_bl(), 0, lastrow),
+                    cluster_key_place(web_post_bl(), 0, cornerrow),
                     self.tl_place(self.thumb_post_tr()),
-                    key_place(web_post_br(), 0, lastrow),
+                    cluster_key_place(web_post_br(), 0, cornerrow),
                     self.tr_place(self.thumb_post_tl()),
-                    key_place(web_post_bl(), 1, lastrow),
+                    cluster_key_place(web_post_bl(), 1, cornerrow),
                     self.tr_place(self.thumb_post_tr()),
-                    key_place(web_post_br(), 1, lastrow),
-                    # key_place(web_post_tl(), 2, lastrow),
-                    # key_place(web_post_bl(), 2, lastrow),
+                    cluster_key_place(web_post_br(), 1, cornerrow),
+                    cluster_key_place(web_post_tl(), 2, lastrow),
+                    cluster_key_place(web_post_bl(), 2, lastrow),
+                    # self.tr_place(self.thumb_post_br()),
+                    cluster_key_place(web_post_bl(), 2, lastrow),
+
+                    # cluster_key_place(web_post_br(), 1, cornerrow),
+                    cluster_key_place(web_post_br(), 1, cornerrow),
                     self.tr_place(self.thumb_post_tr()),
-                    key_place(web_post_bl(), 2, lastrow),
+                    cluster_key_place(web_post_bl(), 2, lastrow),
                     self.tr_place(self.thumb_post_br()),
-                    key_place(web_post_br(), 2, lastrow),
-                    key_place(web_post_bl(), 3, lastrow),
-                    key_place(web_post_tr(), 2, lastrow),
-                    key_place(web_post_tl(), 3, lastrow),
-                    # key_place(web_post_bl(), 3, lastrow),
-                    # key_place(web_post_tr(), 3, lastrow),
-                    # key_place(web_post_br(), 3, lastrow),
+                    self.tr_place(self.thumb_post_tr()),
+                    cluster_key_place(web_post_bl(), 2, lastrow),
+                    # self.tr_place(self.thumb_post_tr()),
+                    # cluster_key_place(web_post_br(), 1, lastrow),
+
+                    self.tr_place(self.thumb_post_br()),
+                    cluster_key_place(web_post_br(), 2, lastrow),
+                    cluster_key_place(web_post_bl(), 3, lastrow),
+                    cluster_key_place(web_post_tr(), 2, lastrow),
+                    cluster_key_place(web_post_tl(), 3, lastrow),
+                    # cluster_key_place(web_post_bl(), 3, cornerrow),
+                    # cluster_key_place(web_post_tr(), 3, lastrow),
+                    # cluster_key_place(web_post_br(), 3, cornerrow),
                 ]
             )
         )
@@ -225,40 +235,35 @@ class Minithicc3(MinidoxCluster):
         hulls.append(
             triangle_hulls(
                 [
-                    key_place(web_post_tr(), 3, lastrow),
-                    key_place(web_post_br(), 3, lastrow),
-                    key_place(web_post_bl(), 4, lastrow),
+                    cluster_key_place(web_post_tr(), 3, lastrow),
+                    cluster_key_place(web_post_br(), 3, lastrow),
+                    cluster_key_place(web_post_bl(), 4, cornerrow),
                 ]
             )
         )
-
-
         # hulls.append(
         #     triangle_hulls(
         #         [
-        #             key_place(web_post_br(), 1, lastrow),
-        #             key_place(web_post_tl(), 2, lastrow),
-        #             key_place(web_post_bl(), 2, lastrow),
-        #             key_place(web_post_tr(), 2, lastrow),
-        #             key_place(web_post_br(), 2, lastrow),
-        #             key_place(web_post_bl(), 3, lastrow),
+        #             cluster_key_place(web_post_br(), 1, cornerrow),
+        #             cluster_key_place(web_post_tl(), 2, lastrow),
+        #             cluster_key_place(web_post_bl(), 2, cornerrow),
+        #             cluster_key_place(web_post_tr(), 2, lastrow),
+        #             cluster_key_place(web_post_br(), 2, cornerrow),
+        #             cluster_key_place(web_post_bl(), 3, cornerrow),
         #         ]
         #     )
         # )
-
-
 
         if not trackball_present(side):
             hulls.append(
                 triangle_hulls(
                     [
-                        key_place(web_post_tr(), 3, lastrow),
-                        key_place(web_post_br(), 3, lastrow),
-                        key_place(web_post_bl(), 4, lastrow),
+                        cluster_key_place(web_post_tr(), 3, lastrow),
+                        cluster_key_place(web_post_br(), 3, cornerrow),
+                        cluster_key_place(web_post_bl(), 4, cornerrow),
                     ]
                 )
             )
-
 
         return union(hulls)
 
@@ -280,18 +285,12 @@ class Minithicc3(MinidoxCluster):
         else:
             shape = union([shape,wall_brace(self.ml_place, 0, 1, self.thumb_post_tr(), self.ml_place, 0, 1, self.thumb_post_tl())])
         # shape = union([shape, wall_brace(left_wall_cluster_join_location, -1, 0, web_post(), self.ml_place, 0, 1, self.thumb_post_tl())])
-        shape = union([shape, wall_brace(self.tr_place, 0, -1, self.thumb_post_br(), (lambda sh: key_place(sh, 3, lastrow)), 0, -1, web_post_bl())])
-        # shape = union(
-        #     [shape, wall_brace(left_wall_cluster_join_location, -1, 0, web_post(), self.ml_place, 0, 1, self.thumb_post_tl())])
-        # shape = union([shape,
-        #                wall_brace(self.tr_place, 0, -1, self.thumb_post_br(), (lambda sh: key_place(sh, 3, lastrow)), 0,
-        #                           -1, web_post_bl())])
+        shape = union([shape, wall_brace(self.tr_place, 0, -1, self.thumb_post_br(), (lambda sh: cluster_key_place(sh, 3, lastrow)), 0, -1, web_post_bl())])
 
         return shape
 
     def connection(self, side='right'):
         print('thumb_connection()')
-        # clunky bit on the top left thumb connection  (normal connectors don't work well)
         if trackball_present(side):
             return self.trackball_in_wall_connection(side)
 
@@ -299,8 +298,8 @@ class Minithicc3(MinidoxCluster):
         # clunky bit on the top left thumb connection  (normal connectors don't work well)
         shape = union([bottom_hull(
             [
-                left_key_place(translate(web_post(), wall_locate2(-1, 0)), lastrow, -1, low_corner=True, side=side),
-                left_key_place(translate(web_post(), wall_locate3(-1, 0)), lastrow, -1, low_corner=True, side=side),
+                left_cluster_key_place(translate(web_post(), wall_locate2(-1, 0)), cornerrow, -1, low_corner=True, side=side),
+                left_cluster_key_place(translate(web_post(), wall_locate3(-1, 0)), cornerrow, -1, low_corner=True, side=side),
                 self.bl_place(translate(self.thumb_post_tr(), wall_locate2(-1.4, 1.2))),
                 self.bl_place(translate(self.thumb_post_tr(), wall_locate3(-0.8, 0.23))),
             ]
@@ -309,8 +308,8 @@ class Minithicc3(MinidoxCluster):
         shape = union([shape,
                        hull_from_shapes(
                            [
-                               left_key_place(translate(web_post(), wall_locate2(-1, 0)), cornerrow, -1, low_corner=True, side=side),
-                               left_key_place(translate(web_post(), wall_locate3(-1, 0)), cornerrow, -1, low_corner=True, side=side),
+                               left_cluster_key_place(translate(web_post(), wall_locate2(-1, 0)), cornerrow, -1, low_corner=True, side=side),
+                               left_cluster_key_place(translate(web_post(), wall_locate3(-1, 0)), cornerrow, -1, low_corner=True, side=side),
                                self.ml_place(translate(self.thumb_post_tr(), wall_locate2(-0.3, 1))),
                                self.ml_place(translate(self.thumb_post_tr(), wall_locate3(-0.3, 1))),
                                self.tl_place(self.thumb_post_tl()),
@@ -320,10 +319,10 @@ class Minithicc3(MinidoxCluster):
         shape = union([shape,
                        hull_from_shapes(
                            [
-                               left_key_place(web_post(), cornerrow, -1, low_corner=True, side=side),
-                               left_key_place(translate(web_post(), wall_locate1(-1, 0)), cornerrow, -1, low_corner=True, side=side),
-                               left_key_place(translate(web_post(), wall_locate2(-1, 0)), cornerrow, -1, low_corner=True, side=side),
-                               left_key_place(translate(web_post(), wall_locate3(-1, 0)), cornerrow, -1, low_corner=True, side=side),
+                               left_cluster_key_place(web_post(), cornerrow, -1, low_corner=True, side=side),
+                               left_cluster_key_place(translate(web_post(), wall_locate1(-1, 0)), cornerrow, -1, low_corner=True, side=side),
+                               left_cluster_key_place(translate(web_post(), wall_locate2(-1, 0)), cornerrow, -1, low_corner=True, side=side),
+                               left_cluster_key_place(translate(web_post(), wall_locate3(-1, 0)), cornerrow, -1, low_corner=True, side=side),
                                self.tl_place(self.thumb_post_tl()),
                            ]
                        )])
@@ -331,11 +330,10 @@ class Minithicc3(MinidoxCluster):
         shape = union([shape,
                        hull_from_shapes(
                            [
-                               left_key_place(web_post(), lastrow, -1, low_corner=True, side=side),
-                               left_key_place(translate(web_post(), wall_locate1(-1, 0)), lastrow, -1, low_corner=True,
-                                              side=side),
-                               key_place(web_post_bl(), 0, lastrow),
-                               # key_place(translate(web_post_bl(), wall_locate1(-1, 0)), lastrow, -1, low_corner=True),
+                               left_cluster_key_place(web_post(), cornerrow, -1, low_corner=True, side=side),
+                               left_cluster_key_place(translate(web_post(), wall_locate1(-1, 0)), cornerrow, -1, low_corner=True, side=side),
+                               cluster_key_place(web_post_bl(), 0, cornerrow),
+                               # cluster_key_place(translate(web_post_bl(), wall_locate1(-1, 0)), cornerrow, -1, low_corner=True),
                                self.tl_place(self.thumb_post_tl()),
                            ]
                        )])
@@ -398,10 +396,10 @@ class Minithicc3(MinidoxCluster):
         shape = union([
                        hull_from_shapes(
                            [
-                               left_key_place(web_post(), cornerrow, -1, low_corner=True, side=side),
-                               left_key_place(translate(web_post(), wall_locate1(-1, 0)), cornerrow, -1, low_corner=True,
+                               left_cluster_key_place(web_post(), cornerrow, -1, low_corner=True, side=side),
+                               left_cluster_key_place(translate(web_post(), wall_locate1(-1, 0)), cornerrow, -1, low_corner=True,
                                               side=side),
-                               key_place(web_post_bl(), 0, cornerrow),
+                               cluster_key_place(web_post_bl(), 0, cornerrow),
                                # key_place(translate(web_post_bl(), wall_locate1(-1, 0)), lastrow, -1, low_corner=True),
                                self.tl_place(self.thumb_post_tl()),
                            ]
@@ -424,7 +422,6 @@ class Minithicc3(MinidoxCluster):
                        )])
 
         return shape
-
 
     def screw_positions(self):
         position = self.thumborigin()

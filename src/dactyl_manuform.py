@@ -111,13 +111,62 @@ def get_left_wall_offsets(side="right"):
     return offsets
 
 def make_dactyl():
+
+    def is_side(side, param):
+        return param == side or param == "both"
+
+    def is_oled(side):
+        return oled_mount_type not in [None, "None"] and is_side(side, oled_side)
+    #
+    # def get_left_wall_offsets(side="right"):
+    #
+    #     wide = 22 if not oled_horizontal else tbiw_left_wall_x_offset_override
+    #     short = 8 if not oled_horizontal else tbiw_left_wall_x_offset_override
+    #     offsets = [
+    #         short, short, short, short, short, short, short, short
+    #     ]
+    #     if trackball_in_wall and is_side(side, ball_side):
+    #         wide = tbiw_left_wall_x_offset_override
+    #         # if oled_mount_type == None or not is_side(side, oled_side):
+    #         #     short = 8
+    #         # else:
+    #         #     left_wall_x_offset = oled_left_wall_x_offset_override
+    #         #     short = tbiw_left_wall_x_offset_override  - 5# HACKISH
+    #
+    #         offsets[nrows - 3] = wide
+    #         offsets[nrows - 2] = wide
+    #         offsets[nrows - 1] = wide
+    #         # if nrows == 3:
+    #         #     offsets = [short, wide, wide, wide]
+    #         # elif nrows == 4:
+    #         #     offsets = [short, short, wide, wide]
+    #         # elif nrows == 5:
+    #         #     offsets = [short, short, short, wide, wide]
+    #         # elif nrows == 6:
+    #         #     offsets = [short, short, wide, wide, wide, wide]
+    #     if oled_mount_type not in [None, "None"] and is_side(side, oled_side):
+    #         left_wall_x_offset = oled_left_wall_x_offset_override
+    #         wide = oled_left_wall_x_offset_override
+    #         offsets[0] = wide
+    #         offsets[1] = wide
+    #         offsets[2] = wide
+    #         # if nrows <= 4:
+    #         #     offsets = [wide, wide, wide, wide]
+    #         # elif nrows == 5:
+    #         #     offsets = [wide, wide, wide, short, short]
+    #         # elif nrows == 6:
+    #         #     offsets = [wide, wide, wide, short, short, short]
+    #         # left_wall_x_row_offsets = [22 if row > oled_row else 8 for row in range(lastrow)]
+    #
+    #     return offsets
+
     right_cluster = None
     left_cluster = None
 
     left_wall_x_offset = 8
-    left_wall_x_row_offsets = [
-        8, 8, 8, 8, 8, 8, 8, 8
-    ]
+    # left_wall_x_row_offsets = [
+    #     8, 8, 8, 8, 8, 8, 8, 8
+    # ]
     left_wall_z_offset = 3
     left_wall_lower_y_offset = 0
     left_wall_lower_z_offset = 0
@@ -186,8 +235,12 @@ def make_dactyl():
 
     if save_name not in ['', None]:
         config_name = save_name
+        r_config_name = save_name
+        l_config_name = save_name
     elif overrides_name is not None:
-        config_name = overrides_name + "_" + str(nrows) + "x" + str(ncols) + "_" + thumb_style
+        config_name = overrides_name + "_" + str(nrows) + "x" + str(ncols)
+        r_config_name = config_name + "_" + thumb_style
+        l_config_name = config_name + "_" + other_thumb
 
     ENGINE = data["ENGINE"]
     # Really rough setup.  Check for ENGINE, set it not present from configuration.
@@ -294,12 +347,21 @@ def make_dactyl():
     else:
         double_plate_height = (sa_double_length - mount_height) / 3
 
-    if oled_mount_type is not None and oled_mount_type != "NONE":
-        left_wall_x_offset = oled_left_wall_x_offset_override
-        # left_wall_x_row_offsets = [22 if row > oled_row else 8 for row in range(lastrow)]
-        left_wall_z_offset = oled_left_wall_z_offset_override
-        left_wall_lower_y_offset = oled_left_wall_lower_y_offset
-        left_wall_lower_z_offset = oled_left_wall_lower_z_offset
+    # wide = 22 if not oled_horizontal else tbiw_left_wall_x_offset_override
+    # short = 8 if not oled_horizontal else tbiw_left_wall_x_offset_override
+    #
+    # if oled_mount_type is not None and oled_mount_type != "NONE":
+    #     left_wall_x_offset = oled_left_wall_x_offset_override
+    #     if nrows <= 4:
+    #         left_wall_x_row_offsets = [wide, wide, wide, wide]
+    #     elif nrows == 5:
+    #         left_wall_x_row_offsets = [wide, wide, wide, short, short]
+    #     elif nrows == 6:
+    #         left_wall_x_row_offsets = [wide, wide, wide, short, short, short]
+    #     # left_wall_x_row_offsets = [22 if row > oled_row else 8 for row in range(lastrow)]
+    #     left_wall_z_offset = oled_left_wall_z_offset_override
+    #     left_wall_lower_y_offset = oled_left_wall_lower_y_offset
+    #     left_wall_lower_z_offset = oled_left_wall_lower_z_offset
 
     cap_top_height = plate_thickness + sa_profile_key_height
     row_radius = ((mount_height + extra_height) / 2) / (np.sin(alpha / 2)) + cap_top_height
@@ -333,14 +395,14 @@ def make_dactyl():
         return c
 
     def column_offset(column: int) -> list:
-        c = column - shift_column
+        c = col(column)
 
-        if c < 0:
-            c = 0
-        if c > ncols - 1:
-            c = ncols - 1
+        # if inner_column:
+        #     if column == 0:
+        #         return column_offsets[0]
+        #     return column_offsets[column - 1]
 
-        return column_offsets[c]
+        return column_offsets[column]
 
 
     # column_style='fixed'
