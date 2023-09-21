@@ -225,9 +225,9 @@ class Minithicc3(MinidoxCluster):
                     cluster_key_place(web_post_bl(), 3, lastrow),
                     cluster_key_place(web_post_tr(), 2, lastrow),
                     cluster_key_place(web_post_tl(), 3, lastrow),
-                    cluster_key_place(web_post_bl(), 3, cornerrow),
-                    cluster_key_place(web_post_tr(), 3, lastrow),
-                    cluster_key_place(web_post_br(), 3, cornerrow),
+                    # cluster_key_place(web_post_bl(), 3, cornerrow),
+                    # cluster_key_place(web_post_tr(), 3, lastrow),
+                    # cluster_key_place(web_post_br(), 3, cornerrow),
                 ]
             )
         )
@@ -241,18 +241,18 @@ class Minithicc3(MinidoxCluster):
                 ]
             )
         )
-        hulls.append(
-            triangle_hulls(
-                [
-                    cluster_key_place(web_post_br(), 1, cornerrow),
-                    cluster_key_place(web_post_tl(), 2, lastrow),
-                    cluster_key_place(web_post_bl(), 2, cornerrow),
-                    cluster_key_place(web_post_tr(), 2, lastrow),
-                    cluster_key_place(web_post_br(), 2, cornerrow),
-                    cluster_key_place(web_post_bl(), 3, cornerrow),
-                ]
-            )
-        )
+        # hulls.append(
+        #     triangle_hulls(
+        #         [
+        #             cluster_key_place(web_post_br(), 1, cornerrow),
+        #             cluster_key_place(web_post_tl(), 2, lastrow),
+        #             cluster_key_place(web_post_bl(), 2, cornerrow),
+        #             cluster_key_place(web_post_tr(), 2, lastrow),
+        #             cluster_key_place(web_post_br(), 2, cornerrow),
+        #             cluster_key_place(web_post_bl(), 3, cornerrow),
+        #         ]
+        #     )
+        # )
 
         if not trackball_present(side):
             hulls.append(
@@ -425,8 +425,8 @@ class Minithicc3(MinidoxCluster):
 
     def screw_positions(self):
         position = self.thumborigin()
-        position = list(np.array(position) + np.array([-33, -38, -16]))
-        # position[1] = position[1] - 2
+        position = list(np.array(position) + np.array([-33, -35, -16]))
+        position[1] = position[1] - 4
         position[2] = 0
 
         return position
