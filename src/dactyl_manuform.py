@@ -87,7 +87,7 @@ def get_left_wall_offsets(side="right"):
             short = 8
         else:
             left_wall_x_offset = oled_left_wall_x_offset_override
-            short = tbiw_left_wall_x_offset_override  - 5# HACKISH
+            short = oled_left_wall_x_offset_override # HACKISH
 
         if nrows == 3:
             offsets = [short, wide, wide, wide]
@@ -220,7 +220,9 @@ def make_dactyl():
         save_path = path.join(save_path, overrides_name)
         override_file = path.join(save_path, overrides_name + '.json')
         with open(override_file, mode='r') as fid:
-            data = load_json(override_file, data, save_path)
+            override_data = load_json(override_file, {}, save_path)
+            for (key,value) in override_data.items():
+                data[key] = value
 
     try:
         if data["branch"] not in ["", None]:
@@ -291,9 +293,9 @@ def make_dactyl():
     except NameError:
         quickly = False
 
-    if oled_mount_type is not None and oled_mount_type != "NONE":
-        for item in oled_configurations[oled_mount_type]:
-            globals()[item] = oled_configurations[oled_mount_type][item]
+    # if oled_mount_type is not None and oled_mount_type != "NONE":
+    #     for item in oled_configurations[oled_mount_type]:
+    #         globals()[item] = oled_configurations[oled_mount_type][item]
 
     if nrows > 5:
         column_style = column_style_gt5
@@ -1604,12 +1606,13 @@ def make_dactyl():
 
 
     def oled_position_rotation(side='right'):
+        if side == "left":
+            print("stop")
         _oled_center_row = None
         if trackball_in_wall and (side == ball_side or ball_side == 'both'):
             _oled_center_row = tbiw_oled_center_row
             _oled_translation_offset = tbiw_oled_translation_offset
             _oled_rotation_offset = tbiw_oled_rotation_offset
-
         elif oled_center_row is not None:
             _oled_center_row = oled_center_row
             _oled_translation_offset = oled_translation_offset
@@ -1628,8 +1631,8 @@ def make_dactyl():
 
             if oled_horizontal:
                 _left_wall_x_offset = tbiw_left_wall_x_offset_override
-            elif (trackball_in_wall or oled_horizontal) and (side == ball_side or ball_side == 'both'):
-                _left_wall_x_offset = tbiw_left_wall_x_offset_override
+            # elif (trackball_in_wall or oled_horizontal) and (side == ball_side or ball_side == 'both'):
+            #     _left_wall_x_offset = tbiw_left_wall_x_offset_override
             else:
                 _left_wall_x_offset = left_wall_x_offset
 
