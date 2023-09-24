@@ -2412,17 +2412,19 @@ def make_dactyl():
 
     def run():
         mod_r, walls_r = model_side(side="right")
-        export_file(shape=mod_r, fname=path.join(save_path, config_name + r"_right"))
+        if resin:
+            mod_r = rotate(mod_r, (333.04, 43.67, 85.00))
+        export_file(shape=mod_r, fname=path.join(save_path, r_config_name + r"_right"))
 
         if right_side_only:
             print(">>>>>  RIGHT SIDE ONLY: Only rendering a the right side.")
             return
         base = baseplate(walls_r, side='right')
-        export_file(shape=base, fname=path.join(save_path, config_name + r"_right_plate"))
+        export_file(shape=base, fname=path.join(save_path, r_config_name + r"_right_plate"))
         if quickly:
             print(">>>>>  QUICK RENDER: Only rendering a the right side and bottom plate.")
             return
-        export_dxf(shape=base, fname=path.join(save_path, config_name + r"_right_plate"))
+        export_dxf(shape=base, fname=path.join(save_path, r_config_name + r"_right_plate"))
 
         # rest = wrist_rest(mod_r, base, side="right")
         #
@@ -2431,11 +2433,13 @@ def make_dactyl():
         # if symmetry == "asymmetric":
 
         mod_l, walls_l = model_side(side="left")
-        export_file(shape=mod_l, fname=path.join(save_path, config_name + r"_left"))
+        if resin:
+            mod_l = rotate(mod_l, (333.04, 317.33, 286.35))
+        export_file(shape=mod_l, fname=path.join(save_path, l_config_name + r"_left"))
 
         base_l = mirror(baseplate(walls_l, side='left'), 'YZ')
-        export_file(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
-        export_dxf(shape=base_l, fname=path.join(save_path, config_name + r"_left_plate"))
+        export_file(shape=base_l, fname=path.join(save_path, l_config_name + r"_left_plate"))
+        export_dxf(shape=base_l, fname=path.join(save_path, l_config_name + r"_left_plate"))
 
         # else:
         #     export_file(shape=mirror(mod_r, 'YZ'), fname=path.join(save_path, config_name + r"_left"))

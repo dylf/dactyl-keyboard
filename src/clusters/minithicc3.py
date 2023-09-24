@@ -193,44 +193,72 @@ class Minithicc3(MinidoxCluster):
             )
         )
 
-        # top two to the main keyboard, starting on the left
-        hulls.append(
-            triangle_hulls(
-                [
-                    self.tl_place(self.thumb_post_tl()),
-                    cluster_key_place(web_post_bl(), 0, cornerrow),
-                    self.tl_place(self.thumb_post_tr()),
-                    cluster_key_place(web_post_br(), 0, cornerrow),
-                    self.tr_place(self.thumb_post_tl()),
-                    cluster_key_place(web_post_bl(), 1, cornerrow),
-                    self.tr_place(self.thumb_post_tr()),
-                    cluster_key_place(web_post_br(), 1, cornerrow),
-                    cluster_key_place(web_post_tl(), 2, lastrow),
-                    cluster_key_place(web_post_bl(), 2, lastrow),
-                    # self.tr_place(self.thumb_post_br()),
-                    cluster_key_place(web_post_bl(), 2, lastrow),
-
-                    # cluster_key_place(web_post_br(), 1, cornerrow),
-                    cluster_key_place(web_post_br(), 1, cornerrow),
-                    self.tr_place(self.thumb_post_tr()),
-                    cluster_key_place(web_post_bl(), 2, lastrow),
-                    self.tr_place(self.thumb_post_br()),
-                    self.tr_place(self.thumb_post_tr()),
-                    cluster_key_place(web_post_bl(), 2, lastrow),
-                    # self.tr_place(self.thumb_post_tr()),
-                    # cluster_key_place(web_post_br(), 1, lastrow),
-
-                    self.tr_place(self.thumb_post_br()),
-                    cluster_key_place(web_post_br(), 2, lastrow),
-                    cluster_key_place(web_post_bl(), 3, lastrow),
-                    cluster_key_place(web_post_tr(), 2, lastrow),
-                    cluster_key_place(web_post_tl(), 3, lastrow),
-                    # cluster_key_place(web_post_bl(), 3, cornerrow),
-                    # cluster_key_place(web_post_tr(), 3, lastrow),
-                    # cluster_key_place(web_post_br(), 3, cornerrow),
-                ]
+        if all_last_rows:
+            hulls.append(
+                triangle_hulls(
+                    [
+                        self.tl_place(self.thumb_post_tl()),
+                        key_place(web_post_bl(), 0, lastrow),
+                        self.tl_place(self.thumb_post_tr()),
+                        key_place(web_post_br(), 0, lastrow),
+                        self.tr_place(self.thumb_post_tl()),
+                        key_place(web_post_bl(), 1, lastrow),
+                        self.tr_place(self.thumb_post_tr()),
+                        key_place(web_post_br(), 1, lastrow),
+                        # key_place(web_post_tl(), 2, lastrow),
+                        # key_place(web_post_bl(), 2, lastrow),
+                        self.tr_place(self.thumb_post_tr()),
+                        key_place(web_post_bl(), 2, lastrow),
+                        self.tr_place(self.thumb_post_br()),
+                        key_place(web_post_br(), 2, lastrow),
+                        key_place(web_post_bl(), 3, lastrow),
+                        key_place(web_post_tr(), 2, lastrow),
+                        key_place(web_post_tl(), 3, lastrow),
+                        # key_place(web_post_bl(), 3, lastrow),
+                        # key_place(web_post_tr(), 3, lastrow),
+                        # key_place(web_post_br(), 3, lastrow),
+                    ]
+                )
             )
-        )
+        else:
+            # top two to the main keyboard, starting on the left
+            hulls.append(
+                triangle_hulls(
+                    [
+                        self.tl_place(self.thumb_post_tl()),
+                        cluster_key_place(web_post_bl(), 0, cornerrow),
+                        self.tl_place(self.thumb_post_tr()),
+                        cluster_key_place(web_post_br(), 0, cornerrow),
+                        self.tr_place(self.thumb_post_tl()),
+                        cluster_key_place(web_post_bl(), 1, cornerrow),
+                        self.tr_place(self.thumb_post_tr()),
+                        cluster_key_place(web_post_br(), 1, cornerrow),
+                        cluster_key_place(web_post_tl(), 2, lastrow),
+                        cluster_key_place(web_post_bl(), 2, lastrow),
+                        # self.tr_place(self.thumb_post_br()),
+                        cluster_key_place(web_post_bl(), 2, lastrow),
+
+                        # cluster_key_place(web_post_br(), 1, cornerrow),
+                        cluster_key_place(web_post_br(), 1, cornerrow),
+                        self.tr_place(self.thumb_post_tr()),
+                        cluster_key_place(web_post_bl(), 2, lastrow),
+                        self.tr_place(self.thumb_post_br()),
+                        self.tr_place(self.thumb_post_tr()),
+                        cluster_key_place(web_post_bl(), 2, lastrow),
+                        # self.tr_place(self.thumb_post_tr()),
+                        # cluster_key_place(web_post_br(), 1, lastrow),
+
+                        self.tr_place(self.thumb_post_br()),
+                        cluster_key_place(web_post_br(), 2, lastrow),
+                        cluster_key_place(web_post_bl(), 3, lastrow),
+                        cluster_key_place(web_post_tr(), 2, lastrow),
+                        cluster_key_place(web_post_tl(), 3, lastrow),
+                        # cluster_key_place(web_post_bl(), 3, cornerrow),
+                        # cluster_key_place(web_post_tr(), 3, lastrow),
+                        # cluster_key_place(web_post_br(), 3, cornerrow),
+                    ]
+                )
+            )
 
         hulls.append(
             triangle_hulls(
@@ -241,18 +269,20 @@ class Minithicc3(MinidoxCluster):
                 ]
             )
         )
-        # hulls.append(
-        #     triangle_hulls(
-        #         [
-        #             cluster_key_place(web_post_br(), 1, cornerrow),
-        #             cluster_key_place(web_post_tl(), 2, lastrow),
-        #             cluster_key_place(web_post_bl(), 2, cornerrow),
-        #             cluster_key_place(web_post_tr(), 2, lastrow),
-        #             cluster_key_place(web_post_br(), 2, cornerrow),
-        #             cluster_key_place(web_post_bl(), 3, cornerrow),
-        #         ]
-        #     )
-        # )
+
+        if not all_last_rows:
+            hulls.append(
+                triangle_hulls(
+                    [
+                        cluster_key_place(web_post_br(), 1, cornerrow),
+                        cluster_key_place(web_post_tl(), 2, lastrow),
+                        cluster_key_place(web_post_bl(), 2, cornerrow),
+                        cluster_key_place(web_post_tr(), 2, lastrow),
+                        cluster_key_place(web_post_br(), 2, cornerrow),
+                        cluster_key_place(web_post_bl(), 3, cornerrow),
+                    ]
+                )
+            )
 
         if not trackball_present(side):
             hulls.append(
