@@ -687,6 +687,25 @@ def make_dactyl():
 
         return shape
 
+    def boxit(w, h, d, key, offset):
+        off = key.center(off=offset)
+        return translate(rotate(box(w, h, d), key.rot), off)
+
+    def boxify(func1, func2, func3, func4, offsets1, offsets2):
+        w1 = offsets1[0]
+        w2 = offsets2[0]
+        l1 = offsets1[1]
+        l2 = offsets2[1]
+        d1 = offsets1[2]
+        d2 = offsets2[2]
+
+        face1 = [func1(of=w1), func2(of=w1), func3(of=w1), func4(of=w1)]
+        face2 = [func1(of=w1), func2(of=w1), func3(of=w1), func4(of=w1)]
+        face3 = [func1(of=w1), func2(of=w1), func3(of=w1), func4(of=w1)]
+        face4 = [func1(of=w1), func2(of=w1), func3(of=w1), func4(of=w1)]
+        face5 = [func1(of=w1), func2(of=w1), func3(of=w1), func4(of=w1)]
+        face6 = [func1(of=w1), func2(of=w1), func3(of=w1), func4(of=w1)]
+
     def _offset(point, w=1, h=1, d=1):
         return translate(box(w, h, d), point)
 
@@ -695,7 +714,8 @@ def make_dactyl():
             raise Exception("Points list must have 4 elements")
         process = points.copy()
         process.append(points[0])
-        return tess_hull([_offset(pnt, w=w, h=h, d=d) for pnt in process])
+        # return tess_hull([_offset(pnt, w=w, h=h, d=d) for pnt in process])
+        return triangle_hulls([_offset(pnt, w=w, h=h, d=d) for pnt in process])
         #     _offset(points[0], w=w, h=h, d=d),
         #     _offset(points[1], w=w, h=h, d=d),
         #     _offset(points[2], w=w, h=h, d=d),
@@ -852,6 +872,113 @@ def make_dactyl():
 
         return rendered_walls
 
+    def pcb_backer(side='right'):
+        pcb_calculated_center = (flex_depth + flex_holder_thickness) / 2
+        pcb_offset = (plate_thickness / 2) + pcb_calculated_center
+        hotswap_offset = pcb_offset + hotswap_depth
+
+        pof = (0, 0, -pcb_offset)
+        hof = (0, 0, -hotswap_offset)
+
+        cx = mount_width / 2
+        cy = mount_height / 2
+
+        grid_columns = []
+        cutouts = []
+        last_column = None
+
+        hs_panel_h = 6
+        hs_panel_w = mount_width
+        hs_panel_d = 3
+        hs_panel_off = (0, hs_panel_h - cy, -hotswap_offset)
+
+
+
+
+        for c in range(ncols):
+            col = []
+            column = KeyFactory.get_column(c)
+            last_row_key = KeyFactory.NONE_KEY
+
+            for row in range(len(column)):
+                key = column[row]
+                if not key.is_none():
+                    col.append(_offset_all([key.tr(hof), key.tl(hof), key.bl(hof), key.br(hof)]))
+                    # col.append(boxit(hs_panel_w, hs_panel_h, hs_panel_d, key, hs_panel_off))
+                    tl = key.get_neighbor("tl")
+                    l = key.get_neighbor("l")
+                    top = key.get_neighbor("t")
+
+                    if not top.is_none():
+                        col.append(_offset_all([top.bl(pof), key.tl(pof), key.tr(pof), top.br(pof)], d=1.5))
+                        col.append(_offset_all([top.bl(hof), key.tl(hof), key.tr(hof), top.br(hof)], d=1.5))
+
+                        tc = top.center(off=pof)
+                        bc = key.center(off=pof)
+                        tr = top.rot.copy()
+                        br = key.rot.copy()
+
+                        mid_p = [(tc[0] + bc[0]) / 2, (tc[1] + bc[1]) / 2, (tc[2] + bc[2]) / 2]
+                        mid_r = [(tr[0] + br[0]) / 2, (tr[1] + br[1]) / 2, (tr[2] + br[2]) / 2]
+                        rail = box(10, 1.5, 2.5)
+                        rail = union([rail, translate(box(10, 3, 1), (0, 0, 1))])
+                        rail = translate(rotate(rail, mid_r), mid_p)
+                        col.append(rail)
+                    if not l.is_none():
+                        # col.append(_offset_all([l.tr(of), l.br(osf), key.bl(of), key.tl(of)]))
+                        if not tl.is_none() and not l.is_none() and not top.is_none():
+                            col.append(_offset_all([top.bl(pof), tl.br(pof), l.tr(pof), key.tl(pof)], d=1.5))
+                            col.append(_offset_all([top.bl(hof), tl.br(hof), l.tr(hof), key.tl(hof)], d=1.5))
+                    elif not tl.is_none() and not top.is_none():
+                        col.append(_offset_all([top.bl(pof), tl.br(pof), key.tl(pof), key.tl(pof)], d=1.5))
+
+
+
+                    top_off = -8
+                    side_off = -2
+                    bot_off = -2
+                    hot_depth = 1 - hotswap_offset
+                    pcb_depth = -5 - hotswap_offset
+                    hole_top = [
+                        key.tl([side_off, top_off, hot_depth]),
+                        key.tr([side_off, top_off, hot_depth]),
+                        key.br([side_off, bot_off, hot_depth]),
+                        key.bl([side_off, bot_off, hot_depth]),
+                        key.tl([side_off, top_off, hot_depth])
+                    ]
+
+                    hole_bottom = [
+                        key.tl([side_off, top_off, pcb_depth]),
+                        key.tr([side_off, top_off, pcb_depth]),
+                        key.br([side_off, bot_off, pcb_depth]),
+                        key.bl([side_off, bot_off, pcb_depth]),
+                        key.tl([side_off, top_off, pcb_depth])
+                    ]
+
+
+                    hole_top.extend(hole_bottom)
+                    cutout = tess_hull([_offset(point) for point in hole_top])
+                    cutouts.append(cutout)
+
+
+                last_row_key = key
+
+            last_column = column
+
+            grid_columns.append(union(col))
+
+        # grid_columns.append(union(col))
+        # column_bottoms.append(union(get_walls(side)))
+        shape = difference(union(grid_columns), cutouts)
+
+
+        # bottom_box = translate(union([box(50, 50, 15), box(50, 50, 15)]), (0, 0, -5))
+        # bottom_box = translate(rotate(cylinder(25, 7), (0, 5, 0)), (-10, 0, 7))
+        # bottom_box = difference(bottom_box, [shape])
+        #
+        # shape = union([shape, bottom_box])
+
+        return shape
 
     def case_bottom(side="right"):
         debugprint('case_bottom()')
@@ -894,10 +1021,6 @@ def make_dactyl():
         column_bottoms.append(union(col))
         column_bottoms.append(union(get_walls(side)))
         shape = union(column_bottoms)
-
-        # cutter = tess_hull([shape])
-
-
 
         # bottom_box = translate(union([box(50, 50, 15), box(50, 50, 15)]), (0, 0, -5))
         bottom_box = translate(rotate(cylinder(25, 7), (0, 5, 0)), (-10, 0, 7))
@@ -2280,8 +2403,9 @@ def make_dactyl():
             export_file(shape=walls_shape, fname=path.join(r".", "things", r"debug_walls_shape"))
 
         bottom = case_bottom(side)
+        pcb_grid = pcb_backer(side)
         s2 = union([walls_shape, bottom])
-
+        export_file(shape=pcb_grid, fname=path.join(save_path, r_config_name + r"_pcb_grid"))
         # cshape = single_column(2)
         export_file(shape=bottom, fname=path.join(save_path, r_config_name + r"_case_bottom"))
 

@@ -305,5 +305,9 @@
       0
     ]
   ],
-  "layouts": null
+  "layouts": null,
+  "flex_z_offset": 5.0,
+  "flex_depth": 0.6,
+  "flex_holder_thickness": 2.0,
+  "hotswap_depth": 1.25
 }

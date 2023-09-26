@@ -31,19 +31,30 @@ class Key(Part):
     def __str__(self):
         return f'K-{self.get_id()}'
 
+    def _offset_point(self, width, height, off):
+        offset = rotate_deg([(width / 2.0) + off[0], (height / 2) + off[1], off[2]], self._rot)
+        return add_translate(self._pos, offset)
+
+    def center(self, off=(0, 0, 0)):
+        return self._offset_point(0, 0, off)
+
     def tr(self, off=(0, 0, 0)):
+        # return self._offset_point(mount_width / 2.0, mount_height / 2.0, off)
         offset = rotate_deg([(mount_width / 2.0) + off[0], (mount_height / 2) + off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
     def tl(self, off=(0, 0, 0)):
+        # return self._offset_point(-mount_width / 2.0, mount_height / 2.0, off)
         offset = rotate_deg([-(mount_width / 2.0) - off[0], (mount_height / 2) + off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
     def br(self, off=(0, 0, 0)):
+        # return self._offset_point(mount_width / 2.0, -mount_height / 2.0, off)
         offset = rotate_deg([(mount_width / 2.0) + off[0], -(mount_height / 2) - off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
     def bl(self, off=(0, 0, 0)):
+        # return self._offset_point(-mount_width / 2.0, -mount_height / 2.0, off)
         offset = rotate_deg([-(mount_width / 2.0) - off[0], -(mount_height / 2) - off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
