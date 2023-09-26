@@ -75,6 +75,8 @@ def debugprint(info):
 
 ## IMPORT DEFAULT CONFIG IN CASE NEW PARAMETERS EXIST
 
+exported_plate = False
+
 def get_left_wall_offsets(side="right"):
     offsets = [
         8, 8, 8, 8, 8, 8, 8, 8
@@ -316,7 +318,7 @@ def make_dactyl():
     if plate_style in ['NUB', 'HS_NUB']:
         keyswitch_height = nub_keyswitch_height
         keyswitch_width = nub_keyswitch_width
-    elif plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH']:
+    elif plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH', 'CHOC']:
         keyswitch_height = undercut_keyswitch_height
         keyswitch_width = undercut_keyswitch_width
     else:
@@ -340,6 +342,8 @@ def make_dactyl():
     mount_width = keyswitch_width + 2 * plate_rim
     mount_height = keyswitch_height + 2 * plate_rim
     mount_thickness = plate_thickness
+
+    print(f"Mount Width: {mount_width}, Mount height: ${mount_height}, Mount thickness: {mount_thickness}")
 
     if default_1U_cluster and thumb_style == 'DEFAULT':
         double_plate_height = (.7 * sa_double_length - mount_height) / 3
@@ -411,6 +415,7 @@ def make_dactyl():
 
 
     def single_plate(cylinder_segments=100, side="right"):
+        global exported_plate
         if plate_style in ['NUB', 'HS_NUB']:
             tb_border = (mount_height - keyswitch_height) / 2
             top_wall = box(mount_width, tb_border, plate_thickness)
@@ -460,7 +465,7 @@ def make_dactyl():
             socket = translate(socket, [0, 0, plate_thickness + plate_offset])
             plate = union([plate, socket])
 
-        if plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH', 'AMOEBA']:
+        if plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH', 'AMOEBA', 'CHOC']:
             if plate_style in ['UNDERCUT', 'HS_UNDERCUT']:
                 undercut = box(
                     keyswitch_width + 2 * clip_undercut,
@@ -468,7 +473,7 @@ def make_dactyl():
                     mount_thickness
                 )
 
-            if plate_style in ['NOTCH', 'HS_NOTCH', 'AMOEBA']:
+            elif plate_style in ['NOTCH', 'HS_NOTCH', 'AMOEBA']:
                 undercut = box(
                     notch_width,
                     keyswitch_height + 2 * clip_undercut,
@@ -481,8 +486,21 @@ def make_dactyl():
                         mount_thickness
                     )
                 ])
+            elif plate_style == "CHOC":
+                undercut = box(keyswitch_width + 2 * clip_undercut,
+                               keyswitch_height - 2,
+                               mount_thickness / 2
+                )
 
-            undercut = translate(undercut, (0.0, 0.0, -clip_thickness + mount_thickness / 2.0))
+                if top_plate_offset != 0:
+                    plate = difference(plate, [
+                        translate(box(
+                            keyswitch_width + 2,
+                            keyswitch_height + 2,
+                            top_plate_offset
+                    ), (0, 0, mount_thickness - (top_plate_offset / 2) + 0.01))])
+
+            undercut = translate(undercut, (0.0, 0.0, -clip_thickness - top_plate_offset + mount_thickness / 2.0))
 
             if ENGINE == 'cadquery' and undercut_transition > 0:
                 undercut = undercut.faces("+Z").chamfer(undercut_transition, clip_undercut)
@@ -520,8 +538,12 @@ def make_dactyl():
             ]
             plate = difference(plate, holes)
 
+        if not exported_plate:
+            export_file(plate, path.join(save_path, config_name + r"plate_file"))
+            exported_plate
         if side == "left":
             plate = mirror(plate, 'YZ')
+
 
         return plate
 

@@ -200,6 +200,7 @@ shape_config = {
     # 'HS_NUB' = hot swap underside with nubs.
     # 'HS_UNDERCUT' = hot swap underside with undercut. Does not generate properly.  Hot swap step needs to be modified.
     # 'HS_NOTCH' = hot swap underside with notch.  Does not generate properly.  Hot swap step needs to be modified.
+    # 'CHOC' = Thinner plate, 2.2mm thick, with 1.3mm undercut for choc to clip
     # 'plate_style':  'NUB',
     'plate_style': 'NOTCH',
 
@@ -217,6 +218,7 @@ shape_config = {
     'sa_length': 18.5,
     'sa_double_length': 37.5,
     'plate_thickness':  4+1.1,
+    'top_plate_offset': 0,  # adds a z offset around switch dimensions, used with chocs to keep generally thick top wall
 
     'plate_rim': 1.5 + 0.5,
     # Undercut style dimensions

@@ -155,6 +155,7 @@
   "plate_rim": 2.0,
   "clip_thickness": 1.4,
   "clip_undercut": 1.0,
+  "top_plate_offset": 0,
   "undercut_transition": 0.2,
   "plate_file_name": "hotswap_ridged_test",
   "plate_offset": -6,
