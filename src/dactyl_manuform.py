@@ -74,6 +74,7 @@ def debugprint(info):
 
 ## IMPORT DEFAULT CONFIG IN CASE NEW PARAMETERS EXIST
 
+exported_plate = False
 
 
 def make_dactyl():
@@ -90,38 +91,43 @@ def make_dactyl():
         offsets = [
             short, short, short, short, short, short, short, short
         ]
-        if trackball_in_wall and is_side(side, ball_side):
-            wide = tbiw_left_wall_x_offset_override
-            # if oled_mount_type == None or not is_side(side, oled_side):
-            #     short = 8
-            # else:
-            #     left_wall_x_offset = oled_left_wall_x_offset_override
-            #     short = tbiw_left_wall_x_offset_override  - 5# HACKISH
+        if encoder_in_wall and is_side(side, encoder_side):
+            offsets = [
+                wide, wide, wide, wide, wide, wide, wide, wide
+            ]
+        else:
+            if trackball_in_wall and is_side(side, ball_side):
+                wide = tbiw_left_wall_x_offset_override
+                # if oled_mount_type == None or not is_side(side, oled_side):
+                #     short = 8
+                # else:
+                #     left_wall_x_offset = oled_left_wall_x_offset_override
+                #     short = tbiw_left_wall_x_offset_override  - 5# HACKISH
 
-            offsets[nrows - 3] = wide
-            offsets[nrows - 2] = wide
-            offsets[nrows - 1] = wide
-            # if nrows == 3:
-            #     offsets = [short, wide, wide, wide]
-            # elif nrows == 4:
-            #     offsets = [short, short, wide, wide]
-            # elif nrows == 5:
-            #     offsets = [short, short, short, wide, wide]
-            # elif nrows == 6:
-            #     offsets = [short, short, wide, wide, wide, wide]
-        if oled_mount_type not in [None, "None"] and is_side(side, oled_side):
-            left_wall_x_offset = oled_left_wall_x_offset_override
-            wide = oled_left_wall_x_offset_override
-            offsets[0] = wide
-            offsets[1] = wide
-            offsets[2] = wide
-            # if nrows <= 4:
-            #     offsets = [wide, wide, wide, wide]
-            # elif nrows == 5:
-            #     offsets = [wide, wide, wide, short, short]
-            # elif nrows == 6:
-            #     offsets = [wide, wide, wide, short, short, short]
-            # left_wall_x_row_offsets = [22 if row > oled_row else 8 for row in range(lastrow)]
+                offsets[nrows - 3] = wide
+                offsets[nrows - 2] = wide
+                offsets[nrows - 1] = wide
+                # if nrows == 3:
+                #     offsets = [short, wide, wide, wide]
+                # elif nrows == 4:
+                #     offsets = [short, short, wide, wide]
+                # elif nrows == 5:
+                #     offsets = [short, short, short, wide, wide]
+                # elif nrows == 6:
+                #     offsets = [short, short, wide, wide, wide, wide]
+            if oled_mount_type not in [None, "None"] and is_oled(side):
+                left_wall_x_offset = oled_left_wall_x_offset_override
+                wide = oled_left_wall_x_offset_override
+                offsets[0] = wide
+                offsets[1] = wide
+                offsets[2] = wide
+                # if nrows <= 4:
+                #     offsets = [wide, wide, wide, wide]
+                # elif nrows == 5:
+                #     offsets = [wide, wide, wide, short, short]
+                # elif nrows == 6:
+                #     offsets = [wide, wide, wide, short, short, short]
+                # left_wall_x_row_offsets = [22 if row > oled_row else 8 for row in range(lastrow)]
 
         return offsets
 
@@ -185,7 +191,9 @@ def make_dactyl():
         save_path = path.join(save_path, overrides_name)
         override_file = path.join(save_path, overrides_name + '.json')
         with open(override_file, mode='r') as fid:
-            data = load_json(override_file, data, save_path)
+            override_data = load_json(override_file, {}, save_path)
+            for (key,value) in override_data.items():
+                data[key] = value
 
     try:
         if data["branch"] not in ["", None]:
@@ -256,9 +264,9 @@ def make_dactyl():
     except NameError:
         quickly = False
 
-    if oled_mount_type is not None and oled_mount_type != "NONE":
-        for item in oled_configurations[oled_mount_type]:
-            globals()[item] = oled_configurations[oled_mount_type][item]
+    # if oled_mount_type is not None and oled_mount_type != "NONE":
+    #     for item in oled_configurations[oled_mount_type]:
+    #         globals()[item] = oled_configurations[oled_mount_type][item]
 
     if nrows > 5:
         column_style = column_style_gt5
@@ -276,7 +284,7 @@ def make_dactyl():
     if plate_style in ['NUB', 'HS_NUB']:
         keyswitch_height = nub_keyswitch_height
         keyswitch_width = nub_keyswitch_width
-    elif plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH']:
+    elif plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH', 'CHOC']:
         keyswitch_height = undercut_keyswitch_height
         keyswitch_width = undercut_keyswitch_width
     else:
@@ -370,29 +378,7 @@ def make_dactyl():
 
 
     def single_plate(cylinder_segments=100, side="right"):
-        if plate_style == "MXLEDBIT":
-            pcb_width = 19
-            pcb_length = 19
-            pcb_height = 1.6
-
-            # degrees = np.degrees(alpha / 2)
-            # frame = box(pcb_width + 2, pcb_length + 2, pcb_height * 2)
-            # cutout = union([box(pcb_width - 1, pcb_length - 1, pcb_height * 4),
-            #                 translate(box(pcb_width + 0.2, pcb_height + 0.2, pcb_height * 2), (0, 0, -(pcb_height / 2)))])
-            # # # frame = difference(frame, [box(pcb_width - 1, pcb_length - 1, pcb_height * 4)])
-            # frame = difference(frame, [cutout])
-            # connector = translate(rotate(box(pcb_width + 2, extra_height * 2, pcb_height * 2), (degrees, 0, 0)), (0, (pcb_length / 2), 0))
-            # frame = union([frame, connector])
-
-            degrees = np.degrees(alpha / 2)
-            frame = box(21, 21, 3)
-            # # frame = difference(frame, [box(pcb_width - 1, pcb_length - 1, pcb_height * 4)])
-            frame = difference(frame, [box(18.5, 18.5, 5)])
-            frame = difference(frame, [box(19.5, 19.5, 2.5)])
-            connector = translate(rotate(box(21, 4, 2.5), (degrees, 0, 0)), (0, 11.5, 0))
-            frame = translate(union([frame, connector]), (0, 0, -5))
-            return frame
-
+        global exported_plate
         if plate_style in ['NUB', 'HS_NUB']:
             tb_border = (mount_height - keyswitch_height) / 2
             top_wall = box(mount_width, tb_border, plate_thickness)
@@ -442,7 +428,7 @@ def make_dactyl():
             socket = translate(socket, [0, 0, plate_thickness + plate_offset])
             plate = union([plate, socket])
 
-        if plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH', 'AMOEBA']:
+        if plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH', 'AMOEBA', 'CHOC']:
             if plate_style in ['UNDERCUT', 'HS_UNDERCUT']:
                 undercut = box(
                     keyswitch_width + 2 * clip_undercut,
@@ -450,7 +436,7 @@ def make_dactyl():
                     mount_thickness
                 )
 
-            if plate_style in ['NOTCH', 'HS_NOTCH', 'AMOEBA']:
+            elif plate_style in ['NOTCH', 'HS_NOTCH', 'AMOEBA']:
                 undercut = box(
                     notch_width,
                     keyswitch_height + 2 * clip_undercut,
@@ -463,8 +449,21 @@ def make_dactyl():
                         mount_thickness
                     )
                 ])
+            elif plate_style == "CHOC":
+                undercut = box(keyswitch_width + 2 * clip_undercut,
+                               keyswitch_height - 2,
+                               mount_thickness / 2
+                )
 
-            undercut = translate(undercut, (0.0, 0.0, -clip_thickness + mount_thickness / 2.0))
+                if top_plate_offset != 0:
+                    plate = difference(plate, [
+                        translate(box(
+                            keyswitch_width + 2,
+                            keyswitch_height + 2,
+                            top_plate_offset
+                    ), (0, 0, mount_thickness - (top_plate_offset / 2) + 0.01))])
+
+            undercut = translate(undercut, (0.0, 0.0, -clip_thickness - top_plate_offset + mount_thickness / 2.0))
 
             if ENGINE == 'cadquery' and undercut_transition > 0:
                 undercut = undercut.faces("+Z").chamfer(undercut_transition, clip_undercut)
@@ -625,6 +624,9 @@ def make_dactyl():
         debugprint('apply_key_geometry()')
 
         column_angle = beta * (centercol - column)
+        rot_x = 0
+        rot_y = 0
+        rot_z = 0
 
         column_x_delta_actual = column_x_delta
         if (pinky_1_5U and column == lastcol):
@@ -636,8 +638,10 @@ def make_dactyl():
             column_z_delta = column_radius * (1 - np.cos(column_angle))
             shape = translate_fn(shape, [0, 0, -row_radius])
             shape = rotate_x_fn(shape, alpha * (centerrow - row))
+            rot_x += alpha * (centerrow - row)
             shape = translate_fn(shape, [0, 0, row_radius])
             shape = rotate_y_fn(shape, column_angle)
+            rot_y += column_angle
             shape = translate_fn(
                 shape, [-(column - centercol) * column_x_delta_actual, 0, column_z_delta]
             )
@@ -645,23 +649,29 @@ def make_dactyl():
 
         elif column_style == "fixed":
             shape = rotate_y_fn(shape, fixed_angles[column])
+            rot_y += fixed_angles[column]
             shape = translate_fn(shape, [fixed_x[column], 0, fixed_z[column]])
             shape = translate_fn(shape, [0, 0, -(row_radius + fixed_z[column])])
             shape = rotate_x_fn(shape, alpha * (centerrow - row))
+            rot_x += alpha * (centerrow - row)
             shape = translate_fn(shape, [0, 0, row_radius + fixed_z[column]])
             shape = rotate_y_fn(shape, fixed_tenting)
+            rot_y += fixed_tenting
             shape = translate_fn(shape, [0, column_offset(column)[1], 0])
 
         else:
             shape = translate_fn(shape, [0, 0, -row_radius])
             shape = rotate_x_fn(shape, alpha * (centerrow - row))
+            rot_x += alpha * (centerrow - row)
             shape = translate_fn(shape, [0, 0, row_radius])
             shape = translate_fn(shape, [0, 0, -column_radius])
             shape = rotate_y_fn(shape, column_angle)
+            rot_y += column_angle
             shape = translate_fn(shape, [0, 0, column_radius])
             shape = translate_fn(shape, column_offset(column))
 
         shape = rotate_y_fn(shape, tenting_angle)
+        rot_y += tenting_angle
         shape = translate_fn(shape, [0, 0, keyboard_z_offset])
 
         return shape
@@ -1304,29 +1314,59 @@ def make_dactyl():
 
     # todo mounts account for walls or walls account for mounts
     def encoder_wall_mount(shape, side='right'):
-        pos, rot = oled_position_rotation()
 
+        def low_prep_position(sh):
+            return translate(rotate(sh, (0, -38, 0)), (6, 8, -14))
+
+        def high_prep_position(sh):
+            return translate(rotate(sh, (-4, -38, 10)), (6, 0, -15))
+
+        ec11_mount_high = high_prep_position(rotate(import_file(path.join(parts_path, "ec11_mount_2")), (0, 0, 90)))
+
+        ec11_mount_high = key_place(ec11_mount_high, -1, 0)
+
+        ec11_mount_low = low_prep_position(rotate(import_file(path.join(parts_path, "ec11_mount_2")), (0, 0, 90)))
+        ec11_mount_low = key_place(ec11_mount_low, -1, 2)
+
+        encoder_cut_high = key_place(high_prep_position(box(12, 13, 20)), -1, 0)
+        encoder_cut_low = key_place(low_prep_position(box(12, 13, 20)), -1, 2)
+
+        # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
+
+        # high = key_position([-20, 0, 0], 0, 0)
+        # low = key_position([-20, 0, 0], 0, 2)
+        # pos, rot = oled_position_rotation()
+        # rot = [0, -10, 0]
+        # low_rot = rotate_around_y(low, 20)
         # hackity hack hack
-        if side == 'right':
-            pos[0] -= 5
-            pos[1] -= 34
-            pos[2] -= 7.5
-            rot[0] = 0
-        else:
-            pos[0] -= 3
-            pos[1] -= 31
-            pos[2] -= 7
-            rot[0] = 0
-            rot[1] -= 0
-            rot[2] = -5
+        # if side == 'right':
+        #     pos[0] += 5
+        #     pos[1] -= 34
+        #     pos[2] -= 3.5
+        #     rot[0] -= 15
+        #     rot[1] -= 3
+        #     rot[2] += 13
+        # else:
+        #     pos[0] += 1
+        #     pos[1] -= 34
+        #     pos[2] -= 7.5
+        #     rot[0] = 0
+        #     rot[1] -= 3
+        #     # rot[2] = -8
 
         # enconder_spot = key_position([-10, -5, 13.5], 0, cornerrow)
-        ec11_mount = import_file(path.join(parts_path, "ec11_mount_2"))
-        ec11_mount = translate(rotate(ec11_mount, rot), pos)
-        encoder_cut = box(10.5, 10.5, 20)
-        encoder_cut = translate(rotate(encoder_cut, rot), pos)
-        shape = difference(shape, [encoder_cut])
-        shape = union([shape, ec11_mount])
+        # ec11_mount_high = import_file(path.join(parts_path, "ec11_mount_2"))
+        # ec11_mount_high = translate(rotate(ec11_mount_high, rot), high)
+        # encoder_cut_high = box(11, 13, 20)
+        # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
+        #
+        # ec11_mount_low = import_file(path.join(parts_path, "ec11_mount_2"))
+        # ec11_mount_low = translate(rotate(ec11_mount_low, rot), low)
+        # encoder_cut_low = box(11, 13, 20)
+        # encoder_cut_low = translate(rotate(encoder_cut_low, rot), [low[0], low[1] + 1, low[2]])
+
+        shape = difference(shape, [encoder_cut_high, encoder_cut_low])
+        shape = union([shape, ec11_mount_high, ec11_mount_low])
         # encoder_mount = translate(rotate(encoder_mount, (0, 0, 20)), (-27, -4, -15))
         return shape
 
@@ -2161,31 +2201,27 @@ def make_dactyl():
         if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL']:
             shape = union([shape, rj9_holder()])
 
-        oled_yes = False
         if is_oled(side):
             if oled_mount_type == "UNDERCUT":
                 hole, frame = oled_undercut_mount_frame(side=side)
                 shape = difference(shape, [hole])
                 shape = union([shape, frame])
-                oled_yes = True
 
             elif oled_mount_type == "SLIDING":
                 hole, frame = oled_sliding_mount_frame(side=side)
                 shape = difference(shape, [hole])
                 shape = union([shape, frame])
-                oled_yes = True
 
             elif oled_mount_type == "CLIP":
                 hole, frame = oled_clip_mount_frame(side=side)
                 shape = difference(shape, [hole])
                 shape = union([shape, frame])
-                oled_yes = True
 
-            if oled_yes and encoder_in_wall:
-                shape = encoder_wall_mount(shape, side)
+        if encoder_in_wall and is_side(side, encoder_side):
+            shape = encoder_wall_mount(shape, side)
 
         if not quickly:
-            if trackball_in_wall and (side == ball_side or ball_side == 'both'):
+            if trackball_in_wall and (is_side(side, ball_side)):
                 tbprecut, tb, tbcutout, sensor, ball, mount, top_cutter = generate_trackball_in_wall()
                 # shape = union([shape, mount])
                 # HACK HACKETY HACK HACK!
@@ -2375,7 +2411,7 @@ def make_dactyl():
 
     def run():
         mod_r, walls_r = model_side(side="right")
-        if resin:
+        if resin and ENGINE == "cadquery":
             mod_r = rotate(mod_r, (333.04, 43.67, 85.00))
         export_file(shape=mod_r, fname=path.join(save_path, r_config_name + r"_right"))
 
@@ -2396,7 +2432,7 @@ def make_dactyl():
         # if symmetry == "asymmetric":
 
         mod_l, walls_l = model_side(side="left")
-        if resin:
+        if resin and ENGINE == "cadquery":
             mod_l = rotate(mod_l, (333.04, 317.33, 286.35))
         export_file(shape=mod_l, fname=path.join(save_path, l_config_name + r"_left"))
 
