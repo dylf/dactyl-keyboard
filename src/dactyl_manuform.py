@@ -120,52 +120,59 @@ def make_dactyl():
         return oled_mount_type not in [None, "None"] and is_side(side, oled_side)
 
     def get_left_wall_offsets(side="right"):
-        # if side == "left":
-        #     print("gotcha")
-        wide = 22 if not oled_horizontal else tbiw_left_wall_x_offset_override
-        short = 8 if not oled_horizontal else tbiw_left_wall_x_offset_override
-        if trackball_in_wall and is_side(side, ball_side):
-            wide = tbiw_left_wall_x_offset_override
+        is_track_or_encoder = (trackball_in_wall and is_side(side, ball_side)) or (encoder_in_wall and is_side(side, encoder_side))
+        wide = 22 if not is_track_or_encoder else tbiw_left_wall_x_offset_override
+        short = 8  # if not is_track_or_encoder else tbiw_left_wall_x_offset_override
         offsets = [
             short, short, short, short, short, short, short, short
         ]
-        if encoder_in_wall and is_side(side, encoder_side):
-            offsets = [
-                wide, wide, wide, wide, wide, wide, wide, wide
-            ]
-        else:
-            if trackball_in_wall and is_side(side, ball_side):
-                # wide = tbiw_left_wall_x_offset_override
-                # if oled_mount_type == None or not is_side(side, oled_side):
-                #     short = 8
-                # else:
-                #     left_wall_x_offset = oled_left_wall_x_offset_override
-                #     short = tbiw_left_wall_x_offset_override  - 5# HACKISH
+        # if encoder_in_wall and is_side(side, encoder_side):
+        #     offsets = [
+        #         wide, wide, wide, wide, wide, wide, wide, wide
+        #     ]
+        # else:
+        if (trackball_in_wall and is_side(side, ball_side)):
+            # if oled_mount_type == None or not is_side(side, oled_side):
+            #     short = 8
+            # else:
+            #     left_wall_x_offset = oled_left_wall_x_offset_override
+            #     short = tbiw_left_wall_x_offset_override  - 5# HACKISH
 
-                offsets[nrows - 3] = wide
-                offsets[nrows - 2] = wide
-                offsets[nrows - 1] = wide
-                # if nrows == 3:
-                #     offsets = [short, wide, wide, wide]
-                # elif nrows == 4:
-                #     offsets = [short, short, wide, wide]
-                # elif nrows == 5:
-                #     offsets = [short, short, short, wide, wide]
-                # elif nrows == 6:
-                #     offsets = [short, short, wide, wide, wide, wide]
-            if oled_mount_type not in [None, "None"] and is_oled(side):
-                left_wall_x_offset = oled_left_wall_x_offset_override
-                wide = oled_left_wall_x_offset_override
-                offsets[0] = wide
-                offsets[1] = wide
-                offsets[2] = wide
-                # if nrows <= 4:
-                #     offsets = [wide, wide, wide, wide]
-                # elif nrows == 5:
-                #     offsets = [wide, wide, wide, short, short]
-                # elif nrows == 6:
-                #     offsets = [wide, wide, wide, short, short, short]
-                # left_wall_x_row_offsets = [22 if row > oled_row else 8 for row in range(lastrow)]
+            offsets[nrows - 3] = wide
+            offsets[nrows - 2] = wide
+            offsets[nrows - 1] = wide
+
+        if (encoder_in_wall and is_side(side, encoder_side)):
+            # if oled_mount_type == None or not is_side(side, oled_side):
+            #     short = 8
+            # else:
+            #     left_wall_x_offset = oled_left_wall_x_offset_override
+            #     short = tbiw_left_wall_x_offset_override  - 5# HACKISH
+
+            offsets[nrows - 2] = wide
+            offsets[nrows - 3] = wide
+            # offsets[nrows - 1] = wide
+            # if nrows == 3:
+            #     offsets = [short, wide, wide, wide]
+            # elif nrows == 4:
+            #     offsets = [short, short, wide, wide]
+            # elif nrows == 5:
+            #     offsets = [short, short, short, wide, wide]
+            # elif nrows == 6:
+            #     offsets = [short, short, wide, wide, wide, wide]
+        if oled_mount_type not in [None, "None"] and is_oled(side):
+            left_wall_x_offset = oled_left_wall_x_offset_override
+            wide = oled_left_wall_x_offset_override
+            offsets[0] = wide
+            offsets[1] = wide
+            offsets[2] = wide
+            # if nrows <= 4:
+            #     offsets = [wide, wide, wide, wide]
+            # elif nrows == 5:
+            #     offsets = [wide, wide, wide, short, short]
+            # elif nrows == 6:
+            #     offsets = [wide, wide, wide, short, short, short]
+            # left_wall_x_row_offsets = [22 if row > oled_row else 8 for row in range(lastrow)]
 
         return offsets
 
@@ -1387,31 +1394,59 @@ def make_dactyl():
 
     # todo mounts account for walls or walls account for mounts
     def encoder_wall_mount(shape, side='right'):
-        pos, rot = oled_position_rotation()
 
+        def low_prep_position(sh):
+            return translate(rotate(sh, (0, -38, 0)), (2, 4, -14))
+
+        def high_prep_position(sh):
+            return translate(rotate(sh, (-4, -38, 10)), (6, 0, -15))
+
+        ec11_mount_high = high_prep_position(rotate(import_file(path.join(parts_path, "ec11_mount_2")), (0, 0, 90)))
+
+        ec11_mount_high = key_place(ec11_mount_high, -1, 0)
+
+        ec11_mount_low = low_prep_position(rotate(import_file(path.join(parts_path, "ec11_mount_2")), (0, 0, 90)))
+        ec11_mount_low = key_place(ec11_mount_low, -1, 2)
+
+        encoder_cut_high = key_place(high_prep_position(box(12, 13, 20)), -1, 0)
+        encoder_cut_low = key_place(low_prep_position(box(12, 13, 20)), -1, 2)
+
+        # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
+
+        # high = key_position([-20, 0, 0], 0, 0)
+        # low = key_position([-20, 0, 0], 0, 2)
+        # pos, rot = oled_position_rotation()
+        # rot = [0, -10, 0]
+        # low_rot = rotate_around_y(low, 20)
         # hackity hack hack
-        if side == 'right':
-            pos[0] += 5
-            pos[1] -= 34
-            pos[2] -= 3.5
-            rot[0] -= 15
-            rot[1] -= 3
-            rot[2] += 13
-        else:
-            pos[0] += 1
-            pos[1] -= 34
-            pos[2] -= 7.5
-            rot[0] = 0
-            rot[1] -= 3
-            # rot[2] = -8
+        # if side == 'right':
+        #     pos[0] += 5
+        #     pos[1] -= 34
+        #     pos[2] -= 3.5
+        #     rot[0] -= 15
+        #     rot[1] -= 3
+        #     rot[2] += 13
+        # else:
+        #     pos[0] += 1
+        #     pos[1] -= 34
+        #     pos[2] -= 7.5
+        #     rot[0] = 0
+        #     rot[1] -= 3
+        #     # rot[2] = -8
 
         # enconder_spot = key_position([-10, -5, 13.5], 0, cornerrow)
-        ec11_mount = import_file(path.join(parts_path, "ec11_mount_2"))
-        ec11_mount = translate(rotate(ec11_mount, rot), pos)
-        encoder_cut = box(11, 13, 20)
-        encoder_cut = translate(rotate(encoder_cut, rot), [pos[0], pos[1] + 1, pos[2]])
-        shape = difference(shape, [encoder_cut])
-        shape = union([shape, ec11_mount])
+        # ec11_mount_high = import_file(path.join(parts_path, "ec11_mount_2"))
+        # ec11_mount_high = translate(rotate(ec11_mount_high, rot), high)
+        # encoder_cut_high = box(11, 13, 20)
+        # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
+        #
+        # ec11_mount_low = import_file(path.join(parts_path, "ec11_mount_2"))
+        # ec11_mount_low = translate(rotate(ec11_mount_low, rot), low)
+        # encoder_cut_low = box(11, 13, 20)
+        # encoder_cut_low = translate(rotate(encoder_cut_low, rot), [low[0], low[1] + 1, low[2]])
+
+        shape = difference(shape, [encoder_cut_low])
+        shape = union([shape, ec11_mount_low])
         # encoder_mount = translate(rotate(encoder_mount, (0, 0, 20)), (-27, -4, -15))
         return shape
 

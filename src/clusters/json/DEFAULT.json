@@ -1,9 +1,10 @@
 {
   "thumb_offsets": [
-    6,
-    -3,
-    7
+    2,
+    3,
+    8
   ],
+  "thumb_screw": [-5, -58, 0],
   "thumb_plate_tr_rotation": 0.0,
   "thumb_plate_tl_rotation": 0.0,
   "thumb_plate_mr_rotation": 0.0,
