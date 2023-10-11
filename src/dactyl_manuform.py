@@ -120,9 +120,12 @@ def make_dactyl():
         return oled_mount_type not in [None, "None"] and is_side(side, oled_side)
 
     def get_left_wall_offsets(side="right"):
-
+        # if side == "left":
+        #     print("gotcha")
         wide = 22 if not oled_horizontal else tbiw_left_wall_x_offset_override
         short = 8 if not oled_horizontal else tbiw_left_wall_x_offset_override
+        if trackball_in_wall and is_side(side, ball_side):
+            wide = tbiw_left_wall_x_offset_override
         offsets = [
             short, short, short, short, short, short, short, short
         ]
@@ -132,7 +135,7 @@ def make_dactyl():
             ]
         else:
             if trackball_in_wall and is_side(side, ball_side):
-                wide = tbiw_left_wall_x_offset_override
+                # wide = tbiw_left_wall_x_offset_override
                 # if oled_mount_type == None or not is_side(side, oled_side):
                 #     short = 8
                 # else:
