@@ -998,7 +998,7 @@ def make_dactyl():
                 tbiw_left_wall_z_offset_override + z_offset
             ]))
 
-        if low_corner:
+        elif low_corner:
             y_offset = left_wall_lower_y_offset
             z_offset = left_wall_lower_z_offset
         else:
