@@ -331,19 +331,19 @@ class DefaultCluster(object):
                         cluster_key_place(web_post_bl(), 1, cornerrow),
                         self.tr_place(web_post_tr()),
                         cluster_key_place(web_post_br(), 1, cornerrow),
-                        cluster_key_place(web_post_tl(), 2, lastrow),
+                        # cluster_key_place(web_post_tl(), 2, lastrow),
                         cluster_key_place(web_post_bl(), 2, lastrow),
                         self.tr_place(web_post_tr()),
                         cluster_key_place(web_post_bl(), 2, lastrow),
                         self.tr_place(web_post_br()),
                         cluster_key_place(web_post_br(), 2, lastrow),
                         cluster_key_place(web_post_bl(), 3, lastrow),
-                        cluster_key_place(web_post_tr(), 2, lastrow),
-                        cluster_key_place(web_post_tl(), 3, lastrow),
+                        # cluster_key_place(web_post_tr(), 2, lastrow),
+                        # cluster_key_place(web_post_tl(), 3, lastrow),
                         cluster_key_place(web_post_bl(), 3, cornerrow),
-                        cluster_key_place(web_post_tr(), 3, lastrow),
-                        cluster_key_place(web_post_br(), 3, cornerrow),
-                        cluster_key_place(web_post_bl(), 4, cornerrow),
+                        # cluster_key_place(web_post_tr(), 3, lastrow),
+                        # cluster_key_place(web_post_br(), 3, cornerrow),
+                        # cluster_key_place(web_post_bl(), 4, cornerrow),
                     ]
                 )
             )
@@ -376,18 +376,18 @@ class DefaultCluster(object):
                 )
             )
 
-        hulls.append(
-            triangle_hulls(
-                [
-                    cluster_key_place(web_post_br(), 1, cornerrow),
-                    cluster_key_place(web_post_tl(), 2, lastrow),
-                    cluster_key_place(web_post_bl(), 2, cornerrow),
-                    cluster_key_place(web_post_tr(), 2, lastrow),
-                    cluster_key_place(web_post_br(), 2, cornerrow),
-                    cluster_key_place(web_post_bl(), 3, cornerrow),
-                ]
-            )
-        )
+        # hulls.append(
+        #     triangle_hulls(
+        #         [
+        #             cluster_key_place(web_post_br(), 1, cornerrow),
+        #             # cluster_key_place(web_post_tl(), 2, lastrow),
+        #             cluster_key_place(web_post_bl(), 2, cornerrow),
+        #             # cluster_key_place(web_post_tr(), 2, lastrow),
+        #             cluster_key_place(web_post_br(), 2, cornerrow),
+        #             cluster_key_place(web_post_bl(), 3, cornerrow),
+        #         ]
+        #     )
+        # )
 
         if not full_last_rows:
             hulls.append(
