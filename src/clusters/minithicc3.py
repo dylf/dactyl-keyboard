@@ -50,6 +50,7 @@ class Minithicc3(MinidoxCluster):
     def tl_place(self, shape):
         shape = rotate(shape, [14, -15, 20])
         shape = translate(shape, [-36, -16, -15])
+        # shape = translate(shape, [-32.5, -15, -15])  # edits for Felix
         shape = self.thumb_place(shape)
         return shape
 
@@ -62,6 +63,7 @@ class Minithicc3(MinidoxCluster):
     def ml_place(self, shape):
         shape = rotate(shape, [10, -15, 30])
         shape = translate(shape, [-56, -26, -21])
+        # shape = translate(shape, [-50, -22, -21])  # edits for Felix
         shape = self.thumb_place(shape)
         return shape
 

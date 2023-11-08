@@ -1396,7 +1396,10 @@ def make_dactyl():
     def encoder_wall_mount(shape, side='right'):
 
         def low_prep_position(sh):
-            return translate(rotate(sh, (0, -41, 0)), (2, 4, -17))
+            if side == "right":
+                return translate(rotate(sh, (0, -41, 0)), (2, 1, -17))
+
+            return translate(rotate(sh, (5, -41, 0)), (2, 0, -15))
 
         def high_prep_position(sh):
             return translate(rotate(sh, (-4, -38, 10)), (6, 0, -15))
