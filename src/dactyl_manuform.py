@@ -130,6 +130,20 @@ def make_dactyl():
         #     offsets = [
         #         wide, wide, wide, wide, wide, wide, wide, wide
         #     ]
+        if oled_mount_type not in [None, "None"] and is_oled(side):
+            left_wall_x_offset = oled_left_wall_x_offset_override
+            wide = oled_left_wall_x_offset_override
+            offsets[0] = wide
+            offsets[1] = wide
+            offsets[2] = wide
+            # if nrows <= 4:
+            #     offsets = [wide, wide, wide, wide]
+            # elif nrows == 5:
+            #     offsets = [wide, wide, wide, short, short]
+            # elif nrows == 6:
+            #     offsets = [wide, wide, wide, short, short, short]
+            # left_wall_x_row_offsets = [22 if row > oled_row else 8 for row in range(lastrow)]
+
         # else:
         if (trackball_in_wall and is_side(side, ball_side)):
             # if oled_mount_type == None or not is_side(side, oled_side):
@@ -1399,7 +1413,7 @@ def make_dactyl():
             if side == "right":
                 return translate(rotate(sh, (0, -41, 0)), (2, 1, -17))
 
-            return translate(rotate(sh, (5, -41, 0)), (2, 0, -15))
+            return translate(rotate(sh, (2, -40, 0)), (2, 0, -15))
 
         def high_prep_position(sh):
             return translate(rotate(sh, (-4, -38, 10)), (6, 0, -15))
@@ -1408,11 +1422,13 @@ def make_dactyl():
 
         ec11_mount_high = key_place(ec11_mount_high, -1, 0)
 
-        ec11_mount_low = low_prep_position(rotate(import_file(path.join(parts_path, "ec11_mount_2")), (0, 0, 90)))
+        # ec11_mount_low = low_prep_position(rotate(import_file(path.join(parts_path, "ec11_mount_2")), (0, 0, 90)))
+        ec11_mount_low = low_prep_position(rotate(single_plate(side=side), (0, 0, 90)))
+
         ec11_mount_low = key_place(ec11_mount_low, -1, 2)
 
         encoder_cut_high = key_place(high_prep_position(box(12, 13, 20)), -1, 0)
-        encoder_cut_low = key_place(low_prep_position(box(12, 13, 20)), -1, 2)
+        encoder_cut_low = key_place(low_prep_position(box(keyswitch_width, keyswitch_height, 20)), -1, 2)
 
         # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
 
