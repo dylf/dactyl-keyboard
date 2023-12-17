@@ -439,7 +439,6 @@ def make_dactyl():
 
     # column_style='fixed'
 
-
     def single_plate(cylinder_segments=100, side="right"):
         global exported_plate
         if plate_style in ['NUB', 'HS_NUB']:
@@ -2185,21 +2184,32 @@ def make_dactyl():
 
     def screw_insert_all_shapes(bottom_radius, top_radius, height, offset=0, side='right', hole=False):
         print('screw_insert_all_shapes()')
-        so = screw_offsets
-        shape = (
-            translate(screw_insert(0, 0, bottom_radius, top_radius, height, side=side, hole=hole), (so[0][0], so[0][1], so[0][2] + offset)),  # rear left
-            translate(screw_insert(0, lastrow - 1, bottom_radius, top_radius, height, side=side, hole=hole),
-                      (so[1][0], so[1][1] + left_wall_lower_y_offset, so[1][2] + offset)),  # front left
-            translate(screw_insert(3, lastrow, bottom_radius, top_radius, height, side=side, hole=hole),
-                      (so[2][0], so[2][1], so[2][2] + offset)),  # front middle
-            translate(screw_insert(3, 0, bottom_radius, top_radius, height, side=side, hole=hole), (so[3][0], so[3][1], so[3][2] + offset)),  # rear middle
-            translate(screw_insert(lastcol, 0, bottom_radius, top_radius, height, side=side, hole=hole),
-                      (so[4][0], so[4][1], so[4][2] + offset)),  # rear right
-            translate(screw_insert(lastcol, lastrow - 1, bottom_radius, top_radius, height, side=side, hole=hole),
-                      (so[5][0], so[5][1], so[5][2] + offset)),  # front right
-            translate(screw_insert_thumb(bottom_radius, top_radius, height, side=side, hole=hole), (so[6][0], so[6][1], so[6][2] + offset)),  # thumb cluster
-        )
-
+        so = [[off[0], off[1], off[2] + offset] for off in screw_offsets]
+        if nrows > 3:
+            # so = [[off[0], off[1], off[2] + offset] for off in screw_offsets]
+            shape = (
+                translate(screw_insert(0, 0, bottom_radius, top_radius, height, side=side, hole=hole), so[0]),  # rear left
+                translate(screw_insert(0, lastrow - 1, bottom_radius, top_radius, height, side=side, hole=hole),
+                          so[1]),  # front left
+                translate(screw_insert(3, lastrow, bottom_radius, top_radius, height, side=side, hole=hole), so[2]),  # front middle
+                translate(screw_insert(3, 0, bottom_radius, top_radius, height, side=side, hole=hole), so[3]),  # rear middle
+                translate(screw_insert(lastcol, 0, bottom_radius, top_radius, height, side=side, hole=hole), so[4]),  # rear right
+                translate(screw_insert(lastcol, lastrow - 1, bottom_radius, top_radius, height, side=side, hole=hole), so[5]),  # front right
+                translate(screw_insert_thumb(bottom_radius, top_radius, height, side=side, hole=hole), so[6])  # thumb cluster
+            )
+        else:
+            shape = (
+                translate(screw_insert(0, -1, bottom_radius, top_radius, height, side=side, hole=hole),
+                          (so[0][0], so[0][1] - 13, so[0][2] + offset)),  # rear left
+                translate(screw_insert(0, lastrow, bottom_radius, top_radius, height, side=side, hole=hole),
+                          (so[1][0], so[1][1] + left_wall_lower_y_offset, so[1][2] + offset)),  # front left
+                translate(screw_insert(lastcol, -1, bottom_radius, top_radius, height, side=side, hole=hole),
+                          (so[4][0], so[4][1] - 15, so[4][2] + offset)),  # rear right
+                translate(screw_insert(lastcol, lastrow, bottom_radius, top_radius, height, side=side, hole=hole),
+                          (so[5][0], so[5][1] - 10, so[5][2] + offset)),  # front right
+                translate(screw_insert_thumb(bottom_radius, top_radius, height, side=side, hole=hole),
+                          (so[6][0], so[6][1], so[6][2] + offset)),  # thumb cluster
+            )
         return shape
 
 
@@ -2485,9 +2495,27 @@ def make_dactyl():
                             # (loc.x, loc.y, screw_cbore_depth/2)
                         )
                     )
+                controller_shape = translate(box(36.5, 57.5, 5),
+                                             (
+                                                 external_start[0] + external_holder_xoffset,
+                                                 external_start[1] + external_holder_yoffset - 24,
+                                                 external_holder_height / 2 - 7
+                                             ))
+
+                holder = translate(get_holder(),
+                                   (
+                                       external_start[0] + external_holder_xoffset,
+                                       external_start[1] + external_holder_yoffset - 28.25,
+                                       external_holder_height / 2 - 2.7
+                                   ))
+
+                # hole_shapes.append(controller_shape)
+                # shape = union([shape, inner_shape, controller_shape])
                 shape = difference(shape, hole_shapes)
                 shape = translate(shape, (0, 0, -base_rim_thickness))
                 shape = union([shape, inner_shape])
+                shape = difference(shape, [controller_shape])
+                shape = union([shape, holder])
                 if magnet_bottom:
                     shape = difference(shape, [translate(magnet, (0, 0, 0.05 - (screw_insert_height / 2))) for magnet in list(tool)])
 

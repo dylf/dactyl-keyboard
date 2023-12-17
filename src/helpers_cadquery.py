@@ -360,7 +360,7 @@ pcb_v2 = {
     "w": 33.0,
     "h": 1.15,
     "h2": -2.2,
-    "h3": 5.4,
+    "h3": 4.4,
     "offsets": {
         "l": 0,
         "w": 0,
@@ -370,17 +370,17 @@ pcb_v2 = {
         {
             "rot": [0, 0, 0],
             "relative_to": "h",
-            "offset": [15.25, 17, -5.65],
-            "w": 11,
-            "h": 4.5,
-            "l": 2515
-        },
-        {
-            "rot": [0, 0, 0],
-            "offset": [15.25, 17, 3.65],
+            "offset": [15.25, 17, -6],
             "w": 11,
             "h": 4.5,
             "l": 25
+        },
+        {
+            "rot": [0, 0, 0],
+            "offset": [15.25, 17, 2.35],
+            "w": 11,
+            "h": 4.5,
+            "l": 40
         }
     ]
 }
@@ -389,9 +389,9 @@ pcb_v2 = {
 def build_holder(pcb):
     pcb_box = wp().box(pcb["w"], pcb["l"], pcb["h"])
 
-    left_x = -pcb_v2["w"] / 2
-    back_y = pcb_v2["l"] / 2
-    h_off = pcb_v2["h"]  # + pcb_v2["h2"]
+    left_x = -pcb["w"] / 2
+    back_y = pcb["l"] / 2
+    h_off = pcb["offsets"]["h"]
 
     for data in pcb["port_cuts"]:
         off = data["offset"]
@@ -410,9 +410,9 @@ def build_holder(pcb):
 
     base = base.translate([0, 0, -7])
     holder_hole_width = 29.2
-    holder_hole_height = 12.5
+    holder_hole_height = 15.5
 
-    wall = wp().box(holder_hole_width + 4, 9, holder_hole_height + 10).translate([0, back_y + 4, 2.75])
+    wall = wp().box(holder_hole_width + 4, 9, holder_hole_height + 3).translate([0, back_y + 4, 0.75])
     wall = wall.edges(">Z and |Y").fillet(3)
     groove_neg = wp().box(holder_hole_width + 6, 7, holder_hole_height + 11).translate([0, back_y + 3, 3.25])
     groove_neg = groove_neg.cut(wp().box(holder_hole_width, 30, holder_hole_height).translate([0, back_y + 3, -2.3]))
@@ -420,6 +420,7 @@ def build_holder(pcb):
     inset = inset.edges(">Z and |Y").fillet(2)
     wall = wall.cut(inset)
     wall = wall.cut(groove_neg)
+    pcb_box = pcb_box.translate([0, 0, -2])
     wall = wall.cut(pcb_box)
 
     wall = wall.union(base)
