@@ -2296,7 +2296,7 @@ def make_dactyl():
             if controller_mount_type in ['BLACKPILL_EXTERNAL']:
                 s2 = difference(s2, [blackpill_mount_hole()])
 
-            if controller_mount_type in ['EXTERNAL']:
+            if controller_mount_type in ['EXTERNAL', 'EXTERNAL_BREAKOUT']:
                 s2 = difference(s2, [external_mount_hole()])
 
             if controller_mount_type in ['None']:
@@ -2495,27 +2495,42 @@ def make_dactyl():
                             # (loc.x, loc.y, screw_cbore_depth/2)
                         )
                     )
-                controller_shape = translate(box(36.5, 57.5, 5),
-                                             (
-                                                 external_start[0] + external_holder_xoffset,
-                                                 external_start[1] + external_holder_yoffset - 24,
-                                                 external_holder_height / 2 - 7
-                                             ))
-
-                holder = translate(get_holder(),
-                                   (
-                                       external_start[0] + external_holder_xoffset,
-                                       external_start[1] + external_holder_yoffset - 28.25,
-                                       external_holder_height / 2 - 2.7
-                                   ))
+                # controller_shape = translate(box(36.5, 57.5, 5),
+                #                              (
+                #                                  external_start[0] + external_holder_xoffset,
+                #                                  external_start[1] + external_holder_yoffset - 24,
+                #                                  external_holder_height / 2 - 7
+                #                              ))
+                #
+                # holder = translate(get_holder(),
+                #                    (
+                #                        external_start[0] + external_holder_xoffset,
+                #                        external_start[1] + external_holder_yoffset - 28.25,
+                #                        external_holder_height / 2 - 1.5
+                #                    ))
 
                 # hole_shapes.append(controller_shape)
                 # shape = union([shape, inner_shape, controller_shape])
                 shape = difference(shape, hole_shapes)
                 shape = translate(shape, (0, 0, -base_rim_thickness))
                 shape = union([shape, inner_shape])
-                shape = difference(shape, [controller_shape])
-                shape = union([shape, holder])
+                if controller_mount_type is "EXTERNAL_BREAKOUT":
+                    controller_shape = translate(box(36.5, 57.5, 5),
+                                                 (
+                                                     external_start[0] + external_holder_xoffset,
+                                                     external_start[1] + external_holder_yoffset - 24,
+                                                     external_holder_height / 2 - 7
+                                                 ))
+
+                    holder = translate(get_holder(),
+                                       (
+                                           external_start[0] + external_holder_xoffset,
+                                           external_start[1] + external_holder_yoffset - 28.25,
+                                           external_holder_height / 2 - 1.5
+                                       ))
+                    shape = difference(shape, [controller_shape])
+                    shape = union([shape, holder])
+
                 if magnet_bottom:
                     shape = difference(shape, [translate(magnet, (0, 0, 0.05 - (screw_insert_height / 2))) for magnet in list(tool)])
 

@@ -377,11 +377,18 @@ pcb_v2 = {
         },
         {
             "rot": [0, 0, 0],
-            "offset": [15.25, 17, 2.35],
+            "offset": [15.25, 17, 0.25],
             "w": 11,
             "h": 4.5,
             "l": 40
-        }
+        },
+        {
+            "rot": [0, 0, 0],
+            "offset": [15.25, 17, -3],
+            "w": 11,
+            "h": 10,
+            "l": 40
+        },
     ]
 }
 
@@ -406,23 +413,27 @@ def build_holder(pcb):
     pin_row1 = wp().box(3, 49, 3).translate([left_x + 15.25 + 9 + 5.5, -1, 0])
     pin_row2 = wp().box(3, 49, 3).translate([left_x + 15.25 - 9 + 5.5, -1, 0])
 
-    base = base.union(pin_row2).union(pin_row1)
+    # base = base.cut(pin_row2).cut(pin_row1)
 
-    base = base.translate([0, 0, -7])
+    base = base.translate([0, 0, -7.5])
     holder_hole_width = 29.2
-    holder_hole_height = 15.5
+    holder_hole_height = 16.5
+    # front wall
 
-    wall = wp().box(holder_hole_width + 4, 9, holder_hole_height + 3).translate([0, back_y + 4, 0.75])
+    wall = wp().box(holder_hole_width + 8, 9, holder_hole_height + 1).translate([0, back_y + 4, -0.25])
     wall = wall.edges(">Z and |Y").fillet(3)
-    groove_neg = wp().box(holder_hole_width + 6, 7, holder_hole_height + 11).translate([0, back_y + 3, 3.25])
-    groove_neg = groove_neg.cut(wp().box(holder_hole_width, 30, holder_hole_height).translate([0, back_y + 3, -2.3]))
-    inset = wp().box(holder_hole_width - 2, 10, holder_hole_height - 1).translate([0, back_y + 7, -2.75])
+    groove_neg = wp().box(holder_hole_width + 10, 7, holder_hole_height + 11).translate([0, back_y + 3, 2.25])
+    groove_neg = groove_neg.cut(
+        wp().box(holder_hole_width, 30, holder_hole_height + 1).translate([0, back_y + 3, -2.3]))
+    inset = wp().box(holder_hole_width - 2, 10, holder_hole_height + 1).translate([0, back_y + 7, -2.75])
     inset = inset.edges(">Z and |Y").fillet(2)
     wall = wall.cut(inset)
     wall = wall.cut(groove_neg)
     pcb_box = pcb_box.translate([0, 0, -2])
+    posts1 = wp().box(pcb["w"], 3.0, 5.5).cut(wp().box(pcb["w"] - 6, 3.0, 6.0)).translate([0, -pcb["l"] / 2 + 1, -5.8])
+    posts2 = wp().box(pcb["w"], 3.0, 5.5).cut(wp().box(pcb["w"] - 6, 3.0, 6.0)).translate([0, pcb["l"] / 2 - 1, -5.8])
     wall = wall.cut(pcb_box)
-
+    base = base.union(posts1).union(posts2)
     wall = wall.union(base)
 
     return wall
