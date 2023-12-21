@@ -2514,15 +2514,17 @@ def make_dactyl():
                 shape = difference(shape, hole_shapes)
                 shape = translate(shape, (0, 0, -base_rim_thickness))
                 shape = union([shape, inner_shape])
-                if controller_mount_type is "EXTERNAL_BREAKOUT":
+                if controller_mount_type == "EXTERNAL_BREAKOUT":
                     controller_shape = translate(box(36.5, 57.5, 5),
                                                  (
                                                      external_start[0] + external_holder_xoffset,
                                                      external_start[1] + external_holder_yoffset - 24,
                                                      external_holder_height / 2 - 7
                                                  ))
-
-                    holder = translate(get_holder(),
+                    basic_holder = get_holder()
+                    if side == "left":
+                        basic_holder = mirror(basic_holder, 'YZ')
+                    holder = translate(basic_holder,
                                        (
                                            external_start[0] + external_holder_xoffset,
                                            external_start[1] + external_holder_yoffset - 28.25,
