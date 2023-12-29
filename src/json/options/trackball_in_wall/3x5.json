@@ -19,7 +19,7 @@
     10,
     -25
   ],
-  "tbiw_left_wall_x_offset_override": 36.0,
+  "tbiw_left_wall_x_offset_override": 30.0,
   "tbiw_left_wall_z_offset_override": 6.0,
   "tbiw_left_wall_lower_y_offset": -12.0,
   "tbiw_left_wall_lower_z_offset": 14.0,
@@ -34,6 +34,7 @@
   "trackball_in_wall": true,
   "tbiw_ball_center_row": 0.2,
   "tbiw_oled_center_row": 0.75,
+    "external_holder_xoffset": -3.0,
   "tbiw_oled_translation_offset": [
     0,
     -6,

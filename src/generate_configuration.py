@@ -382,6 +382,12 @@ shape_config = {
 
     ##### ENCODER MOUNT POINT
     "encoder_in_wall": False,
+    "encoder_side": "both",
+    "encoder_keys": None,  # can be array of keys where encoders should sit: {"side": "right", "col": 2, "row": 4}
+
+
+    ##### SPECIAL KEY HANDLING
+    "skip_keys": None,  # can be array of keys holes to fill [{"side": "right", "col": 2, "row": 4}]
 
     ###################################
     ## Bottom Plate Dimensions

@@ -163,8 +163,8 @@ def make_dactyl():
             #     left_wall_x_offset = oled_left_wall_x_offset_override
             #     short = tbiw_left_wall_x_offset_override  - 5# HACKISH
 
+            offsets[nrows - 1] = wide
             offsets[nrows - 2] = wide
-            offsets[nrows - 3] = wide
             # offsets[nrows - 1] = wide
             # if nrows == 3:
             #     offsets = [short, wide, wide, wide]
@@ -756,7 +756,14 @@ def make_dactyl():
                 return c
 
 
-    def valid_key(column, row):
+    def skip_key(column, row, side):
+        if skip_keys is not None:
+            for key in skip_keys:
+                if side == key["side"] and column == key["col"] and row == key["row"]:
+                    return True
+        return False
+
+    def valid_key(column, row, side):
         return row <= bottom_key(column)
 
     def x_rot(shape, angle):
@@ -804,15 +811,22 @@ def make_dactyl():
         holes = []
         for column in range(ncols):
             for row in range(nrows):
-                if valid_key(column, row):
-                    holes.append(key_place(single_plate(side=side), column, row))
+                if valid_key(column, row, side=side):
+                    if not skip_key(column, row, side):
+                        holes.append(key_place(single_plate(side=side), column, row))
+                    else:
+                        holes.append(key_place(key_cover(), column, row))
+
+
 
         shape = union(holes)
 
         return shape
 
+    def key_cover():
+        return translate(box(mount_width, mount_height, mount_thickness), (0, 0, mount_thickness / 2))
 
-    def caps():
+    def caps(side="right"):
         caps = None
         for column in range(ncols):
             size = 1
@@ -820,7 +834,7 @@ def make_dactyl():
                 if row >= first_1_5U_row and row <= last_1_5U_row:
                     size = 1.5
             for row in range(nrows):
-                if valid_key(column, row):
+                if valid_key(column, row, side=side):
                     if caps is None:
                         caps = key_place(sa_cap(size), column, row)
                     else:
@@ -1407,10 +1421,12 @@ def make_dactyl():
 
     # todo mounts account for walls or walls account for mounts
     def encoder_wall_mount(shape, side='right'):
-
+        encoder_row = nrows - 2
+        # row_position = key_position([0, 0, 0], -1, encoder_row)
+        # row_position[1] += 10
         def low_prep_position(sh):
             if side == "right":
-                return translate(rotate(sh, (0, -41, 0)), (2, 1, -17))
+                return translate(rotate(sh, (0, -41, 0)), (2, 5, -17))
 
             return translate(rotate(sh, (2, -40, 0)), (2, 0, -15))
 
@@ -1424,33 +1440,12 @@ def make_dactyl():
         # ec11_mount_low = low_prep_position(rotate(import_file(path.join(parts_path, "ec11_mount_2")), (0, 0, 90)))
         ec11_mount_low = low_prep_position(rotate(single_plate(side=side), (0, 0, 90)))
 
-        ec11_mount_low = key_place(ec11_mount_low, -1, 2)
+        ec11_mount_low = key_place(ec11_mount_low, -1, encoder_row)
 
         encoder_cut_high = key_place(high_prep_position(box(12, 13, 20)), -1, 0)
-        encoder_cut_low = key_place(low_prep_position(box(keyswitch_width, keyswitch_height, 20)), -1, 2)
+        encoder_cut_low = key_place(low_prep_position(box(keyswitch_width, keyswitch_height, 20)), -1, encoder_row)
 
         # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
-
-        # high = key_position([-20, 0, 0], 0, 0)
-        # low = key_position([-20, 0, 0], 0, 2)
-        # pos, rot = oled_position_rotation()
-        # rot = [0, -10, 0]
-        # low_rot = rotate_around_y(low, 20)
-        # hackity hack hack
-        # if side == 'right':
-        #     pos[0] += 5
-        #     pos[1] -= 34
-        #     pos[2] -= 3.5
-        #     rot[0] -= 15
-        #     rot[1] -= 3
-        #     rot[2] += 13
-        # else:
-        #     pos[0] += 1
-        #     pos[1] -= 34
-        #     pos[2] -= 7.5
-        #     rot[0] = 0
-        #     rot[1] -= 3
-        #     # rot[2] = -8
 
         # enconder_spot = key_position([-10, -5, 13.5], 0, cornerrow)
         # ec11_mount_high = import_file(path.join(parts_path, "ec11_mount_2"))
@@ -2200,13 +2195,13 @@ def make_dactyl():
         else:
             shape = (
                 translate(screw_insert(0, -1, bottom_radius, top_radius, height, side=side, hole=hole),
-                          (so[0][0], so[0][1] - 13, so[0][2] + offset)),  # rear left
+                          (so[0][0] + 1, so[0][1] - 3, so[0][2] + offset)),  # rear left
                 translate(screw_insert(0, lastrow, bottom_radius, top_radius, height, side=side, hole=hole),
-                          (so[1][0], so[1][1] + left_wall_lower_y_offset, so[1][2] + offset)),  # front left
+                          (so[1][0] - 2, so[1][1] + left_wall_lower_y_offset + 10, so[1][2] + offset)),  # front left
                 translate(screw_insert(lastcol, -1, bottom_radius, top_radius, height, side=side, hole=hole),
-                          (so[4][0], so[4][1] - 15, so[4][2] + offset)),  # rear right
+                          (so[4][0] + 1, so[4][1] - 25, so[4][2] + offset)),  # rear right
                 translate(screw_insert(lastcol, lastrow, bottom_radius, top_radius, height, side=side, hole=hole),
-                          (so[5][0], so[5][1] - 10, so[5][2] + offset)),  # front right
+                          (so[5][0] + 3, so[5][1] +2, so[5][2] + offset)),  # front right
                 translate(screw_insert_thumb(bottom_radius, top_radius, height, side=side, hole=hole),
                           (so[6][0], so[6][1], so[6][2] + offset)),  # thumb cluster
             )

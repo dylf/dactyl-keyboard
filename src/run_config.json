@@ -24,6 +24,7 @@
   "all_last_rows": false,
   "full_last_rows": false,
   "keyboard_z_offset": 12,
+  "skip_keys": null,
   "thumb_style": "TRACKBALL_WILD",
   "right_side_only": false,
   "default_1U_cluster": true,
@@ -55,6 +56,8 @@
     0
   ],
   "encoder_in_wall": false,
+  "encoder_side": "both",
+  "encoder_keys": null,
   "other_thumb": "DEFAULT",
   "ball_side": "right",
   "trackball_modular": false,
