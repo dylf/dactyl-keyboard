@@ -5,6 +5,11 @@ import numpy as np
 
 debug_trace = False
 
+
+def wp(orient="XY"):
+    return cq.Workplane(orient)
+
+
 def debugprint(info):
     if debug_trace:
         print(info)
@@ -252,7 +257,7 @@ def blockerize(shape):
         height = 9.6
 
     t = (pitch - (2 * clearance) - bumpDiam) / 2.0
-    postDiam = 6.5  # pitch - t  # works out to 6.5
+    postDiam = 6.5  # pitch  t  # works out to 6.5
     total_length = lbumps * pitch - 2.0 * clearance
     total_width = wbumps * pitch - 2.0 * clearance
 
@@ -260,7 +265,7 @@ def blockerize(shape):
     # s = cq.Workplane("XY").box(total_length, total_width, height)
 
     # shell inwards not outwards
-    s = shape.faces("<Z").shell(-1.0 * t)
+    s = shape.faces("<Z").shell(-2.5 * t)
 
     # make the bumps on the top
     s = (s.faces(">Z").workplane().
@@ -284,3 +289,152 @@ def blockerize(shape):
         tmp = s
 
     return intersect(shape, tmp)
+
+# generate a cutter to exact size/shape of an M3 4mm x 4mm brass insert
+# size is scaled a bit for non-resin prints, so heat-set works
+def insert_cutter(radii=(2.35, 2.0), heights=(2.8, 1.5), scale_by=1):
+    if len(radii) != len(heights):
+        raise Exception("radii and heights collections must have equal length")
+
+    top_radius = 4.7 / 2
+    top_height = 2.8
+    medium_radius = 4.0 / 2
+    medium_height = 1.5
+    # medium2_radius = 5.1 / 2
+    # medium2_height = 0.8
+    # bottom_radius = 4.85 / 2
+    # bottom_height = 1.6
+
+    total_height = sum(heights) + 0.3  # add 0.3 for a titch extra
+
+    half_height = total_height / 2
+    offset = half_height
+    cyl = None
+    for i in range(len(radii)):
+        radius = radii[i] * scale_by
+        height = heights[i]
+        offset -= height / 2
+        new_cyl = cq.Workplane('XY').cylinder(height, radius).translate((0, 0, offset))
+        if cyl is None:
+            cyl = new_cyl
+        else:
+            cyl = cyl.union(new_cyl)
+        offset -= height / 2
+
+    return cyl
+
+pcb_v1 = {
+    "l": 52.2,
+    "w": 34.0,
+    "h1": 1.15,
+    "h2": 4.3,
+    "h3": 9.5,
+    "offsets": {
+        "l": 1,
+        "w": 1,
+        "h": 2
+    },
+    "port_cuts": [
+        {
+            "rot": [0, 0, 0],
+            "offset": [5, 17, 4],
+            "w": 10,
+            "h": 4,
+            "l": 15
+        },
+        {
+            "rot": [0, 0, 0],
+            "offset": [25, 17, 0],
+            "w": 3.2,
+            "h": 10,
+            "l": 15
+        }
+    ]
+}
+
+pcb_v2 = {
+    "l": 52.2,
+    "w": 33.0,
+    "h": 1.15,
+    "h2": -2.2,
+    "h3": 4.4,
+    "offsets": {
+        "l": 0,
+        "w": 0,
+        "h": 3
+    },
+    "port_cuts": [
+        {
+            "rot": [0, 0, 0],
+            "relative_to": "h",
+            "offset": [15.25, 17, -6],
+            "w": 11,
+            "h": 4.5,
+            "l": 25
+        },
+        {
+            "rot": [0, 0, 0],
+            "offset": [15.25, 17, 0.25],
+            "w": 11,
+            "h": 4.5,
+            "l": 40
+        },
+        {
+            "rot": [0, 0, 0],
+            "offset": [15.25, 17, -3],
+            "w": 11,
+            "h": 10,
+            "l": 40
+        },
+    ]
+}
+
+
+def build_holder(pcb):
+    pcb_box = wp().box(pcb["w"], pcb["l"], pcb["h"])
+
+    left_x = -pcb["w"] / 2
+    back_y = pcb["l"] / 2
+    h_off = pcb["offsets"]["h"]
+
+    for data in pcb["port_cuts"]:
+        off = data["offset"]
+        port = wp().box(data["w"], data["l"], data["h"]).translate(
+            [left_x + off[0] + data["w"] / 2, back_y, off[2] + data["h"] / 2 + pcb["h"] / 2])
+        port = port.edges("|Y").fillet(1)
+        pcb_box = pcb_box.union(port)
+
+    base = wp().box(pcb["w"] + 3.5, pcb["l"] + 3.5, 1).translate([0, 0, -1])
+    base = base.edges("|Z and >Y").chamfer(2.5)
+    base = base.cut(wp().box(pcb["w"] + 0.5, pcb["l"] + 0.5, 2).translate([0, 0, 1]))
+    pin_row1 = wp().box(3, 49, 3).translate([left_x + 15.25 + 9 + 5.5, -1, 0])
+    pin_row2 = wp().box(3, 49, 3).translate([left_x + 15.25 - 9 + 5.5, -1, 0])
+
+    # base = base.cut(pin_row2).cut(pin_row1)
+
+    base = base.translate([0, 0, -7.5])
+    holder_hole_width = 28.9
+    holder_hole_height = 16.5
+    # front wall
+
+    wall = wp().box(holder_hole_width + 8, 9, holder_hole_height + 1).translate([0, back_y + 4, -0.25])
+    wall = wall.edges(">Z and |Y").fillet(3)
+    groove_neg = wp().box(holder_hole_width + 10, 7, holder_hole_height + 11).translate([0, back_y + 3, 2.25])
+    groove_neg = groove_neg.cut(
+        wp().box(holder_hole_width, 30, holder_hole_height + 1).translate([0, back_y + 3, -2.3]))
+    inset = wp().box(holder_hole_width - 2, 10, holder_hole_height + 1).translate([0, back_y + 7, -2.75])
+    inset = inset.edges(">Z and |Y").fillet(2)
+    wall = wall.cut(inset)
+    wall = wall.cut(groove_neg)
+    pcb_box = pcb_box.translate([0, 0, -2])
+    posts1 = wp().box(pcb["w"], 3.0, 5.5).cut(wp().box(pcb["w"] - 6, 3.0, 6.0)).translate([0, -pcb["l"] / 2 + 1, -5.8])
+    posts2 = wp().box(pcb["w"], 3.0, 5.5).cut(wp().box(pcb["w"] - 6, 3.0, 6.0)).translate([0, pcb["l"] / 2 - 1, -5.8])
+    wall = wall.cut(pcb_box)
+    base = base.union(posts1).union(posts2)
+    wall = wall.union(base)
+
+    return wall
+
+
+def get_holder():
+    return build_holder(pcb_v2)
