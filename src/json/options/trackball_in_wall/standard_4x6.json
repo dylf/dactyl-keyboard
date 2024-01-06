@@ -12,11 +12,11 @@
   "tbiw_translational_offset": [
     -6,
     -28,
-    -6
+    -8
   ],
   "tbiw_rotation_offset": [
     40,
-    10,
+    20,
     -25
   ],
   "tbiw_left_wall_x_offset_override": 36.0,
@@ -34,6 +34,16 @@
   "trackball_in_wall": true,
   "tbiw_ball_center_row": 0.2,
   "tbiw_oled_center_row": 0.75,
+      "oled_translation_offset": [
+        -3,
+        -12,
+        -6
+      ],
+      "oled_rotation_offset": [
+        -6,
+        -5,
+        5
+      ],
   "tbiw_oled_translation_offset": [
     0,
     -7,
