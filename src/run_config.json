@@ -58,6 +58,18 @@
   "encoder_in_wall": false,
   "encoder_side": "both",
   "encoder_keys": null,
+    "right_encoder_wall_offset": [
+    2, 0, -17
+  ],
+  "right_encoder_wall_rotation": [
+    0, -41, 0
+  ],
+  "left_encoder_wall_offset": [
+    2, 0, -15
+  ],
+  "left_encoder_wall_rotation": [
+    2, -40, 0
+  ],
   "other_thumb": "DEFAULT",
   "ball_side": "right",
   "trackball_modular": false,

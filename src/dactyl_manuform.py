@@ -1421,14 +1421,14 @@ def make_dactyl():
 
     # todo mounts account for walls or walls account for mounts
     def encoder_wall_mount(shape, side='right'):
-        encoder_row = np.floor(centerrow_offset) - 1
+        encoder_row = nrows - 3
         # row_position = key_position([0, 0, 0], -1, encoder_row)
         # row_position[1] += 10
         def low_prep_position(sh):
             if side == "right":
-                return translate(rotate(sh, (0, -41, 0)), (2, 0, -17))
+                return translate(rotate(sh, right_encoder_wall_rotation), right_encoder_wall_offset)
 
-            return translate(rotate(sh, (2, -40, 0)), (2, 0, -15))
+            return translate(rotate(sh, left_encoder_wall_rotation), left_encoder_wall_offset)
 
         def high_prep_position(sh):
             return translate(rotate(sh, (-4, -38, 10)), (6, 0, -15))

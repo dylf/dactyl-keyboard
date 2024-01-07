@@ -384,7 +384,18 @@ shape_config = {
     "encoder_in_wall": False,
     "encoder_side": "both",
     "encoder_keys": None,  # can be array of keys where encoders should sit: {"side": "right", "col": 2, "row": 4}
-
+    "right_encoder_wall_offset": [
+        2, 0, -17
+    ],
+    "right_encoder_wall_rotation": [
+        0, -41, 0
+    ],
+    "left_encoder_wall_offset": [
+        2, 0, -15
+    ],
+    "left_encoder_wall_rotation": [
+        2, -40, 0
+    ],
 
     ##### SPECIAL KEY HANDLING
     "skip_keys": None,  # can be array of keys holes to fill [{"side": "right", "col": 2, "row": 4}]
