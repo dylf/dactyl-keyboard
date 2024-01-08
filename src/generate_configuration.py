@@ -384,6 +384,7 @@ shape_config = {
     "encoder_in_wall": False,
     "encoder_side": "both",
     "encoder_keys": None,  # can be array of keys where encoders should sit: {"side": "right", "col": 2, "row": 4}
+    "encoder_wall_row": 2,
     "right_encoder_wall_offset": [
         2, 0, -17
     ],

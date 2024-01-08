@@ -151,7 +151,8 @@ def make_dactyl():
             # else:
             #     left_wall_x_offset = oled_left_wall_x_offset_override
             #     short = tbiw_left_wall_x_offset_override  - 5# HACKISH
-
+            if not all_last_rows and nrows == 6:
+                offsets[nrows - 4] = wide
             offsets[nrows - 3] = wide
             offsets[nrows - 2] = wide
             offsets[nrows - 1] = wide
@@ -1003,34 +1004,44 @@ def make_dactyl():
             key_position([-mount_width * 0.5, direction * mount_height * 0.5, 0], 0, row)
         )
         wall_x_offsets = get_left_wall_offsets(side)
+        x_offset = 0.0
+        y_offset = 0.0
+        z_offset = 0.0
+        if side == "right":
+            join_offset_x = right_left_wall_x_join_offset
+            join_offset_y = right_left_wall_y_join_offset
+            join_offset_z = right_left_wall_z_join_offset
+        else:
+            join_offset_x = left_left_wall_x_join_offset
+            join_offset_y = left_left_wall_y_join_offset
+            join_offset_z = left_left_wall_z_join_offset
 
-        if trackball_in_wall and is_side(side, ball_side):
-
-            if low_corner:
+        if low_corner:
+            if trackball_in_wall and is_side(side, ball_side):
                 y_offset = tbiw_left_wall_lower_y_offset
                 z_offset = tbiw_left_wall_lower_z_offset
-                # RIDICULOUS HACK 1
-            elif row >= nrows - 2:
-                y_offset = -26
-                z_offset = 0
-                if row >= nrows - 2:
-                    z_offset = 0
             else:
-                y_offset = 0.0
-                z_offset = 0.0
+                y_offset = left_wall_lower_y_offset
+                z_offset = left_wall_lower_z_offset
+                # RIDICULOUS HACK 1
+        elif row > 0 and wall_x_offsets[row] != wall_x_offsets[row - 1]:
+                # if wall_x_offsets[row] > wall_x_offsets[row - 1]:
+            y_offset = join_offset_y
+            z_offset += join_offset_z
 
             return list(pos - np.array([
-                wall_x_offsets[row],
+                wall_x_offsets[row] + join_offset_x,
                 -y_offset,
-                tbiw_left_wall_z_offset_override + z_offset
+                left_wall_z_offset + z_offset
             ]))
+        # elif row < nrows - 1 and wall_x_offsets[row] != wall_x_offsets[row + 1]:
+        #     y_offset = +
+        #     return list(pos - np.array([
+        #         wall_x_offsets[row],
+        #         -y_offset,
+        #         left_wall_z_offset + z_offset
+        #     ]))
 
-        elif low_corner:
-            y_offset = left_wall_lower_y_offset
-            z_offset = left_wall_lower_z_offset
-        else:
-            y_offset = 0.0
-            z_offset = 0.0
 
         return list(pos - np.array([wall_x_offsets[row], -y_offset, left_wall_z_offset + z_offset]))
 
@@ -1199,12 +1210,19 @@ def make_dactyl():
             (lambda sh: left_key_place(sh, 0, 1, side=side)), -1, 0, web_post(),
         )])
 
+        wall_offsets = get_left_wall_offsets(side)
+
         torow = lastrow
         if all_last_rows:
             torow = lastrow + 1
+        found = False
         for i in range(torow):
             y = i
             low = (y == torow - 1)
+            y_shift = 0
+            if not found and y < torow - 1 and wall_offsets[i] != wall_offsets[y + 1]:
+                found = True
+                y_shift += 1
             temp_shape1 = wall_brace(
                 (lambda sh: left_key_place(sh, y, 1, side=side)), -1, 0, web_post(),
                 (lambda sh: left_key_place(sh, y, -1, low_corner=low, side=side)), -1, 0, web_post(),
@@ -1217,10 +1235,14 @@ def make_dactyl():
             ))
             shape = union([shape, temp_shape1])
             shape = union([shape, temp_shape2])
-
+        found = False
         for i in range(torow - 1):
             y = i + 1
             low = (y == torow - 1)
+            y_shift = 0
+            if not found and wall_offsets[i] != wall_offsets[y]:
+                found = True
+                y_shift += 1
             temp_shape1 = wall_brace(
                 (lambda sh: left_key_place(sh, y - 1, -1, side=side)), -1, 0, web_post(),
                 (lambda sh: left_key_place(sh, y, 1, side=side)), -1, 0, web_post(),
@@ -1421,7 +1443,7 @@ def make_dactyl():
 
     # todo mounts account for walls or walls account for mounts
     def encoder_wall_mount(shape, side='right'):
-        encoder_row = nrows - 3
+        encoder_row = encoder_wall_row  #  nrows - 3
         # row_position = key_position([0, 0, 0], -1, encoder_row)
         # row_position[1] += 10
         def low_prep_position(sh):
@@ -1547,7 +1569,7 @@ def make_dactyl():
         return (cluster is not None and cluster.has_btus())
 
     def trackball_cutout(segments=100, side="right"):
-        shape = translate(cylinder(trackball_hole_diameter / 2, trackball_hole_height), (0, 0, 0))
+        shape = translate(cylinder(trackball_hole_diameter / 2 - 2, trackball_hole_height), (0, 0, 0))
         return shape
 
 
