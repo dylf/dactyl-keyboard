@@ -19,11 +19,12 @@
     20,
     -25
   ],
-    "right_encoder_wall_offset": [
-    2, 0, -17
+  "encoder_wall_row": 1,
+  "right_encoder_wall_offset": [
+    2, 3, -15
   ],
   "right_encoder_wall_rotation": [
-    0, -41, 0
+    0, -38, 0
   ],
   "left_encoder_wall_offset": [
     2, 0, -15
@@ -31,6 +32,12 @@
   "left_encoder_wall_rotation": [
     2, -40, 0
   ],
+  "left_left_wall_x_join_offset": -0.33,
+  "left_left_wall_y_join_offset": -5,
+  "left_left_wall_z_join_offset": -0.6,
+  "right_left_wall_x_join_offset": -0.35,
+  "right_left_wall_y_join_offset": -4,
+  "right_left_wall_z_join_offset": -0.6,
   "tbiw_left_wall_x_offset_override": 30.0,
   "tbiw_left_wall_z_offset_override": 6.0,
   "tbiw_left_wall_lower_y_offset": -22.0,

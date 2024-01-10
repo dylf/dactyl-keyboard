@@ -151,9 +151,10 @@ def make_dactyl():
             # else:
             #     left_wall_x_offset = oled_left_wall_x_offset_override
             #     short = tbiw_left_wall_x_offset_override  - 5# HACKISH
-            if not all_last_rows and nrows == 6:
+            if not all_last_rows and nrows >= 5:
                 offsets[nrows - 4] = wide
-            offsets[nrows - 3] = wide
+            if nrows > 3:
+                offsets[nrows - 3] = wide
             offsets[nrows - 2] = wide
             offsets[nrows - 1] = wide
 
@@ -1569,7 +1570,7 @@ def make_dactyl():
         return (cluster is not None and cluster.has_btus())
 
     def trackball_cutout(segments=100, side="right"):
-        shape = translate(cylinder(trackball_hole_diameter / 2 - 2, trackball_hole_height), (0, 0, 0))
+        shape = translate(cylinder(trackball_hole_diameter / 2 - 0.4, trackball_hole_height), (0, 0, 0))
         return shape
 
 

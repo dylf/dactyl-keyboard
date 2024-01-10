@@ -99,6 +99,15 @@ shape_config = {
     'tbiw_oled_translation_offset': (-3.5, 0, 1.5),  # Z offset tweaks are expected depending on curvature and OLED mount choice.
     'tbiw_oled_rotation_offset': (0, 0, 0),
 
+    ## These parameters tweak the angled wall handling for trackball in wall,
+    # oleds, and encoders in wall
+    "left_left_wall_x_join_offset": 0.35,
+    "left_left_wall_y_join_offset": -6,
+    "left_left_wall_z_join_offset": 0.6,
+    "right_left_wall_x_join_offset": 0.35,
+    "right_left_wall_y_join_offset": -6,
+    "right_left_wall_z_join_offset": 0.6,
+
     ###########################################
     ## Trackball JS / ORBYL Thumb Cluster    ##
     ##########################################
