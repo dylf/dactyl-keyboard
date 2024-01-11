@@ -332,12 +332,10 @@ class CarbonfetCluster(DefaultCluster):
         # clunky bit on the top left thumb connection  (normal connectors don't work well)
         shape = bottom_hull(
             [
-                left_wall_cluster_join_location(web_post()),
                 left_key_place(translate(web_post(), wall_locate2(-1, 0)), cornerrow, -1, low_corner=True, side=side),
-                left_key_place(translate(web_post(), wall_locate3(-1, 0)), cornerrow, -1, low_corner=True, side=side),
-                left_wall_cluster_join_location(web_post()),
-                # self.bl_place(translate(self.thumb_post_tr(), wall_locate2(-0.3, 1))),
-                # self.bl_place(translate(self.thumb_post_tr(), wall_locate3(-0.3, 1))),
+                left_key_place(translate(web_post(), wall_locate3(-1, 0.2)), cornerrow, -1, low_corner=True, side=side),
+                self.bl_place(translate(self.thumb_post_tr(), wall_locate2(-0.3, 1))),
+                self.bl_place(translate(self.thumb_post_tr(), wall_locate3(-0.3, 1))),
             ]
         )
 
