@@ -54,14 +54,14 @@
   "tbiw_ball_center_row": 0.2,
   "tbiw_oled_center_row": 0.75,
       "oled_translation_offset": [
-        -3,
+        -2,
         -12,
         -6
       ],
       "oled_rotation_offset": [
         -6,
         -5,
-        5
+        3
       ],
   "tbiw_oled_translation_offset": [
     0,
@@ -75,7 +75,7 @@
   ],
   "screw_offsets": [
     [
-      0,
+      -1,
       0,
       0
     ],
