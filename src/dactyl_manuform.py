@@ -249,8 +249,13 @@ def make_dactyl():
         #     data[item] = override_data[item]
     if overrides_name != "":
         print(f"Importing config overrides for: {overrides_name}")
-        save_path = path.join(save_path, overrides_name)
-        override_file = path.join(save_path, overrides_name + '.json')
+        if "standard_" in overrides_name:
+            save_path = path.join(save_path, "STANDARD", overrides_name[9:])
+            override_file = os.path.join(".", "src", "json", "standard", overrides_name + '.json')
+        else:
+            save_path = path.join(save_path, overrides_name)
+            override_file = path.join(save_path, overrides_name + '.json')
+
         with open(override_file, mode='r') as fid:
             override_data = load_json(override_file, {}, save_path)
             for (key,value) in override_data.items():

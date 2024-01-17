@@ -1,4 +1,28 @@
 {
+  "ENGINE": "cadquery",
+  "branch": "trackball_in_wall",
+  "nrows": 4,
+  "ncols": 6,
+  "plate_file": "file:switch_holes/notch.json",
+  "material_file": "file:material/fdm.json",
+  "quick_render": false,
+  "centerrow_offset": 2.5,
+  "thumb_style": "MINITHICC3",
+  "other_thumb": "MINITHICC3",
+  "controller_mount_type": "EXTERNAL",
+  "keyboard_z_offset": 12,
+  "block_bottoms": false,
+  "ball_side": "right",
+  "oled_side": "left",
+  "show_caps": false,
+  "encoder_in_wall": true,
+  "encoder_side": "right",
+  "pinky_1_5U": false,
+  "last_1_5U_row": 3,
+  "full_last_rows": true,
+  "default_1U_cluster": true,
+  "oled_file": "file:mounts/oled/sliding.json",
+  "logo_file": "/Users/andrew/OneDrive/Wylderbuilds/small_logo_model",
   "tb_socket_translation_offset": [
     0,
     0,
@@ -19,26 +43,7 @@
     20,
     -25
   ],
-  "encoder_wall_row": 1,
-  "right_encoder_wall_offset": [
-    2, 3, -15
-  ],
-  "right_encoder_wall_rotation": [
-    0, -38, 0
-  ],
-  "left_encoder_wall_offset": [
-    2, 0, -15
-  ],
-  "left_encoder_wall_rotation": [
-    2, -40, 0
-  ],
-  "left_left_wall_x_join_offset": -0.33,
-  "left_left_wall_y_join_offset": -5,
-  "left_left_wall_z_join_offset": -0.6,
-  "right_left_wall_x_join_offset": -0.35,
-  "right_left_wall_y_join_offset": -4,
-  "right_left_wall_z_join_offset": -0.6,
-  "tbiw_left_wall_x_offset_override": 30.0,
+  "tbiw_left_wall_x_offset_override": 36.0,
   "tbiw_left_wall_z_offset_override": 6.0,
   "tbiw_left_wall_lower_y_offset": -22.0,
   "tbiw_left_wall_lower_z_offset": 14.0,
@@ -54,14 +59,14 @@
   "tbiw_ball_center_row": 0.2,
   "tbiw_oled_center_row": 0.75,
       "oled_translation_offset": [
-        -2,
+        -3,
         -12,
         -6
       ],
       "oled_rotation_offset": [
         -6,
         -5,
-        3
+        5
       ],
   "tbiw_oled_translation_offset": [
     0,
@@ -75,7 +80,7 @@
   ],
   "screw_offsets": [
     [
-      -1,
+      0,
       0,
       0
     ],
