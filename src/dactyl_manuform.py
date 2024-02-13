@@ -290,9 +290,9 @@ def make_dactyl():
     except NameError:
         quickly = False
 
-    if oled_mount_type is not None and oled_mount_type != "NONE":
-        for item in oled_configurations[oled_mount_type]:
-            globals()[item] = oled_configurations[oled_mount_type][item]
+    # if oled_mount_type is not None and oled_mount_type != "NONE":
+    #     for item in oled_configurations[oled_mount_type]:
+    #         globals()[item] = oled_configurations[oled_mount_type][item]
 
     if nrows > 5:
         column_style = column_style_gt5
@@ -816,7 +816,6 @@ def make_dactyl():
                 col.append(_offset_all([key.tr(of2), key.tl(of2), key.tl(of), key.tr(of)]))
                 col.append(_offset_all([key.tr(of2), key.br(of2), key.br(of), key.tr(of)]))
                 col.append(_offset_all([key.tl(of2), key.bl(of2), key.bl(of), key.tl(of)]))
-
 
                 col.append(_offset_all([key.tl(of2), key.bl(of2), key.bl(of), key.tl(of)]))
 
