@@ -1,6 +1,6 @@
 {
   "oled_mount_type": "SLIDING",
-  "oled_mount_width": 12.5,
+  "oled_mount_width": 14,
   "oled_mount_height": 25.0,
   "oled_mount_rim": 2.5,
   "oled_mount_depth": 8.0,
@@ -14,16 +14,6 @@
     6.0,
     0.0,
     -3.0
-  ],
-  "oled_translation_offset": [
-    0,
-    0,
-    2
-  ],
-  "oled_rotation_offset": [
-    0,
-    -5,
-    0
   ],
   "oled_left_wall_x_offset_override": 24.0,
   "oled_left_wall_z_offset_override": 0.0,
