@@ -278,7 +278,7 @@ class TrackballWild(TrackballOrbyl):
         # TOP LEFT BEHIND TRACKBALL
         shape = union([shape, wall_brace(
             self.track_place, -1.5, 0, self.tb_post_tl(),
-            (lambda sh: left_key_place(sh, lastrow - 1, -1, side=ball_side, low_corner=True)), -1, 0, web_post(),
+            (lambda sh: left_key_place(sh, lastrow, -1, side=ball_side, low_corner=True)), -1, 0, web_post(),
         )])
         # LEFT OF TRACKBALL
         shape = union([shape, wall_brace(
@@ -289,6 +289,13 @@ class TrackballWild(TrackballOrbyl):
             self.track_place, -2, 0, self.tb_post_l(),
             self.bl_place, -1, 0, web_post_tl(),
         )])
+        # if trackball_present(side):
+        #     shape = union([shape, wall_brace(left_wall_cluster_join_location, -1, 0, web_post(), self.ml_place, 0, 1, self.thumb_post_tl())])
+        # else:
+        #     shape = union([shape,wall_brace(self.ml_place, 0, 1, self.thumb_post_tr(), self.ml_place, 0, 1, self.thumb_post_tl())])
+        # # shape = union([shape, wall_brace(left_wall_cluster_join_location, -1, 0, web_post(), self.ml_place, 0, 1, self.thumb_post_tl())])
+        # shape = union([shape, wall_brace(self.tr_place, 0, -1, self.thumb_post_br(), (lambda sh: cluster_key_place(sh, 3, lastrow)), 0, -1, web_post_bl())])
+
 
         # BEFORE BTUS
         #
@@ -363,22 +370,22 @@ class TrackballWild(TrackballOrbyl):
 
         #  ==========================
 
-        hulls.append(
-            triangle_hulls(
-                [
-                    key_place(web_post_bl(), 0, cornerrow),
-                    left_key_place(web_post(), lastrow - 1, -1, side=side, low_corner=True),
-                    # left_key_place(translate(web_post(), wall_locate1(-1, 0)), cornerrow, -1, low_corner=True),
-                    self.track_place(self.tb_post_tl()),
-                ]
-            )
-        )
+        # hulls.append(
+        #     triangle_hulls(
+        #         [
+        #             key_place(web_post_bl(), 0, lastrow),
+        #             left_key_place(web_post(), lastrow, -1, side=side, low_corner=True),
+        #             # left_key_place(translate(web_post(), wall_locate1(-1, 0)), cornerrow, -1, low_corner=True),
+        #             self.track_place(self.tb_post_tl()),
+        #         ]
+        #     )
+        # )
 
         hulls.append(
             triangle_hulls(
                 [
-                    key_place(web_post_bl(), 0, cornerrow),
-                    left_key_place(web_post(), lastrow - 1, -1, side=side, low_corner=True),
+                    key_place(web_post_bl(), 0, lastrow),
+                    left_key_place(web_post(), lastrow, -1, side=side, low_corner=True),
                     # left_key_place(translate(web_post(), wall_locate1(-1, 0)), cornerrow, -1, low_corner=True),
                     self.track_place(self.tb_post_tl()),
                 ]

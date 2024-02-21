@@ -389,6 +389,16 @@ class DefaultCluster(object):
         #     )
         # )
 
+        hulls.append(
+            triangle_hulls(
+                [
+                    cluster_key_place(web_post_br(), 1, cornerrow),
+                    cluster_key_place(web_post_bl(), 2, lastrow),
+                    cluster_key_place(web_post_bl(), 2, cornerrow),
+                    cluster_key_place(web_post_br(), 1, cornerrow)
+                ]
+            )
+        )
         if not full_last_rows:
             hulls.append(
                 triangle_hulls(

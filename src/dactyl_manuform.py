@@ -119,6 +119,14 @@ def make_dactyl():
     def is_oled(side):
         return oled_mount_type not in [None, "None"] and is_side(side, oled_side)
 
+    def encoder_type(side="right"):
+        if side == "right":
+            return encoder_right
+        return encoder_left
+
+    def encoder_in_wall(side="right"):
+        return encoder_type(side) != "none"
+
     def get_left_wall_offsets(side="right"):
         wide = 22
         short = 8  # if not is_track_or_encoder else tbiw_left_wall_x_offset_override
@@ -133,7 +141,7 @@ def make_dactyl():
             oled_yes = True
         if (trackball_in_wall and is_side(side, ball_side)):
             track_yes = True
-        if (encoder_in_wall and is_side(side, encoder_side)):
+        if (encoder_in_wall(side)):
             encoder_yes = True
 
         if oled_yes and track_yes:
@@ -1473,35 +1481,62 @@ def make_dactyl():
         def high_prep_position(sh):
             return translate(rotate(sh, (-4, -38, 10)), (6, 0, -15))
 
-        ec11_mount_high = high_prep_position(rotate(import_file(path.join(parts_path, "ec11_mount_2")), (0, 0, 90)))
+        if encoder_type(side) == "ec11":
+            # ec11_mount_high = high_prep_position(rotate(import_file(path.join(parts_path, "ec11_mount_2")), (0, 0, 90)))
+            #
+            # ec11_mount_high = key_place(ec11_mount_high, -1, 0)
 
-        ec11_mount_high = key_place(ec11_mount_high, -1, 0)
+            # ec11_mount_low = low_prep_position(rotate(import_file(path.join(parts_path, "ec11_mount_2")), (0, 0, 90)))
+            ec11_mount_low = low_prep_position(rotate(single_plate(side=side), (0, 0, 90)))
 
-        # ec11_mount_low = low_prep_position(rotate(import_file(path.join(parts_path, "ec11_mount_2")), (0, 0, 90)))
-        ec11_mount_low = low_prep_position(rotate(single_plate(side=side), (0, 0, 90)))
+            # ec11_mount_low = key_place(ec11_mount_low, -1, encoder_row)
 
-        ec11_mount_low = key_place(ec11_mount_low, -1, encoder_row)
+            # encoder_cut_high = key_place(high_prep_position(box(12, 13, 20)), -1, 0)
+            encoder_cut_low = low_prep_position(box(keyswitch_width, keyswitch_height, 20))
 
-        encoder_cut_high = key_place(high_prep_position(box(12, 13, 20)), -1, 0)
-        encoder_cut_low = key_place(low_prep_position(box(keyswitch_width, keyswitch_height, 20)), -1, encoder_row)
+            # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
 
-        # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
+            # enconder_spot = key_position([-10, -5, 13.5], 0, cornerrow)
+            # ec11_mount_high = import_file(path.join(parts_path, "ec11_mount_2"))
+            # ec11_mount_high = translate(rotate(ec11_mount_high, rot), high)
+            # encoder_cut_high = box(11, 13, 20)
+            # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
+            #
+            # ec11_mount_low = import_file(path.join(parts_path, "ec11_mount_2"))
+            # ec11_mount_low = translate(rotate(ec11_mount_low, rot), low)
+            # encoder_cut_low = box(11, 13, 20)
+            # encoder_cut_low = translate(rotate(encoder_cut_low, rot), [low[0], low[1] + 1, low[2]])
 
-        # enconder_spot = key_position([-10, -5, 13.5], 0, cornerrow)
-        # ec11_mount_high = import_file(path.join(parts_path, "ec11_mount_2"))
-        # ec11_mount_high = translate(rotate(ec11_mount_high, rot), high)
-        # encoder_cut_high = box(11, 13, 20)
-        # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
-        #
-        # ec11_mount_low = import_file(path.join(parts_path, "ec11_mount_2"))
-        # ec11_mount_low = translate(rotate(ec11_mount_low, rot), low)
-        # encoder_cut_low = box(11, 13, 20)
-        # encoder_cut_low = translate(rotate(encoder_cut_low, rot), [low[0], low[1] + 1, low[2]])
+            shape = difference(shape, [encoder_cut_low])
+            shape = union([shape, ec11_mount_low])
+            # encoder_mount = translate(rotate(encoder_mount, (0, 0, 20)), (-27, -4, -15))
+            return shape
+        elif encoder_type(side) == "wheel":
+            wheel_cut_low = box(17.2, 13.5, 8)
 
-        shape = difference(shape, [encoder_cut_low])
-        shape = union([shape, ec11_mount_low])
-        # encoder_mount = translate(rotate(encoder_mount, (0, 0, 20)), (-27, -4, -15))
-        return shape
+            # wheel_cut_low = key_place(box(17.2, 13.5, 8), -1, encoder_row)
+
+            wheel_cut_low = low_prep_position(wheel_cut_low)
+
+            # encoder_cut_low = key_place(low_prep_position(box(keyswitch_width, keyswitch_height, 20)), -1, encoder_row)
+
+            # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
+
+            # enconder_spot = key_position([-10, -5, 13.5], 0, cornerrow)
+            # ec11_mount_high = import_file(path.join(parts_path, "ec11_mount_2"))
+            # ec11_mount_high = translate(rotate(ec11_mount_high, rot), high)
+            # encoder_cut_high = box(11, 13, 20)
+            # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
+            #
+            # ec11_mount_low = import_file(path.join(parts_path, "ec11_mount_2"))
+            # ec11_mount_low = translate(rotate(ec11_mount_low, rot), low)
+            # encoder_cut_low = box(11, 13, 20)
+            # encoder_cut_low = translate(rotate(encoder_cut_low, rot), [low[0], low[1] + 1, low[2]])
+
+            shape = difference(shape, [wheel_cut_low])
+            # shape = union([shape, ec11_mount_low])
+            # encoder_mount = translate(rotate(encoder_mount, (0, 0, 20)), (-27, -4, -15))
+            return shape
 
     def usb_c_shape(width, height, depth):
         shape = box(width, depth, height)
@@ -2363,7 +2398,7 @@ def make_dactyl():
                 shape = difference(shape, [hole])
                 shape = union([shape, frame])
 
-        if encoder_in_wall and is_side(side, encoder_side):
+        if encoder_in_wall(side):
             shape = encoder_wall_mount(shape, side)
 
         if not quickly:

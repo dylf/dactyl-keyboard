@@ -58,6 +58,8 @@
   "encoder_in_wall": false,
   "encoder_side": "both",
   "encoder_keys": null,
+  "encoder_right": "none",
+  "encoder_left": "none",
   "encoder_wall_row": 2,
     "right_encoder_wall_offset": [
     2, 0, -17
@@ -195,95 +197,6 @@
     0
   ],
   "magnet_bottom": false,
-  "oled_configurations": {
-    "UNDERCUT": {
-      "oled_mount_width": 15.0,
-      "oled_mount_height": 35.0,
-      "oled_mount_rim": 3.0,
-      "oled_mount_depth": 6.0,
-      "oled_mount_cut_depth": 20.0,
-      "oled_mount_location_xyz": [
-        -80.0,
-        20.0,
-        45.0
-      ],
-      "oled_mount_rotation_xyz": [
-        13.0,
-        0.0,
-        -6.0
-      ],
-      "oled_left_wall_x_offset_override": 28.0,
-      "oled_left_wall_z_offset_override": 0.0,
-      "oled_left_wall_lower_y_offset": 12.0,
-      "oled_left_wall_lower_z_offset": 5.0,
-      "oled_mount_undercut": 1.0,
-      "oled_mount_undercut_thickness": 2.0
-    },
-    "SLIDING": {
-      "oled_mount_width": 12.5,
-      "oled_mount_height": 25.0,
-      "oled_mount_rim": 2.5,
-      "oled_mount_depth": 8.0,
-      "oled_mount_cut_depth": 20.0,
-      "oled_mount_location_xyz": [
-        -78.0,
-        10.0,
-        41.0
-      ],
-      "oled_mount_rotation_xyz": [
-        6.0,
-        0.0,
-        -3.0
-      ],
-      "oled_left_wall_x_offset_override": 24.0,
-      "oled_left_wall_z_offset_override": 0.0,
-      "oled_left_wall_lower_y_offset": 12.0,
-      "oled_left_wall_lower_z_offset": 5.0,
-      "oled_thickness": 4.2,
-      "oled_edge_overlap_end": 6.5,
-      "oled_edge_overlap_connector": 5.5,
-      "oled_edge_overlap_thickness": 2.5,
-      "oled_edge_overlap_clearance": 2.5,
-      "oled_edge_chamfer": 2.0
-    },
-    "CLIP": {
-      "oled_mount_width": 12.5,
-      "oled_mount_height": 39.0,
-      "oled_mount_rim": 2.0,
-      "oled_mount_depth": 7.0,
-      "oled_mount_cut_depth": 20.0,
-      "oled_mount_location_xyz": [
-        -78.0,
-        20.0,
-        42.0
-      ],
-      "oled_mount_rotation_xyz": [
-        12.0,
-        0.0,
-        -6.0
-      ],
-      "oled_left_wall_x_offset_override": 24.0,
-      "oled_left_wall_z_offset_override": 0.0,
-      "oled_left_wall_lower_y_offset": 12.0,
-      "oled_left_wall_lower_z_offset": 5.0,
-      "oled_thickness": 4.2,
-      "oled_mount_bezel_thickness": 3.5,
-      "oled_mount_bezel_chamfer": 2.0,
-      "oled_mount_connector_hole": 6.0,
-      "oled_screen_start_from_conn_end": 6.5,
-      "oled_screen_length": 24.5,
-      "oled_screen_width": 10.5,
-      "oled_clip_thickness": 1.5,
-      "oled_clip_width": 6.0,
-      "oled_clip_overhang": 1.0,
-      "oled_clip_extension": 5.0,
-      "oled_clip_width_clearance": 0.5,
-      "oled_clip_undercut": 0.5,
-      "oled_clip_undercut_thickness": 2.5,
-      "oled_clip_y_gap": 0.2,
-      "oled_clip_z_gap": 0.2
-    }
-  },
   "logo_offsets": [
     -10,
     -10,
