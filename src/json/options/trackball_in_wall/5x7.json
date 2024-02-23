@@ -45,13 +45,13 @@
   "trackball_in_wall": true,
   "tbiw_ball_center_row": 0.2,
   "tbiw_oled_translation_offset": [
-    0,
+    -1,
     4,
-    -2
+    0
   ],
   "tbiw_oled_rotation_offset": [
     1,
-    -8,
+    -1,
     0
   ],
   "screw_offsets": [
