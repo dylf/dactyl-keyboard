@@ -192,6 +192,8 @@ def make_dactyl():
             offsets[nrows - 2] = wide
             offsets[nrows - 1] = wide
         elif encoder_yes:
+            left_wall_x_offset = oled_left_wall_x_offset_override - 3
+            wide = oled_left_wall_x_offset_override - 3
             # if oled_mount_type == None or not is_side(side, oled_side):
             #     short = 8
             # else:
@@ -200,6 +202,7 @@ def make_dactyl():
 
             offsets[nrows - 1] = wide
             offsets[nrows - 2] = wide
+            offsets[nrows - 3] = wide
             # offsets[nrows - 1] = wide
             # if nrows == 3:
             #     offsets = [short, wide, wide, wide]
