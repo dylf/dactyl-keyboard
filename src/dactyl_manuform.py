@@ -2257,7 +2257,11 @@ def make_dactyl():
 
     def screw_insert_all_shapes(bottom_radius, top_radius, height, offset=0, side='right', hole=False):
         print('screw_insert_all_shapes()')
-        so = [[off[0], off[1], off[2] + offset] for off in screw_offsets]
+        if side == "left" and left_screw_offsets is not None:
+            so = [[off[0], off[1], off[2] + offset] for off in left_screw_offsets]
+        else:
+            so = [[off[0], off[1], off[2] + offset] for off in screw_offsets]
+
         if nrows > 3:
             # so = [[off[0], off[1], off[2] + offset] for off in screw_offsets]
             shape = (
