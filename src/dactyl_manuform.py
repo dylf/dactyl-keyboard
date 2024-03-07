@@ -183,12 +183,14 @@ def make_dactyl():
             # if oled_mount_type == None or not is_side(side, oled_side):
             #     short = 8
             # else:
-            #     left_wall_x_offset = oled_left_wall_x_offset_override
-            #     short = tbiw_left_wall_x_offset_override  - 5# HACKISH
+            left_wall_x_offset = tbiw_left_wall_x_offset_override
+            wide = tbiw_left_wall_x_offset_override
+            short = tbiw_left_wall_x_offset_override  - 5   # HACKI SH
+
             if not all_last_rows and nrows >= 5:
                 offsets[nrows - 4] = wide
-            if nrows > 3:
-                offsets[nrows - 3] = wide
+
+            offsets[nrows - 3] = wide
             offsets[nrows - 2] = wide
             offsets[nrows - 1] = wide
         elif encoder_yes:
@@ -1052,7 +1054,7 @@ def make_dactyl():
             else:
                 y_offset = left_wall_lower_y_offset
                 z_offset = left_wall_lower_z_offset
-                # RIDICULOUS HACK 1
+
         elif row > 0 and wall_x_offsets[row] != wall_x_offsets[row - 1]:
                 # if wall_x_offsets[row] > wall_x_offsets[row - 1]:
             y_offset = join_offset_y
