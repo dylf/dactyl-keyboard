@@ -47,16 +47,16 @@ class Minithicc3(MinidoxCluster):
         #     z = shift_column * -10
         return [x, y, 3]
 
+    def tr_place(self, shape):
+        shape = rotate(shape, [17, -15, 10])
+        shape = translate(shape, [-14, -10, -9])
+        shape = self.thumb_place(shape)
+        return shape
+
     def tl_place(self, shape):
         shape = rotate(shape, [14, -15, 20])
         shape = translate(shape, [-36, -16, -15])
         # shape = translate(shape, [-32.5, -15, -15])  # edits for Felix
-        shape = self.thumb_place(shape)
-        return shape
-
-    def tr_place(self, shape):
-        shape = rotate(shape, [17, -15, 10])
-        shape = translate(shape, [-14, -10, -9])
         shape = self.thumb_place(shape)
         return shape
 
