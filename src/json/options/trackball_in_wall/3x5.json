@@ -11,12 +11,12 @@
   ],
   "tbiw_translational_offset": [
     -6,
-    -25,
+    -27,
     -8
   ],
   "tbiw_rotation_offset": [
     45,
-    0,
+    10,
     -25
   ],
   "tbiw_left_wall_x_offset_override": 36.0,
@@ -44,12 +44,12 @@
   "external_holder_xoffset": -3.0,
   "tbiw_oled_translation_offset": [
     0,
-    -6,
-    -8
+    -4,
+    -4
   ],
   "tbiw_oled_rotation_offset": [
-    -8,
-    -8,
+    -2,
+    -4,
     2
   ],
   "encoder_wall_row": 2,
