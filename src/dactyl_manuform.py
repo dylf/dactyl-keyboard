@@ -2529,7 +2529,6 @@ def make_dactyl():
                     max_val = sizes[-1]
             debugprint(sizes)
             inner_wire = base_wires[inner_index]
-
             # inner_plate = cq.Workplane('XY').add(cq.Face.makeFromWires(inner_wire))
             if wedge_angle is not None:
                 cq.Workplane('XY').add(cq.Solid.revolve(outerWire, innerWires, angleDegrees, axisStart, axisEnd))
@@ -2537,24 +2536,25 @@ def make_dactyl():
                 inner_shape = cq.Workplane('XY').add(
                     cq.Solid.extrudeLinear(inner_wire, [], cq.Vector(0, 0, base_thickness)))
                 inner_shape = translate(inner_shape, (0, 0, -base_rim_thickness))
+
                 if block_bottoms:
                     inner_shape = blockerize(inner_shape)
-                if logo_file not in ["", None]:
-                    logo_offset = [
-                        -10,
-                        -10,
-                        -0.5
-                    ]
-                    logo = import_file(logo_file)
-                    if side == "left":
-                        logo = mirror(logo, "YZ")
-                    if ncols <= 6:
-                        logo_offset[0] -= 12 * (7 - ncols)
-                    if nrows <= 5:
-                        logo_offset[1] += 15 * (6 - ncols)
-                    logo = translate(logo, logo_offset)
-
-                    inner_shape = union([inner_shape, logo])
+                # if logo_file not in ["", None]:
+                #     logo_offset = [
+                #         -10,
+                #         -10,
+                #         -0.5
+                #     ]
+                #     logo = import_file(logo_file)
+                #     if side == "left":
+                #         logo = mirror(logo, "YZ")
+                #     if ncols <= 6:
+                #         logo_offset[0] -= 12 * (7 - ncols)
+                #     if nrows <= 5:
+                #         logo_offset[1] += 15 * (6 - ncols)
+                #     logo = translate(logo, logo_offset)
+                #
+                #     inner_shape = union([inner_shape, logo])
 
                 holes = []
                 for i in range(len(base_wires)):
@@ -2590,9 +2590,48 @@ def make_dactyl():
 
                 # hole_shapes.append(controller_shape)
                 # shape = union([shape, inner_shape, controller_shape])
+
+
+
                 shape = difference(shape, hole_shapes)
+
+
                 shape = translate(shape, (0, 0, -base_rim_thickness))
                 shape = union([shape, inner_shape])
+
+                if has_puck:
+                    puck_base = get_puck_base()
+                    # export_file(shape=puck_hole, fname=path.join(save_path, r"puck_hole"))
+                    # export_file(shape=puck_base, fname=path.join(save_path, r"puck_base"))
+                    # shape = union([shape, puck_base])
+                    # shape = difference(shape, [puck_hole])
+                    hole_dist = 38.1 / 2
+                    holes = [
+                        [hole_dist, 0],
+                        [0, hole_dist],
+                        [-hole_dist, 0],
+                        [0, -hole_dist]
+                    ]
+
+                    # hole_shapes = []
+                    puck_centerpoint = key_position([0, 0, 0], 0, centerrow_offset - 0.5)
+                    puck_centerpoint[0] += 10
+                    # puck_centerpoint[0] += 10
+                    puck_centerpoint[2] = -2
+                    puck_base = translate(puck_base, puck_centerpoint)
+
+                    shape = union([shape, puck_base])
+
+                    all_holes = None
+                    for hole in holes:
+                        new_hole = wp().cylinder(200, 1.55).translate((hole[0], hole[1], 0))
+                        all_holes = new_hole if all_holes is None else union([all_holes, new_hole])
+
+                    all_holes = rotate(all_holes, (0, 0, 45))
+                    all_holes = translate(all_holes, puck_centerpoint)
+
+                    shape = difference(shape, [all_holes])
+
                 if controller_mount_type == "EXTERNAL_BREAKOUT":
                     controller_shape = translate(box(36.5, 57.5, 5),
                                                  (
@@ -2647,7 +2686,8 @@ def make_dactyl():
         if quickly:
             print(">>>>>  QUICK RENDER: Only rendering a the right side and bottom plate.")
             return
-        export_dxf(shape=base, fname=path.join(save_path, r_config_name + r"_right_plate"))
+        if not has_puck:
+            export_dxf(shape=base, fname=path.join(save_path, r_config_name + r"_right_plate"))
 
         # rest = wrist_rest(mod_r, base, side="right")
         #
@@ -2662,7 +2702,8 @@ def make_dactyl():
 
         base_l = mirror(baseplate(walls_l, side='left'), 'YZ')
         export_file(shape=base_l, fname=path.join(save_path, l_config_name + r"_left_plate"))
-        export_dxf(shape=base_l, fname=path.join(save_path, l_config_name + r"_left_plate"))
+        if not has_puck:
+            export_dxf(shape=base_l, fname=path.join(save_path, l_config_name + r"_left_plate"))
 
         # else:
         #     export_file(shape=mirror(mod_r, 'YZ'), fname=path.join(save_path, config_name + r"_left"))

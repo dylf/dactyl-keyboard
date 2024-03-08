@@ -233,6 +233,37 @@ def export_file(shape, fname):
 
     export_stl(shape, fname)
 
+puck_height = 3
+puck_r = 41.1 / 2
+base_top_r = puck_r + 2
+base_bottom_r = base_top_r + 5
+base_z_offset = 2
+base_height = puck_height + base_z_offset
+hole_dist = 38.1 / 2
+
+
+def get_puck_base():
+    # main_puck = wp().cylinder(puck_height + 1, puck_r).translate((-65, 0, (puck_height / 2) - 2))
+    base_bottom = cq.Sketch().circle(base_bottom_r)
+    base_top = cq.Sketch().circle(base_top_r)
+    puck_base = wp().placeSketch(base_bottom, base_top.moved(cq.Location(cq.Vector(0, 0, base_height)))).loft()
+    # puck_base = puck_base.translate((-65, 0, (base_height / 2) - 2))
+
+    # holes = [
+    #     [1, 0],
+    #     [0, 1],
+    #     [-1, 0],
+    #     [0, -1]
+    # ]
+    #
+    # hole_shapes = []
+    # for hole in holes:
+    #     hole_shapes.append(wp().cylinder(30, 1.55).translate((hole[0] * hole_dist, hole[1] * hole_dist, base_height)))
+    #
+    # puck_base = difference(puck_base, hole_shapes)
+
+    return puck_base
+
 
 def export_dxf(shape, fname):
     print("EXPORTING TO {}".format(fname))

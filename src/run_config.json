@@ -298,6 +298,7 @@
     ]
   ],
   "thumb_screw_position_override": null,
+  "has_puck": false,
   "screw_offsets": [
     [
       0,
