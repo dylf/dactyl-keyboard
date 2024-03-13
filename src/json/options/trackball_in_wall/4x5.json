@@ -11,12 +11,12 @@
   ],
   "tbiw_translational_offset": [
     -6,
-    -28,
-    -6
+    -24,
+    -3
   ],
   "tbiw_rotation_offset": [
     40,
-    10,
+    5,
     -25
   ],
   "encoder_wall_row": 2,

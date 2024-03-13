@@ -33,6 +33,13 @@ class Minithicc(MinidoxCluster):
         for item in parent_locals:
             globals()[item] = parent_locals[item]
 
+
+    def thumb_rotate(self):
+        x = y = z = 0
+        # if shift_column < 0:
+        #     y = shift_column * 4
+        #     z = shift_column * -10
+        return [x, y, 10]
     # def tl_place(self, shape):
     #     shape = rotate(shape, [14, -15, 20])
     #     shape = translate(shape, self.thumborigin())
@@ -52,26 +59,26 @@ class Minithicc(MinidoxCluster):
     #     return shape
 
     def tr_place(self, shape):
-        shape = rotate(shape, [19, -15, 2])
-        shape = translate(shape, self.thumborigin())
+        shape = rotate(shape, [19, -15, -8])
+        shape = self.thumb_place(shape)
         shape = translate(shape, [-14, -11, -3])
         return shape
 
     def tl_place(self, shape):
-        shape = rotate(shape, [17, -15, 10])
-        shape = translate(shape, self.thumborigin())
+        shape = rotate(shape, [17, -15, 0])
+        shape = self.thumb_place(shape)
         shape = translate(shape, [-35, -13, -9])
         return shape
 
     def mr_place(self, shape):
-        shape = rotate(shape, [14, -15, 20])
-        shape = translate(shape, self.thumborigin())
+        shape = rotate(shape, [14, -15, 10])
+        shape = self.thumb_place(shape)
         shape = translate(shape, [-55, -19, -15])
         return shape
 
     def ml_place(self, shape):
-        shape = rotate(shape, [10, -15, 28])
-        shape = translate(shape, self.thumborigin())
+        shape = rotate(shape, [10, -15, 18])
+        shape = self.thumb_place(shape)
         shape = translate(shape, [-73, -28, -21])
         return shape
 
@@ -217,13 +224,13 @@ class Minithicc(MinidoxCluster):
             triangle_hulls(
                 [
                     self.tl_place(self.thumb_post_tl()),
-                    key_place(web_post_bl(), 0, cornerrow),
+                    key_place(web_post_bl(), 0, lastrow),
                     self.tl_place(self.thumb_post_tr()),
-                    key_place(web_post_br(), 0, cornerrow),
+                    key_place(web_post_br(), 0, lastrow),
                     self.tr_place(self.thumb_post_tl()),
-                    key_place(web_post_bl(), 1, cornerrow),
+                    key_place(web_post_bl(), 1, lastrow),
                     self.tr_place(self.thumb_post_tr()),
-                    key_place(web_post_br(), 1, cornerrow),
+                    key_place(web_post_br(), 1, lastrow),
                     key_place(web_post_tl(), 2, lastrow),
                     key_place(web_post_bl(), 2, lastrow),
                     self.tr_place(self.thumb_post_tr()),
@@ -233,9 +240,9 @@ class Minithicc(MinidoxCluster):
                     key_place(web_post_bl(), 3, lastrow),
                     key_place(web_post_tr(), 2, lastrow),
                     key_place(web_post_tl(), 3, lastrow),
-                    key_place(web_post_bl(), 3, cornerrow),
-                    key_place(web_post_tr(), 3, lastrow),
-                    key_place(web_post_br(), 3, cornerrow),
+                    # key_place(web_post_bl(), 3, lastrow),
+                    # key_place(web_post_tr(), 3, lastrow),
+                    # key_place(web_post_br(), 3, lastrow),
                 ]
             )
         )
@@ -258,18 +265,19 @@ class Minithicc(MinidoxCluster):
                 ]
             )
         )
-        hulls.append(
-            triangle_hulls(
-                [
-                    key_place(web_post_br(), 1, cornerrow),
-                    key_place(web_post_tl(), 2, lastrow),
-                    key_place(web_post_bl(), 2, cornerrow),
-                    key_place(web_post_tr(), 2, lastrow),
-                    key_place(web_post_br(), 2, cornerrow),
-                    key_place(web_post_bl(), 3, cornerrow),
-                ]
+        if not all_last_rows:
+            hulls.append(
+                triangle_hulls(
+                    [
+                        cluster_key_place(web_post_br(), 1, cornerrow),
+                        cluster_key_place(web_post_tl(), 2, lastrow),
+                        cluster_key_place(web_post_bl(), 2, cornerrow),
+                        cluster_key_place(web_post_tr(), 2, lastrow),
+                        cluster_key_place(web_post_br(), 2, cornerrow),
+                        cluster_key_place(web_post_bl(), 3, cornerrow),
+                    ]
+                )
             )
-        )
 
         return union(hulls)
 

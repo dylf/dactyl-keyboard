@@ -33,12 +33,6 @@ class Minithicc3(MinidoxCluster):
         for item in parent_locals:
             globals()[item] = parent_locals[item]
 
-    def __init__(self, parent_locals):
-        self.num_keys = 3
-        super().__init__(parent_locals)
-        # have to repeat this for all classes/namespaces
-        for item in parent_locals:
-            globals()[item] = parent_locals[item]
 
     def thumb_rotate(self):
         x = y = z = 0
