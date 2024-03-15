@@ -1517,8 +1517,8 @@ def make_dactyl():
             # encoder_mount = translate(rotate(encoder_mount, (0, 0, 20)), (-27, -4, -15))
             return shape
         elif encoder_type(side) == "wheel":
-            wheel_width = 17.7
-            wheel_height = 14
+            wheel_width = 17.3
+            wheel_height = 15
             wheel_cut_low = box(wheel_width, wheel_height, 8)
             wheel_mount_low = translate(difference(box(wheel_width + 4, wheel_height + 4, 3), [wheel_cut_low]), (0, 0, -2))
             # wheel_cut_low = key_place(box(17.2, 13.5, 8), -1, encoder_row)
