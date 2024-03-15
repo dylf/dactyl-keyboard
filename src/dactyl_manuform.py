@@ -641,7 +641,7 @@ def make_dactyl():
             bl2 = sa_length / 2
             bw2 = 22.64 / 2
             m = 0
-            pl2 = 16
+            pl2 = 6
             pw2 = 11
 
         k1 = polyline([(bw2, bl2), (bw2, -bl2), (-bw2, -bl2), (-bw2, bl2), (bw2, bl2)])

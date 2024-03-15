@@ -144,7 +144,7 @@ class Minithicc(MinidoxCluster):
     #         ])
 
     def thumbcaps(self, side='right'):
-        t1 = self.thumb_15x_layout(sa_cap())
+        t1 = self.thumb_15x_layout(sa_cap(1.25))
         return t1
 
     def thumb(self, side="right"):
@@ -224,13 +224,13 @@ class Minithicc(MinidoxCluster):
             triangle_hulls(
                 [
                     self.tl_place(self.thumb_post_tl()),
-                    key_place(web_post_bl(), 0, lastrow),
+                    key_place(web_post_bl(), 0, cornerrow),
                     self.tl_place(self.thumb_post_tr()),
-                    key_place(web_post_br(), 0, lastrow),
+                    key_place(web_post_br(), 0, cornerrow),
                     self.tr_place(self.thumb_post_tl()),
-                    key_place(web_post_bl(), 1, lastrow),
+                    key_place(web_post_bl(), 1, cornerrow),
                     self.tr_place(self.thumb_post_tr()),
-                    key_place(web_post_br(), 1, lastrow),
+                    key_place(web_post_br(), 1, cornerrow),
                     key_place(web_post_tl(), 2, lastrow),
                     key_place(web_post_bl(), 2, lastrow),
                     self.tr_place(self.thumb_post_tr()),
@@ -240,9 +240,9 @@ class Minithicc(MinidoxCluster):
                     key_place(web_post_bl(), 3, lastrow),
                     key_place(web_post_tr(), 2, lastrow),
                     key_place(web_post_tl(), 3, lastrow),
-                    # key_place(web_post_bl(), 3, lastrow),
-                    # key_place(web_post_tr(), 3, lastrow),
-                    # key_place(web_post_br(), 3, lastrow),
+                    key_place(web_post_bl(), 3, cornerrow),
+                    key_place(web_post_tr(), 3, lastrow),
+                    key_place(web_post_br(), 3, cornerrow),
                 ]
             )
         )
@@ -366,7 +366,7 @@ class Minithicc(MinidoxCluster):
 
     def screw_positions(self):
         position = self.thumborigin()
-        position = list(np.array(position) + np.array([-37, -30, -16]))
+        position = list(np.array(position) + np.array([-37, -41, -16]))
         position[1] = position[1] - .4 * (self.minidox_Usize - 1.9) * sa_length
         position[2] = 0
 
