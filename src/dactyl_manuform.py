@@ -888,19 +888,19 @@ def make_dactyl():
 
 
     def web_post_tr(off_w=0, off_h=0, off_z=0):
-        return translate(web_post(), ((mount_width / 2.0) + off_w, (mount_height / 2.0) + off_h, 0))
+        return translate(web_post(), ((mount_width / 2.0) + off_w, (mount_height / 2.0) + off_h, off_z))
 
 
     def web_post_tl(off_w=0, off_h=0, off_z=0):
-        return translate(web_post(), (-(mount_width / 2.0) - off_w, (mount_height / 2.0) + off_h, 0))
+        return translate(web_post(), (-(mount_width / 2.0) - off_w, (mount_height / 2.0) + off_h, off_z))
 
 
     def web_post_bl(off_w=0, off_h=0, off_z=0):
-        return translate(web_post(), (-(mount_width / 2.0) - off_w, -(mount_height / 2.0) - off_h, 0))
+        return translate(web_post(), (-(mount_width / 2.0) - off_w, -(mount_height / 2.0) - off_h, off_z))
 
 
     def web_post_br(off_w=0, off_h=0, off_z=0):
-        return translate(web_post(), ((mount_width / 2.0) + off_w, -(mount_height / 2.0) - off_h, 0))
+        return translate(web_post(), ((mount_width / 2.0) + off_w, -(mount_height / 2.0) - off_h, off_z))
 
     def get_torow(column):
         return bottom_key(column) + 1
@@ -1517,12 +1517,14 @@ def make_dactyl():
             # encoder_mount = translate(rotate(encoder_mount, (0, 0, 20)), (-27, -4, -15))
             return shape
         elif encoder_type(side) == "wheel":
+            wheel_width = 17.7
+            wheel_height = 14
             wheel_cut_low = box(17.2, 13.5, 8)
-
+            wheel_mount_low = translate(difference(box(wheel_width + 4, wheel_height + 4, 3), [wheel_cut_low]), (0, 0, -2))
             # wheel_cut_low = key_place(box(17.2, 13.5, 8), -1, encoder_row)
 
             wheel_cut_low = low_prep_position(wheel_cut_low)
-
+            wheel_mount_low = low_prep_position(wheel_mount_low)
             # encoder_cut_low = key_place(low_prep_position(box(keyswitch_width, keyswitch_height, 20)), -1, encoder_row)
 
             # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
