@@ -318,9 +318,6 @@ class Minithicc3(MinidoxCluster):
     def connection(self, side='right'):
         print('thumb_connection()')
 
-
-
-
         if trackball_present(side):
             shape = union([
                 hull_from_shapes(

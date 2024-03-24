@@ -127,6 +127,38 @@ def make_dactyl():
     def encoder_in_wall(side="right"):
         return encoder_type(side) != "none"
 
+    def get_descriptor_name_side(side="right"):
+        name = ""
+        if overrides_name != "":
+            name = f"{overrides_name}_"
+        if polydactyl:
+            name = f"{name}POLYDACTYL_"
+        else:
+            name = f"{name}{nrows}x{ncols}_"
+
+        type = "STANDARD_"
+
+        if all_last_rows:
+            type = "WHOLE_"
+        elif full_last_rows:
+            type = "FULL_"
+
+        name = f"{name}{type}{cluster(side).name()}_"
+
+        if is_oled(side):
+            name = f"{name}{oled_type}_"
+
+        if encoder_in_wall(side):
+            name = f"{name}{encoder_type(side).upper()}_"
+
+        name = f"{name}{side.upper()}"
+
+        return name
+
+
+    def is_oled(side):
+        return oled_mount_type not in [None, "None"] and is_side(side, oled_side)
+
     def get_left_wall_offsets(side="right"):
         wide = 22
         short = 8  # if not is_track_or_encoder else tbiw_left_wall_x_offset_override
@@ -641,7 +673,7 @@ def make_dactyl():
             bl2 = sa_length / 2
             bw2 = 22.64 / 2
             m = 0
-            pl2 = 6
+            pl2 = 16
             pw2 = 11
 
         k1 = polyline([(bw2, bl2), (bw2, -bl2), (-bw2, -bl2), (-bw2, bl2), (bw2, bl2)])
@@ -1030,6 +1062,8 @@ def make_dactyl():
     ##########
 
     def left_key_position(row, direction, low_corner=False, side='right'):
+        if side == "left" and row == nrows - 1:
+            print("found, line 1034")
         debugprint("left_key_position()")
         pos = np.array(
             key_position([-mount_width * 0.5, direction * mount_height * 0.5, 0], 0, row)
@@ -1047,24 +1081,24 @@ def make_dactyl():
             join_offset_y = left_left_wall_y_join_offset
             join_offset_z = left_left_wall_z_join_offset
 
-        if low_corner:
-            if trackball_in_wall and is_side(side, ball_side):
-                y_offset = tbiw_left_wall_lower_y_offset
-                z_offset = tbiw_left_wall_lower_z_offset
-            else:
-                y_offset = left_wall_lower_y_offset
-                z_offset = left_wall_lower_z_offset
-
-        elif row > 0 and wall_x_offsets[row] != wall_x_offsets[row - 1]:
-                # if wall_x_offsets[row] > wall_x_offsets[row - 1]:
-            y_offset = join_offset_y
-            z_offset += join_offset_z
-
-            return list(pos - np.array([
-                wall_x_offsets[row] + join_offset_x,
-                -y_offset,
-                left_wall_z_offset + z_offset
-            ]))
+        # if low_corner:
+        #     if trackball_in_wall and is_side(side, ball_side):
+        #         y_offset = tbiw_left_wall_lower_y_offset
+        #         z_offset = tbiw_left_wall_lower_z_offset
+        #     else:
+        #         y_offset = left_wall_lower_y_offset
+        #         z_offset = left_wall_lower_z_offset
+        #         # RIDICULOUS HACK 1
+        # elif row == nrows-1 or wall_x_offsets[row] != wall_x_offsets[row - 1]:
+        #         # if wall_x_offsets[row] > wall_x_offsets[row - 1]:
+        #     y_offset = join_offset_y
+        #     z_offset += join_offset_z
+        #
+        #     return list(pos - np.array([
+        #         wall_x_offsets[row] + join_offset_x,
+        #         -y_offset,
+        #         left_wall_z_offset + z_offset
+        #     ]))
         # elif row < nrows - 1 and wall_x_offsets[row] != wall_x_offsets[row + 1]:
         #     y_offset = +
         #     return list(pos - np.array([
@@ -1222,6 +1256,7 @@ def make_dactyl():
         torow = lastrow
         if all_last_rows:
             torow = lastrow + 1
+
         pos = left_key_position(torow - 1, -1, low_corner=True)
         # pos = left_key_position(torow - 1, -2, low_corner=True)
         if shape is not None:
@@ -1250,10 +1285,10 @@ def make_dactyl():
         for i in range(torow):
             y = i
             low = (y == torow - 1)
-            y_shift = 0
-            if not found and y < torow - 1 and wall_offsets[i] != wall_offsets[y + 1]:
-                found = True
-                y_shift += 1
+            # y_shift = 0
+            # if not found and y < torow - 1 and wall_offsets[i] != wall_offsets[y + 1]:
+            #     found = True
+            #     y_shift += 1
             temp_shape1 = wall_brace(
                 (lambda sh: left_key_place(sh, y, 1, side=side)), -1, 0, web_post(),
                 (lambda sh: left_key_place(sh, y, -1, low_corner=low, side=side)), -1, 0, web_post(),
@@ -1270,10 +1305,10 @@ def make_dactyl():
         for i in range(torow - 1):
             y = i + 1
             low = (y == torow - 1)
-            y_shift = 0
-            if not found and wall_offsets[i] != wall_offsets[y]:
-                found = True
-                y_shift += 1
+            # y_shift = 0
+            # if not found and wall_offsets[i] != wall_offsets[y]:
+            #     found = True
+            #     y_shift += 1
             temp_shape1 = wall_brace(
                 (lambda sh: left_key_place(sh, y - 1, -1, side=side)), -1, 0, web_post(),
                 (lambda sh: left_key_place(sh, y, 1, side=side)), -1, 0, web_post(),
@@ -1541,6 +1576,8 @@ def make_dactyl():
             # encoder_cut_low = translate(rotate(encoder_cut_low, rot), [low[0], low[1] + 1, low[2]])
 
             shape = difference(shape, [wheel_cut_low])
+            shape = union([shape, wheel_mount_low])
+            export_file(shape=wheel_mount_low, fname=path.join(r".", "things", r"wheel_encoder_mount"))
             # shape = union([shape, ec11_mount_low])
             # encoder_mount = translate(rotate(encoder_mount, (0, 0, 20)), (-27, -4, -15))
             return shape
@@ -1560,6 +1597,7 @@ def make_dactyl():
         height = usb_c_height * 1.2
         front_bit = translate(usb_c_shape(usb_c_width + 2, usb_c_height + 2, wall_thickness / 2), (0, (wall_thickness / 2) + 1, 0))
         shape = union([front_bit, usb_c_hole()])
+        shape = rotate(shape, [0, 0, usb_c_zrotate])
         shape = translate(shape,
                           (
                               usb_holder_position[0] + usb_c_xoffset,
@@ -2360,7 +2398,7 @@ def make_dactyl():
         if trrs_hole:
             s2 = difference(s2, [trrs_mount_point()])
 
-        if controller_side == "both" or side == controller_side:
+        if is_side(side, controller_side):
             if controller_mount_type in ['RJ9_USB_TEENSY', 'USB_TEENSY']:
                 s2 = union([s2, teensy_holder()])
 
