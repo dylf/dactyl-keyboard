@@ -1062,8 +1062,6 @@ def make_dactyl():
     ##########
 
     def left_key_position(row, direction, low_corner=False, side='right'):
-        if side == "left" and row == nrows - 1:
-            print("found, line 1034")
         debugprint("left_key_position()")
         pos = np.array(
             key_position([-mount_width * 0.5, direction * mount_height * 0.5, 0], 0, row)
