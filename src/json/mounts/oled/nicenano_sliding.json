@@ -1,6 +1,6 @@
 {
   "oled_mount_type": "SLIDING",
-  "oled_mount_width": 14,
+  "oled_mount_width": 15.25,
   "oled_mount_height": 25.0,
   "oled_mount_rim": 2.5,
   "oled_mount_depth": 8.0,
