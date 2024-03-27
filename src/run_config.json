@@ -44,6 +44,7 @@
   "tbiw_left_wall_z_offset_override": 0.0,
   "tbiw_left_wall_lower_y_offset": 0.0,
   "tbiw_left_wall_lower_z_offset": 0.0,
+  "oled_type": "OLED",
   "tbiw_oled_center_row": 0.75,
   "tbiw_oled_translation_offset": [
     -3.5,
@@ -105,6 +106,7 @@
     0,
     -22.0
   ],
+  "has_btus": false,
   "tb_btu_socket_rotation_offset": [
     0,
     0,
@@ -183,6 +185,7 @@
   "undercut_transition": 0.2,
   "plate_file_name": "hotswap_ridged_test",
   "plate_offset": -6,
+  "oled_side": "both",
   "oled_mount_type": null,
   "oled_center_row": 1.25,
   "oled_horizontal": false,
@@ -336,5 +339,6 @@
       0
     ]
   ],
-  "left_screw_offsets": null
+  "left_screw_offsets": null,
+    "polydactyl": false
 }
