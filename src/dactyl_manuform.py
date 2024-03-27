@@ -2711,21 +2711,26 @@ def make_dactyl():
 
 
     def run():
+        right_name = get_descriptor_name_side(side="right")
+        left_name = get_descriptor_name_side(side="left")
         mod_r, walls_r = model_side(side="right")
         if resin and ENGINE == "cadquery":
             mod_r = rotate(mod_r, (333.04, 43.67, 85.00))
-        export_file(shape=mod_r, fname=path.join(save_path, r_config_name + r"_right"))
+        export_file(shape=mod_r, fname=path.join(save_path, right_name + r"_TOP"))
 
+        # print(f"Right descriptor name: {get_descriptor_name_side(side='right')}")
+        # print(f"Left descriptor name: {get_descriptor_name_side(side='left')}")
         if right_side_only:
             print(">>>>>  RIGHT SIDE ONLY: Only rendering a the right side.")
             return
         base = baseplate(walls_r, side='right')
-        export_file(shape=base, fname=path.join(save_path, r_config_name + r"_right_plate"))
+        # rest = wrist_rest(mod_r, base, side="right")
+        # base = union([base, rest])
+        export_file(shape=base, fname=path.join(save_path, right_name + r"_PLATE"))
         if quickly:
             print(">>>>>  QUICK RENDER: Only rendering a the right side and bottom plate.")
             return
-        if not has_puck:
-            export_dxf(shape=base, fname=path.join(save_path, r_config_name + r"_right_plate"))
+        export_dxf(shape=base, fname=path.join(save_path, right_name + r"_PLATE"))
 
         # rest = wrist_rest(mod_r, base, side="right")
         #
@@ -2736,12 +2741,11 @@ def make_dactyl():
         mod_l, walls_l = model_side(side="left")
         if resin and ENGINE == "cadquery":
             mod_l = rotate(mod_l, (333.04, 317.33, 286.35))
-        export_file(shape=mod_l, fname=path.join(save_path, l_config_name + r"_left"))
+        export_file(shape=mod_l, fname=path.join(save_path, left_name + r"_TOP"))
 
         base_l = mirror(baseplate(walls_l, side='left'), 'YZ')
-        export_file(shape=base_l, fname=path.join(save_path, l_config_name + r"_left_plate"))
-        if not has_puck:
-            export_dxf(shape=base_l, fname=path.join(save_path, l_config_name + r"_left_plate"))
+        export_file(shape=base_l, fname=path.join(save_path, left_name + r"_PLATE"))
+        export_dxf(shape=base_l, fname=path.join(save_path, left_name + r"_PLATE"))
 
         # else:
         #     export_file(shape=mirror(mod_r, 'YZ'), fname=path.join(save_path, config_name + r"_left"))
