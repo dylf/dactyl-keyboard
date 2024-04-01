@@ -959,6 +959,9 @@ def make_dactyl():
         cx = mount_width / 2
         cy = mount_height / 2
 
+        pof_mid = (0, -cy, -pcb_offset)
+        hof_mid = (0, -cy, -hotswap_offset)
+
         grid_columns = []
         cutouts = []
         last_column = None
@@ -967,9 +970,6 @@ def make_dactyl():
         hs_panel_w = mount_width
         hs_panel_d = 3
         hs_panel_off = (0, hs_panel_h - cy, -hotswap_offset)
-
-
-
 
         for c in range(ncols):
             col = []
@@ -980,14 +980,20 @@ def make_dactyl():
                 key = column[row]
                 if not key.is_none():
                     col.append(_offset_all([key.tr(hof), key.tl(hof), key.bl(hof), key.br(hof)]))
+                    col.append(_offset_all([key.tr(pof), key.tl(pof), key.bl(pof), key.br(pof)]))
                     # col.append(boxit(hs_panel_w, hs_panel_h, hs_panel_d, key, hs_panel_off))
                     tl = key.get_neighbor("tl")
                     l = key.get_neighbor("l")
                     top = key.get_neighbor("t")
-
+                    # k_pof = rotate_point_around(pof, key.rot)
+                    # k_hof = rotate_point_around(hof, key.rot)
+                    rail = box(15, 6, 2.5)
+                    rail = translate(rail, (0, 5, -3.5))
+                    rail = translate(rotate(rail, key.rot), key.center())
+                    cutouts.append(rail)
                     if not top.is_none():
-                        col.append(_offset_all([top.bl(pof), key.tl(pof), key.tr(pof), top.br(pof)], d=1.5))
-                        col.append(_offset_all([top.bl(hof), key.tl(hof), key.tr(hof), top.br(hof)], d=1.5))
+                        col.append(_offset_all([top.bl(pof), key.tl(pof), key.tr(pof), top.br(pof)]))
+                        col.append(_offset_all([top.bl(hof), key.tl(hof), key.tr(hof), top.br(hof)]))
 
                         tc = top.center(off=pof)
                         bc = key.center(off=pof)
@@ -996,24 +1002,21 @@ def make_dactyl():
 
                         mid_p = [(tc[0] + bc[0]) / 2, (tc[1] + bc[1]) / 2, (tc[2] + bc[2]) / 2]
                         mid_r = [(tr[0] + br[0]) / 2, (tr[1] + br[1]) / 2, (tr[2] + br[2]) / 2]
-                        rail = box(10, 1.5, 2.5)
-                        rail = union([rail, translate(box(10, 3, 1), (0, 0, 1))])
-                        rail = translate(rotate(rail, mid_r), mid_p)
-                        col.append(rail)
-                    if not l.is_none():
-                        # col.append(_offset_all([l.tr(of), l.br(osf), key.bl(of), key.tl(of)]))
-                        if not tl.is_none() and not l.is_none() and not top.is_none():
-                            col.append(_offset_all([top.bl(pof), tl.br(pof), l.tr(pof), key.tl(pof)], d=1.5))
-                            col.append(_offset_all([top.bl(hof), tl.br(hof), l.tr(hof), key.tl(hof)], d=1.5))
-                    elif not tl.is_none() and not top.is_none():
-                        col.append(_offset_all([top.bl(pof), tl.br(pof), key.tl(pof), key.tl(pof)], d=1.5))
 
+                    # if not l.is_none():
+                    #     col.append(_offset_all([l.tr(pof), key.tl(pof), key.tl(pof_mid), l.tr(pof_mid)]))
+                    #     col.append(_offset_all([l.tr(hof), key.tl(hof), key.tl(hof_mid), l.tr(hof_mid)]))
+                    #     # col.append(_offset_all([l.tr(of), l.br(osf), key.bl(of), key.tl(of)]))
+                    #     if not tl.is_none() and not l.is_none() and not top.is_none():
+                    #         col.append(_offset_all([top.bl(pof), tl.br(pof), l.tr(pof), key.tl(pof)]))
+                    #         col.append(_offset_all([top.bl(hof), tl.br(hof), l.tr(hof), key.tl(hof)]))
+                    # elif not tl.is_none() and not top.is_none():
+                    #     col.append(_offset_all([top.bl(pof), tl.br(pof), key.tl(pof), key.tl(pof)]))
 
-
-                    top_off = -8
+                    top_off = -10
                     side_off = -2
                     bot_off = -2
-                    hot_depth = 1 - hotswap_offset
+                    hot_depth = 3 - hotswap_offset
                     pcb_depth = -5 - hotswap_offset
                     hole_top = [
                         key.tl([side_off, top_off, hot_depth]),
@@ -1031,11 +1034,9 @@ def make_dactyl():
                         key.tl([side_off, top_off, pcb_depth])
                     ]
 
-
                     hole_top.extend(hole_bottom)
                     cutout = tess_hull([_offset(point) for point in hole_top])
                     cutouts.append(cutout)
-
 
                 last_row_key = key
 

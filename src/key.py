@@ -24,6 +24,7 @@ class Key(Part):
         self.d = SIZES[key_type]["d"]
         self.neighbors = {}
         self.walls = []
+        self._rot_transform = None
         if parent_locals is not None:
             for item in parent_locals:
                 globals()[item] = parent_locals[item]
@@ -32,8 +33,13 @@ class Key(Part):
         return f'K-{self.get_id()}'
 
     def _offset_point(self, width, height, off):
-        offset = rotate_deg([(width / 2.0) + off[0], (height / 2) + off[1], off[2]], self._rot)
+        offset = [(width / 2.0) + off[0], (height / 2) + off[1], off[2]]
+        new_offset = self._rot_transform.apply(offset)
         return add_translate(self._pos, offset)
+
+    def set_rot(self, new_rot):
+        self._rot = new_rot
+        self._rot_transform = get_rotation_transform(new_rot)
 
     def center(self, off=(0, 0, 0)):
         return self._offset_point(0, 0, off)
@@ -54,7 +60,7 @@ class Key(Part):
         return add_translate(self._pos, offset)
 
     def bl(self, off=(0, 0, 0)):
-        # return self._offset_point(-mount_width / 2.0, -mount_height / 2.0, off)
+        # (-mount_width / 2.0, -mount_height / 2.0, off)
         offset = rotate_deg([-(mount_width / 2.0) - off[0], -(mount_height / 2) - off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
@@ -179,13 +185,13 @@ class Key(Part):
                                 column,
                                 row,
                                 column_style="standard",
+                                origin=(0, 0, 0)
                                 ):
 
         xrot = 0
         yrot = 0
-        position = [0, 0, 0]
+        # origin = [0, 0, 0]
 
-        use_alpha = alpha + ((nrows - row) * 0.1)
         # row_radius = ((mount_height + extra_height) / 2) / (np.sin(use_alpha / 2)) + cap_top_height
         column_angle = beta * (centercol - column)
         column_x_delta_actual = column_x_delta
@@ -196,47 +202,52 @@ class Key(Part):
 
         if column_style == "orthographic":
             column_z_delta = column_radius * (1 - np.cos(column_angle))
-            position = add_translate(position, [0, 0, -row_radius])
-            position = rotate_around_x(position, alpha * (centerrow - row))
+            origin = add_translate(origin, [0, 0, -row_radius])
+            origin = rotate_around_x(origin, alpha * (centerrow - row))
             xrot += alpha * (centerrow - row)
-            position = add_translate(position, [0, 0, row_radius])
-            position = rotate_around_y(position, column_angle)
+            origin = add_translate(origin, [0, 0, row_radius])
+            origin = rotate_around_y(origin, column_angle)
             yrot += column_angle
-            position = add_translate(
-                position, [-(column - centercol) * column_x_delta_actual, 0, column_z_delta]
+            origin = add_translate(
+                origin, [-(column - centercol) * column_x_delta_actual, 0, column_z_delta]
             )
-            position = add_translate(position, column_offset(column))
+            origin = add_translate(origin, column_offset(column))
 
         elif column_style == "fixed":
-            position = rotate_around_y(position, fixed_angles[column])
+            origin = rotate_around_y(origin, fixed_angles[column])
             yrot += fixed_angles[column]
-            position = add_translate(position, [fixed_x[column], 0, fixed_z[column]])
-            position = add_translate(position, [0, 0, -(row_radius + fixed_z[column])])
-            position = rotate_around_x(position, alpha * (centerrow - row))
+            origin = add_translate(origin, [fixed_x[column], 0, fixed_z[column]])
+            origin = add_translate(origin, [0, 0, -(row_radius + fixed_z[column])])
+            origin = rotate_around_x(origin, alpha * (centerrow - row))
             xrot += alpha * (centerrow - row)
-            position = add_translate(position, [0, 0, row_radius + fixed_z[column]])
-            position = rotate_around_y(position, fixed_tenting)
+            origin = add_translate(origin, [0, 0, row_radius + fixed_z[column]])
+            origin = rotate_around_y(origin, fixed_tenting)
             yrot += fixed_tenting
-            position = add_translate(position, [0, column_offset(column)[1], 0])
+            origin = add_translate(origin, [0, column_offset(column)[1], 0])
 
         else:
-            position = add_translate(position, [0, 0, -row_radius])
-            position = rotate_around_x(position, alpha * (centerrow - row))
+            origin = add_translate(origin, [0, 0, -row_radius])
+            origin = rotate_around_x(origin, alpha * (centerrow - row))
             xrot += alpha * (centerrow - row)
-            position = add_translate(position, [0, 0, row_radius])
-            position = add_translate(position, [0, 0, -column_radius])
-            position = rotate_around_y(position, column_angle)
+            origin = add_translate(origin, [0, 0, row_radius])
+            origin = add_translate(origin, [0, 0, -column_radius])
+            origin = rotate_around_y(origin, column_angle)
             yrot += column_angle
-            position = add_translate(position, [0, 0, column_radius])
-            position = add_translate(position, column_offset(column))
+            origin = add_translate(origin, [0, 0, column_radius])
+            origin = add_translate(origin, column_offset(column))
 
-        position = rotate_around_y(position, tenting_angle)
+        origin = rotate_around_y(origin, tenting_angle)
         yrot += tenting_angle
-        position = add_translate(position, [0, 0, keyboard_z_offset])
+        origin = add_translate(origin, [0, 0, keyboard_z_offset])
 
-        self.pos = position
+        self.pos = origin
         self.rot = to_degrees([xrot, yrot, 0])
+
+        dist = distance([0, 0, 0], self.pos)
+        self._d_vec = [d / dist for d in origin]
+        # print(f"{self.get_id()}: pos={self.pos}, offset={self.offset_point([0, 0, -3])}")
         return [self.pos, self.rot]
+
 
     def render(self, plate_file, side="right"):
         if plate_style in ['NUB', 'HS_NUB']:
@@ -317,6 +328,8 @@ class Key(Part):
         plate = translate(plate, self.pos)
 
         return plate
+
+
 
 
 class KeyFactory(object):
