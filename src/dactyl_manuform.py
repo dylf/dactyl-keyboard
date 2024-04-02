@@ -962,7 +962,7 @@ def make_dactyl():
         pof_mid = (0, -cy, -pcb_offset)
         hof_mid = (0, -cy, -hotswap_offset)
 
-        grid_columns = []
+        grid = []
         cutouts = []
         last_column = None
 
@@ -976,103 +976,28 @@ def make_dactyl():
         flex_br = (cx, -cy, -pcb_offset)
         flex_bl = (-cx, -cy, -pcb_offset)
 
+        def key_plate():
+            hs = translate(box(flex_width, cy, 2), (0, cy / 2, -1))
+            border = box(flex_width + 2, mount_height + 2, 4)
+            border = translate(difference(border, [box(flex_width, mount_height, 5)]), (0, 0, -2))
+            return union([hs, border])
 
 
         for c in range(ncols):
-            col = []
             column = KeyFactory.get_column(c)
             last_row_key = KeyFactory.NONE_KEY
 
             for row in range(len(column)):
                 key = column[row]
+
                 if not key.is_none():
-                    # col.append(_offset_all([key.tr(hof), key.tl(hof), key.bl(hof), key.br(hof)]))
-                    col.append(_offset_all([key.tr(pof), key.tl(pof), key.bl(pof), key.br(pof)], d=2.5, rot=key.rot))
-                    # col.append(boxit(hs_panel_w, hs_panel_h, hs_panel_d, key, hs_panel_off))
-                    # tl = key.get_neighbor("tl")
-                    l = key.get_neighbor("l")
-                    top = key.get_neighbor("t")
-                    # k_pof = rotate_point_around(pof, key.rot)
-                    # k_hof = rotate_point_around(hof, key.rot)
-                    rail = box(15, 8, 3.5)
-                    rail = union([rail, translate(box(20, 8, 3.5), (0, -7, 0)), translate(box(20, 8, 3.5), (0, 3, 0))])
-                    rail = translate(rail, (0, 3, -2))
-
-                    rail = translate(rotate(rail, key.rot), key.center())
-                    cutouts.append(rail)
-                    if not top.is_none():
-                        tc = top.center(off=pof)
-                        bc = key.center(off=pof)
-                        tr = top.rot.copy()
-                        br = key.rot.copy()
-
-                        mid_p = [(tc[0] + bc[0]) / 2, (tc[1] + bc[1]) / 2, (tc[2] + bc[2]) / 2]
-                        mid_r = [(tr[0] + br[0]) / 2, (tr[1] + br[1]) / 2, (tr[2] + br[2]) / 2]
-
-                        col.append(_offset_all([top.bl(pof), key.tl(pof), key.tr(pof), top.br(pof)], d=2.5, rot=mid_r))
-                        # col.append(_offset_all([top.bl(hof), key.tl(hof), key.tr(hof), top.br(hof)]))
-
-                    if not l.is_none():
-                        top_of = (pof[0], pof[1] - 3, pof[2])
-                        col.append(_offset_all([l.tr(pof), l.tr(top_of), key.tl(top_of), key.tl(pof)], d=2.5, rot=avg(l.rot, key.rot)))
-                        bot_of = (pof[0], pof[1] + 3, pof[2])
-                        col.append(_offset_all([l.br(pof), l.br(bot_of), key.bl(bot_of), key.bl(pof)], d=2.5,
-                                               rot=avg(l.rot, key.rot)))
-                        # col.append(_offset_all([l.tr(pof), key.tl(pof), key.tl(pof_mid), l.tr(pof_mid)], rot=avg(l.rot, key.rot)))
-                        # col.append(_offset_all([l.tr(hof), key.tl(hof), key.tl(hof_mid), l.tr(hof_mid)], rot=avg(l.rot, key.rot)))
-                        # col.append(_offset_all([l.tr(of), l.br(osf), key.bl(of), key.tl(of)]))
-                        # if not tl.is_none() and not l.is_none() and not top.is_none():
-                        #     avg_all = avg(top.rot, tl.rot, l.rot, key.rot)
-                        #     col.append(_offset_all([top.bl(pof), tl.br(pof), l.tr(pof), key.tl(pof)], rot=avg_all))
-                            # col.append(_offset_all([top.bl(hof), tl.br(hof), l.tr(hof), key.tl(hof)], rot=avg_all))
-                    # elif not tl.is_none() and not top.is_none():
-                    #     col.append(_offset_all([top.bl(pof), tl.br(pof), key.tl(pof), key.tl(pof)], rot=avg(tl.rot, top.rot)))
-                    #
-                    # top_off = -8.5
-                    # side_off = -2
-                    # bot_off = -2
-                    # hot_depth = 3 - hotswap_offset
-                    # pcb_depth = -5 - hotswap_offset
-                    # hole_top = [
-                    #     key.tl([side_off, top_off, hot_depth]),
-                    #     key.tr([side_off, top_off, hot_depth]),
-                    #     key.br([side_off, bot_off, hot_depth]),
-                    #     key.bl([side_off, bot_off, hot_depth]),
-                    #     key.tl([side_off, top_off, hot_depth])
-                    # ]
-                    #
-                    # hole_bottom = [
-                    #     key.tl([side_off, top_off, pcb_depth]),
-                    #     key.tr([side_off, top_off, pcb_depth]),
-                    #     key.br([side_off, bot_off, pcb_depth]),
-                    #     key.bl([side_off, bot_off, pcb_depth]),
-                    #     key.tl([side_off, top_off, pcb_depth])
-                    # ]
-
-                    hole = translate(rotate(box(15, 8, 10), key.rot), key.center(off=(0, -3, 0)))
-
-                    # hole_top.extend(hole_bottom)
-                    # cutout = tess_hull([_offset(point) for point in hole_top])
-                    cutouts.append(hole)
-
-                last_row_key = key
-
-            last_column = column
-
-            grid_columns.append(union(col))
-
-        # grid_columns.append(union(col))
-        # column_bottoms.append(union(get_walls(side)))
-        shape = difference(union(grid_columns), cutouts)
+                    plate = rotate(key_plate(), key.rot)
+                    plate = translate(plate, key.center(pof))
+                    grid.append(plate)
 
 
-        # bottom_box = translate(union([box(50, 50, 15), box(50, 50, 15)]), (0, 0, -5))
-        # bottom_box = translate(rotate(cylinder(25, 7), (0, 5, 0)), (-10, 0, 7))
-        # bottom_box = difference(bottom_box, [shape])
-        #
-        # shape = union([shape, bottom_box])
 
-        return shape
+        return union(grid)
 
     def case_bottom(side="right"):
         debugprint('case_bottom()')
