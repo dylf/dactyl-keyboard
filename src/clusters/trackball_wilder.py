@@ -83,6 +83,7 @@ class TrackballWild(TrackballOrbyl):
         super().__init__(parent_locals)
         for item in parent_locals:
             globals()[item] = parent_locals[item]
+        self.is_tb = True
 
     def position_rotation(self):
         rot = [10, -15, 5]

@@ -171,7 +171,7 @@ def make_dactyl():
 
         if oled_mount_type not in [None, "None"] and is_oled(side):
             oled_yes = True
-        if (trackball_in_wall and is_side(side, ball_side)):
+        if trackball_is_in_wall(side):
             track_yes = True
         if (encoder_in_wall(side)):
             encoder_yes = True
@@ -1727,7 +1727,7 @@ def make_dactyl():
 
 
 
-    def generate_trackball(pos, rot, cluster):
+    def generate_trackball(pos, rot, cluster, side):
         tb_t_offset = tb_socket_translation_offset
         tb_r_offset = tb_socket_rotation_offset
 
@@ -1745,7 +1745,7 @@ def make_dactyl():
         top_cutter = None
         mount = None
 
-        if trackball_in_wall:
+        if trackball_is_in_wall(side):
             top_cutter = orient_to_trackball(trackball_surface_cutter())
             mount = orient_to_trackball(trackball_mount())
 
@@ -1775,11 +1775,11 @@ def make_dactyl():
         return precut, shape, cutout, sensor, ball, mount, top_cutter
 
 
-    def generate_trackball_in_cluster(cluster):
+    def generate_trackball_in_cluster(cluster, side):
         pos, rot = tbiw_position_rotation()
         if cluster.is_tb:
             pos, rot = cluster.position_rotation()
-        return generate_trackball(pos, rot, cluster)
+        return generate_trackball(pos, rot, cluster, side)
 
 
     def tbiw_position_rotation():
@@ -1812,18 +1812,21 @@ def make_dactyl():
 
         return tbiw_mount_location_xyz, tbiw_mount_rotation_xyz
 
-    def trackball_present(side):
-        return cluster(side).is_tb or (trackball_in_wall and ball_side == side)
+    def trackball_is_in_wall(side="right"):
+        return trackball_in_wall and is_side(side, ball_side) and not cluster(side).is_tb
 
-    def generate_trackball_in_wall():
+    def trackball_present(side):
+        return cluster(side).is_tb or trackball_is_in_wall(side)
+
+    def generate_trackball_in_wall(side):
         pos, rot = tbiw_position_rotation()
-        return generate_trackball(pos, rot, None)
+        return generate_trackball(pos, rot, None, side)
 
 
     def oled_position_rotation(side='right'):
         wall_x_offsets = get_left_wall_offsets(side)
         _oled_center_row = None
-        if trackball_in_wall and is_side(side, ball_side):
+        if trackball_is_in_wall(side):
             _oled_center_row = tbiw_oled_center_row
             _oled_translation_offset = tbiw_oled_translation_offset
             _oled_rotation_offset = tbiw_oled_rotation_offset
@@ -1845,7 +1848,7 @@ def make_dactyl():
 
             if oled_horizontal:
                 _left_wall_x_offset = tbiw_left_wall_x_offset_override
-            elif (trackball_in_wall or oled_horizontal) and is_side(side, ball_side):
+            elif trackball_is_in_wall(side):
                 _left_wall_x_offset = tbiw_left_wall_x_offset_override
             else:
                 _left_wall_x_offset = wall_x_offsets[0]
@@ -2449,8 +2452,8 @@ def make_dactyl():
             shape = encoder_wall_mount(shape, side)
 
         if not quickly:
-            if trackball_in_wall and (is_side(side, ball_side)):
-                tbprecut, tb, tbcutout, sensor, ball, mount, top_cutter = generate_trackball_in_wall()
+            if trackball_is_in_wall(side):
+                tbprecut, tb, tbcutout, sensor, ball, mount, top_cutter = generate_trackball_in_wall(side)
                 # shape = union([shape, mount])
                 # HACK HACKETY HACK HACK!
                 # # cut_corner = translate(box(10, 10, 10), spot)
@@ -2485,7 +2488,7 @@ def make_dactyl():
                     shape = add([shape, ball])
 
             elif cluster(side).is_tb:
-                tbprecut, tb, tbcutout, sensor, ball, mount, top_cutter = generate_trackball_in_cluster(cluster(side))
+                tbprecut, tb, tbcutout, sensor, ball, mount, top_cutter = generate_trackball_in_cluster(cluster(side), side)
 
                 shape = difference(shape, [tbprecut])
                 if cluster(side).has_btus():
@@ -2816,18 +2819,19 @@ def make_dactyl():
 
     right_cluster = get_cluster(thumb_style)
 
-    if right_cluster.is_tb:
-        if ball_side == "both":
-            left_cluster = right_cluster
-        elif ball_side == "left":
-            left_cluster = right_cluster
-            right_cluster = get_cluster(other_thumb)
-        else:
-            left_cluster = get_cluster(other_thumb)
-    elif other_thumb != thumb_style:
-        left_cluster = get_cluster(other_thumb)
-    else:
-        left_cluster = right_cluster  # this assumes thumb_style always overrides DEFAULT other_thumb
+    # if right_cluster.is_tb:
+    #     if ball_side == "both":
+    #         if not trackball_is_in_wall("left"):
+    #             left_cluster = right_cluster
+    #     elif ball_side == "left":
+    #         left_cluster = right_cluster
+    #         right_cluster = get_cluster(other_thumb)
+    #     else:
+    #         left_cluster = get_cluster(other_thumb)
+    # elif other_thumb != thumb_style:
+    left_cluster = get_cluster(other_thumb)
+    # else:
+    #     left_cluster = right_cluster  # this assumes thumb_style always overrides DEFAULT other_thumb
 
     run()
 
