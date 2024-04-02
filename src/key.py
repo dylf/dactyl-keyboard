@@ -42,7 +42,8 @@ class Key(Part):
         self._rot_transform = get_rotation_transform(new_rot)
 
     def center(self, off=(0, 0, 0)):
-        return self._offset_point(0, 0, off)
+        offset = rotate_deg(off, self._rot)
+        return add_translate(self._pos, offset)
 
     def tr(self, off=(0, 0, 0)):
         # return self._offset_point(mount_width / 2.0, mount_height / 2.0, off)

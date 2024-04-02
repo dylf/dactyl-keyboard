@@ -93,6 +93,19 @@ def rotate_around_z(position, angle):
     return np.matmul(t_matrix, position)
 
 
+def avg(*argv):
+    x = 0
+    y = 0
+    z = 0
+    l = len(argv)
+    for sublist in argv:
+        x += sublist[0]
+        y += sublist[1]
+        z += sublist[2]
+
+    return [x / l, y / l, z / l]
+
+
 def rotate_rad(start, rotate_by):
     result = rotate_around_x(start, rotate_by[0])
     result = rotate_around_y(result, rotate_by[1])
