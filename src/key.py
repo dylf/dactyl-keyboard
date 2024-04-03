@@ -65,6 +65,26 @@ class Key(Part):
         offset = rotate_deg([-(mount_width / 2.0) - off[0], -(mount_height / 2) - off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
+    def tr_off(self, off):
+        # return self._offset_point(mount_width / 2.0, mount_height / 2.0, off)
+        offset = rotate_deg([(mount_width / 2.0) + off[0], (mount_height / 2) + off[1], off[2]], self._rot)
+        return add_translate(self._pos, offset)
+
+    def tl_off(self, off):
+        # return self._offset_point(-mount_width / 2.0, mount_height / 2.0, off)
+        offset = rotate_deg([-(mount_width / 2.0) + off[0], (mount_height / 2) + off[1], off[2]], self._rot)
+        return add_translate(self._pos, offset)
+
+    def br_off(self, off):
+        # return self._offset_point(mount_width / 2.0, -mount_height / 2.0, off)
+        offset = rotate_deg([(mount_width / 2.0) + off[0], -(mount_height / 2) + off[1], off[2]], self._rot)
+        return add_translate(self._pos, offset)
+
+    def bl_off(self, off):
+        # (-mount_width / 2.0, -mount_height / 2.0, off)
+        offset = rotate_deg([-(mount_width / 2.0) + off[0], -(mount_height / 2) + off[1], off[2]], self._rot)
+        return add_translate(self._pos, offset)
+
     def is_wall_key(self):
         return len(self.walls) > 0
 
@@ -156,6 +176,9 @@ class Key(Part):
 
     def is_none(self):
         return self._id == "none"
+
+    def is_present(self):
+        return not self.is_none()
 
     def closest_corner(self, rel_pos):
         dist = 99999999999.0

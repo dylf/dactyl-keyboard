@@ -948,6 +948,10 @@ def make_dactyl():
 
         return rendered_walls
 
+
+    def is_cq():
+        return ENGINE == "cadquery"
+
     def pcb_backer(side='right'):
         pcb_calculated_center = (flex_depth + flex_holder_thickness) / 2
         pcb_offset = (plate_thickness / 2) + pcb_calculated_center
@@ -971,31 +975,72 @@ def make_dactyl():
         hs_panel_d = 3
         hs_panel_off = (0, hs_panel_h - cy, -hotswap_offset)
 
-        flex_tr = (cx, cy, -pcb_offset)
-        flex_tl = (-cx, cy, -pcb_offset)
-        flex_br = (cx, -cy, -pcb_offset)
-        flex_bl = (-cx, -cy, -pcb_offset)
+        def smooth(shape):
+            if is_cq():
+                # shape = shape.edges("|Z").fillet(2)
+                shape = shape.edges(">Z").chamfer(1)
 
-        def key_plate():
-            hs = translate(box(flex_width, cy, 2), (0, cy / 2, -1))
-            border = box(flex_width + 2, mount_height + 2, 4)
-            border = translate(difference(border, [box(flex_width, mount_height, 5)]), (0, 0, -2))
-            return union([hs, border])
+            return shape
 
+
+        def key_plate(key):
+            plate = translate(box(flex_width / 3, mount_height + 7, 1.8), (0, 0, 0.9))
+            if is_cq():
+                # plate = plate.edges("|Z").fillet(1)
+                plate = plate.edges(">Z").chamfer(1)
+
+            plate = rotate(plate, key.rot)
+            plate = translate(plate, key.center(pof))
+
+            return plate
+            # border = box(flex_width, mount_height + 2, 3.6)
+            # border = translate(difference(border, [box(flex_width + 2, mount_height, 5)]), (0, 0, 1.8))
+            # return union([hs, border])
+
+        def key_web(key, top_key):
+            rot = avg(key.rot, top_key.rot)
+            pos = avg(key.center(pof), top_key.center(pof))
+            rail = smooth(translate(box(mount_width, mount_height / 3, 1.8), (0, 0, -1.8)))
+
+            rail = rotate(rail, rot)
+            rail = translate(rail, pos)
+
+            return rail
+            # return _offset_all([key.tl_off(pof), key.tr_off(pof), top_key.br_off(pof), top_key.bl_off(pof)], rot=rot)
+
+        def key_web_topkey(key):
+            top_pof = [pof[0], pof[1] + 3, pof[2]]
+            return smooth(_offset_all([key.tl_off(pof), key.tr_off(pof), key.tr_off(top_pof), key.tl_off(top_pof)], rot=key.rot))
+
+        def key_web_bottomkey(key):
+            bot_pof = [pof[0], pof[1] - 3, pof[2]]
+            return smooth(_offset_all([key.bl_off(bot_pof), key.br_off(bot_pof), key.br_off(pof), key.bl_off(pof)], rot=key.rot))
 
         for c in range(ncols):
             column = KeyFactory.get_column(c)
             last_row_key = KeyFactory.NONE_KEY
 
+            last_key = None
+
             for row in range(len(column)):
                 key = column[row]
 
                 if not key.is_none():
-                    plate = rotate(key_plate(), key.rot)
-                    plate = translate(plate, key.center(pof))
-                    grid.append(plate)
+                    # plate = rotate(key_plate(key), key.rot)
+                    # plate = translate(plate, key.center(pof))
+                    grid.append(key_plate(key))
 
+                    top_key = key.get_neighbor("t")
 
+                    if not top_key.is_none():
+                        grid.append(key_web(key, top_key))
+                    # else:
+                    #     grid.append(key_web_topkey(key))
+
+                    last_key = key
+
+            # if not last_key.is_none():
+            #     grid.append(key_web_bottomkey(last_key))
 
         return union(grid)
 
@@ -1488,33 +1533,33 @@ def make_dactyl():
     store_bottom_pts = False
     bottom_pts = []
 
-    def case_walls(side="right"):
-        wall_layers = []
+    # def case_walls(side="right"):
+    #     wall_layers = []
+    #
+    #     for i in range(len(wall_offsets) - 1):
+    #         start = wall_offsets[i]
+    #         end = wall_offsets[i + 1]
+    #
+    #         wall_layers.append(get_walls(side, of=start, wof=end))
+    #
+    #     return union(wall_layers)
 
-        for i in range(len(wall_offsets) - 1):
-            start = wall_offsets[i]
-            end = wall_offsets[i + 1]
-
-            wall_layers.append(get_walls(side, of=start, wof=end))
-
-        return union(wall_layers)
-
-    # def case_walls(side='right'):
-    #     print('case_walls()')
-    #     nonlocal store_bottom_pts
-    #     store_bottom_pts = True
-    #     result = (
-    #         union([
-    #             back_wall(),
-    #             left_wall(side=side),
-    #             right_wall(),
-    #             front_wall(),
-    #             cluster(side=side).walls(side=side),
-    #             cluster(side=side).connection(side=side),
-    #         ])
-    #     )
-    #     store_bottom_pts = False
-    #     return result
+    def case_walls(side='right'):
+        print('case_walls()')
+        nonlocal store_bottom_pts
+        store_bottom_pts = True
+        result = (
+            union([
+                back_wall(),
+                left_wall(side=side),
+                right_wall(),
+                front_wall(),
+                cluster(side=side).walls(side=side),
+                cluster(side=side).connection(side=side),
+            ])
+        )
+        store_bottom_pts = False
+        return result
 
 
     rj9_start = list(
@@ -2450,12 +2495,13 @@ def make_dactyl():
         if debug_exports:
             export_file(shape=walls_shape, fname=path.join(r".", "things", r"debug_walls_shape"))
 
-        bottom = case_bottom(side)
+        # bottom = case_bottom(side)
         pcb_grid = pcb_backer(side)
-        s2 = union([walls_shape, bottom])
         export_file(shape=pcb_grid, fname=path.join(save_path, r_config_name + r"_pcb_grid"))
+        s2 = union([walls_shape, bottom])
+
         # cshape = single_column(2)
-        export_file(shape=bottom, fname=path.join(save_path, r_config_name + r"_case_bottom"))
+        # export_file(shape=bottom, fname=path.join(save_path, r_config_name + r"_case_bottom"))
 
         # s2 = union([s2, *screw_insert_outers(side=side)])
         #
