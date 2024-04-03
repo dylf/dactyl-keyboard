@@ -1,5 +1,6 @@
 import solid as sl
 from subprocess import run
+import os
 
 debug_trace = False
 
@@ -151,3 +152,31 @@ def export_stl(shape, fname):
 def export_dxf(shape, fname):
     print("NO DXF EXPORT FOR SOLID".format(fname))
     pass
+
+
+def render_samples(override_name, num_cols, dir_path):
+    dist = (num_cols * 75)
+    x_off = [
+        0, 0, 0, 0, 0, 25, 15, 0
+    ]
+    angles = [
+        0, 0, 0, 0, 0, 20, 30, 32
+    ]
+
+    for filename in os.listdir(dir_path):
+        if "TOP.scad" in filename:
+            x_mult = -1 if "RIGHT" in filename else 1
+            out_file = filename.replace(".scad", ".png")
+            cmd_args = [
+                '/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD',
+                f"/Users/andrew/OneDrive/Sales/Models/Customers/{override_name}/{filename}",
+                '-o',
+                f"/Users/andrew/OneDrive/Sales/Models/Customers/{override_name}/{out_file}",
+                f"--camera={x_off[num_cols] * x_mult},-100,200,{angles[num_cols]},0,0,{dist}",
+                # '--camera=0,0.91,-10.7,0,0,0,40',
+                '--preview',
+                # '--viewall',
+                # '--autocenter',
+                '--enable=manifold',
+            ]
+            run(cmd_args)

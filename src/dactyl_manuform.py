@@ -2778,6 +2778,9 @@ def make_dactyl():
             # export_file(shape=union((oled_clip_mount_frame()[1], oled_clip())),
             #             fname=path.join(save_path, config_name + r"_oled_clip_assy_test"))
 
+        if ENGINE != "cadquery":
+            render_samples(overrides_name, ncols, save_path)
+
     all_merged = locals().copy()
     for item in globals():
         all_merged[item] = globals()[item]
