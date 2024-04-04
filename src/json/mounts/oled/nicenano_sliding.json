@@ -1,6 +1,6 @@
 {
   "oled_mount_type": "UNDERCUT",
-  "oled_mount_width": 13.5,
+  "oled_mount_width": 13.25,
   "oled_mount_height": 27.0,
   "oled_mount_rim": 3,
   "oled_mount_depth": 5.0,
@@ -26,8 +26,8 @@
   "oled_edge_overlap_clearance": 2.5,
   "oled_edge_chamfer": 2.0,
   "oled_mount_undercut": 1.0,
-  "oled_mount_undercut_height": 4.0,
-  "oled_mount_undercut_height_rim": 6.0,
-  "oled_mount_undercut_thickness": 2.0,
+  "oled_mount_undercut_height": 5.25,
+  "oled_mount_undercut_height_rim": 7.25,
+  "oled_mount_undercut_thickness": 1.0,
   "oled_type": "NICEVIEW"
 }

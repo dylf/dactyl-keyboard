@@ -2092,6 +2092,8 @@ def make_dactyl():
 
         return shape
 
+    def is_cq():
+        return ENGINE == 'cadquery'
 
     def oled_undercut_mount_frame(side='right'):
         mount_ext_width = oled_mount_width + 2 * oled_mount_rim
@@ -2106,6 +2108,8 @@ def make_dactyl():
             oled_mount_depth)
         undercut = translate(undercut, (0., 0., -oled_mount_undercut_thickness))
         shape = difference(shape, [undercut])
+        if is_cq():
+            shape = shape.edges(">Z").chamfer(0.7)
 
         oled_mount_location_xyz, oled_mount_rotation_xyz = oled_position_rotation(side=side)
 
@@ -2427,6 +2431,7 @@ def make_dactyl():
         if side == "right" and logo_file not in ["", None]:
             s2 = union([s2, get_logo()])
 
+
         shape = union([shape, s2])
 
         if controller_mount_type in ['RJ9_USB_TEENSY', 'RJ9_USB_WALL']:
@@ -2517,6 +2522,33 @@ def make_dactyl():
             shape = mirror(shape, 'YZ')
 
         return shape, walls_shape
+
+    def puck_plate():
+        offset = 19.55
+        border = 5
+        border_half = border / 2
+        width = offset * 5
+        height = offset * 4
+
+        plate = box(width, height, 2)
+
+        holes = [
+            [offset, 0, 0],
+            [0, offset, 0],
+            [-offset, 0, 0],
+            [0, -offset, 0]
+        ]
+
+
+        if is_cq():
+            plate = plate.edges("|Z").fillet(15)
+            # plate = plate.edges(">Y").chamfer(1)
+            for hole in holes:
+                plate = plate.faces(">Z").workplane().rect(38.1, 38.1, forConstruction=True).vertices().cboreHole(2.2, 3, 1.5, 3)
+        else:
+            plate = difference(plate, [translate(cylinder(radius=1.1, height=20), hole) for hole in holes])
+
+        return plate
 
     def wrist_rest(base, plate, side="right"):
         rest = import_file(path.join(parts_path, "dactyl_wrist_rest_v3_" + side))
@@ -2639,6 +2671,36 @@ def make_dactyl():
 
                 shape = translate(shape, (0, 0, -base_rim_thickness))
                 shape = union([shape, inner_shape])
+
+                top_inside_key = key_position([0, 0, 0], 0, 0)
+                bottom_key_position = key_position([0, 0, 0], ncols - 1, bottom_key(ncols - 1))
+                offsets = get_left_wall_offsets(side)
+                min_offset = 1000
+                for offset in offsets:
+                    if min_offset < offset:
+                        min_offset = offset
+
+                y = top_inside_key[1] + 5
+
+                max_x = bottom_key_position[0] + 6
+                min_y = bottom_key_position[1] - 16
+
+                m2_positions = []
+
+                while y >= min_y:
+                    x = top_inside_key[0] - min_offset + 6
+
+                    while x <= max_x:
+                        m2_positions.append([x, y, 0])
+                        x += 19.55
+
+                    y -= 19.55
+
+                m2_holes = []
+                for puck_position in m2_positions:
+                    m2_holes.append(wp().cylinder(200, 1.1).translate((puck_position[0], puck_position[1], 0)))
+
+                shape = difference(shape, m2_holes)
 
                 if has_puck:
                     puck_base = get_puck_base()
@@ -2777,6 +2839,8 @@ def make_dactyl():
             #             fname=path.join(save_path, config_name + r"_oled_clip_test"))
             # export_file(shape=union((oled_clip_mount_frame()[1], oled_clip())),
             #             fname=path.join(save_path, config_name + r"_oled_clip_assy_test"))
+
+        export_file(shape=puck_plate(), fname=path.join(save_path, config_name + r"_puck_plate"))
 
         if ENGINE != "cadquery":
             render_samples(overrides_name, ncols, save_path)
