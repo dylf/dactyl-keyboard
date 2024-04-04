@@ -2761,13 +2761,13 @@ def make_dactyl():
             import build_report as report
             report.write_build_report(path.abspath(save_path), overrides_name, git_data)
 
-        # if oled_mount_type == 'UNDERCUT':
-        #     export_file(shape=oled_undercut_mount_frame()[1],
-        #                 fname=path.join(save_path, config_name + r"_oled_undercut_test"))
-        #
-        # if oled_mount_type == 'SLIDING':
-        #     export_file(shape=oled_sliding_mount_frame()[1],
-        #                 fname=path.join(save_path, config_name + r"_oled_sliding_test"))
+        if oled_mount_type == 'UNDERCUT':
+            export_file(shape=oled_undercut_mount_frame()[1],
+                        fname=path.join(save_path, config_name + r"_oled_undercut_test"))
+
+        if oled_mount_type == 'SLIDING':
+            export_file(shape=oled_sliding_mount_frame()[1],
+                        fname=path.join(save_path, config_name + r"_oled_sliding_test"))
 
         if oled_mount_type == 'CLIP':
             oled_mount_location_xyz = (0.0, 0.0, -oled_mount_depth / 2)

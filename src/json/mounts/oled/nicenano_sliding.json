@@ -1,9 +1,9 @@
 {
-  "oled_mount_type": "SLIDING",
+  "oled_mount_type": "UNDERCUT",
   "oled_mount_width": 15.25,
-  "oled_mount_height": 25.0,
-  "oled_mount_rim": 2.5,
-  "oled_mount_depth": 8.0,
+  "oled_mount_height": 27.0,
+  "oled_mount_rim": 3,
+  "oled_mount_depth": 5.0,
   "oled_mount_cut_depth": 20.0,
   "oled_mount_location_xyz": [
     -78.0,
@@ -15,7 +15,7 @@
     0.0,
     -3.0
   ],
-  "oled_left_wall_x_offset_override": 24.0,
+  "oled_left_wall_x_offset_override": 28.0,
   "oled_left_wall_z_offset_override": 0.0,
   "oled_left_wall_lower_y_offset": 12.0,
   "oled_left_wall_lower_z_offset": 5.0,
@@ -25,5 +25,7 @@
   "oled_edge_overlap_thickness": 2.5,
   "oled_edge_overlap_clearance": 2.5,
   "oled_edge_chamfer": 2.0,
+  "oled_mount_undercut": 2.0,
+  "oled_mount_undercut_thickness": 2.0,
   "oled_type": "NICEVIEW"
 }

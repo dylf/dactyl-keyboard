@@ -27,7 +27,7 @@ class Minithicc(MinidoxCluster):
         return superdata
 
     def __init__(self, parent_locals):
-        self.num_keys = 3
+        self.num_keys = 4
         super().__init__(parent_locals)
         # have to repeat this for all classes/namespaces
         for item in parent_locals:
@@ -39,7 +39,7 @@ class Minithicc(MinidoxCluster):
         # if shift_column < 0:
         #     y = shift_column * 4
         #     z = shift_column * -10
-        return [x, y, 10]
+        return [x, y, 0]
     # def tl_place(self, shape):
     #     shape = rotate(shape, [14, -15, 20])
     #     shape = translate(shape, self.thumborigin())
@@ -59,26 +59,26 @@ class Minithicc(MinidoxCluster):
     #     return shape
 
     def tr_place(self, shape):
-        shape = rotate(shape, [19, -15, -8])
-        shape = self.thumb_place(shape)
+        shape = rotate(shape, [19, -15, 2])
+        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-14, -11, -3])
         return shape
 
     def tl_place(self, shape):
-        shape = rotate(shape, [17, -15, 0])
-        shape = self.thumb_place(shape)
+        shape = rotate(shape, [17, -15, 10])
+        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-35, -13, -9])
         return shape
 
     def mr_place(self, shape):
-        shape = rotate(shape, [14, -15, 10])
-        shape = self.thumb_place(shape)
+        shape = rotate(shape, [14, -15, 20])
+        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-55, -19, -15])
         return shape
 
     def ml_place(self, shape):
-        shape = rotate(shape, [10, -15, 18])
-        shape = self.thumb_place(shape)
+        shape = rotate(shape, [10, -15, 28])
+        shape = translate(shape, self.thumborigin())
         shape = translate(shape, [-73, -28, -21])
         return shape
 
@@ -323,8 +323,8 @@ class Minithicc(MinidoxCluster):
                            [
                                left_key_place(translate(web_post(), wall_locate2(-1, 0)), cornerrow, -1, low_corner=True, side=side),
                                left_key_place(translate(web_post(), wall_locate3(-1, 0)), cornerrow, -1, low_corner=True, side=side),
-                               self.mr_place(translate(self.thumb_post_tr(), wall_locate2(-0.3, 1))),
-                               self.mr_place(translate(self.thumb_post_tr(), wall_locate3(-0.3, 1))),
+                               self.mr_place(translate(self.thumb_post_tr(), wall_locate2(-1, 0))),
+                               self.mr_place(translate(self.thumb_post_tr(), wall_locate3(-1, 0))),
                                self.tl_place(self.thumb_post_tl()),
                            ]
                        )])
@@ -352,21 +352,21 @@ class Minithicc(MinidoxCluster):
                        )])
 
 
-        shape = union([shape,
-                       hull_from_shapes(
-                           [
-                               self.ml_place(self.thumb_post_tr()),
-                               self.ml_place(translate(self.thumb_post_tr(), wall_locate1(0, 1))),
-                               self.ml_place(translate(self.thumb_post_tr(), wall_locate2(0, 1))),
-                               self.ml_place(translate(self.thumb_post_tr(), wall_locate3(0, 1))),
-                               self.tl_place(self.thumb_post_tl()),
-                           ]
-                       )])
+        # shape = union([shape,
+        #                hull_from_shapes(
+        #                    [
+        #                        self.ml_place(self.thumb_post_tr()),
+        #                        self.ml_place(translate(self.thumb_post_tr(), wall_locate1(0, 1))),
+        #                        self.ml_place(translate(self.thumb_post_tr(), wall_locate2(0, 1))),
+        #                        self.ml_place(translate(self.thumb_post_tr(), wall_locate3(0, 1))),
+        #                        self.tl_place(self.thumb_post_tl()),
+        #                    ]
+        #                )])
         return shape
 
     def screw_positions(self):
         position = self.thumborigin()
-        position = list(np.array(position) + np.array([-37, -41, -16]))
+        position = list(np.array(position) + np.array([-37, -30, -16]))
         position[1] = position[1] - .4 * (self.minidox_Usize - 1.9) * sa_length
         position[2] = 0
 
