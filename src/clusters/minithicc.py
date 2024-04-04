@@ -231,8 +231,8 @@ class Minithicc(MinidoxCluster):
                     key_place(web_post_bl(), 1, cornerrow),
                     self.tr_place(self.thumb_post_tr()),
                     key_place(web_post_br(), 1, cornerrow),
-                    key_place(web_post_tl(), 2, lastrow),
-                    key_place(web_post_bl(), 2, lastrow),
+                    key_place(web_post_tl(), 2, lastrow) if not all_last_rows else key_place(web_post_bl(), 2, lastrow),
+                    key_place(web_post_bl(), 2, cornerrow),
                     self.tr_place(self.thumb_post_tr()),
                     key_place(web_post_bl(), 2, lastrow),
                     self.tr_place(self.thumb_post_br()),
@@ -240,9 +240,9 @@ class Minithicc(MinidoxCluster):
                     key_place(web_post_bl(), 3, lastrow),
                     key_place(web_post_tr(), 2, lastrow),
                     key_place(web_post_tl(), 3, lastrow),
-                    key_place(web_post_bl(), 3, cornerrow),
-                    key_place(web_post_tr(), 3, lastrow),
-                    key_place(web_post_br(), 3, cornerrow),
+                    # key_place(web_post_bl(), 3, cornerrow),
+                    # key_place(web_post_tr(), 3, lastrow),
+                    # key_place(web_post_br(), 3, cornerrow),
                 ]
             )
         )
