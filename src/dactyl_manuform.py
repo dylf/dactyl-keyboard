@@ -1,3 +1,4 @@
+import datetime
 from geom import *
 from key import Key, KeyFactory
 import numpy as np
@@ -82,8 +83,45 @@ def make_dactyl():
     def is_oled(side):
         return oled_mount_type not in [None, "None"] and is_side(side, oled_side)
 
+    def encoder_type(side="right"):
+        if side == "right":
+            return encoder_right
+        return encoder_left
+
+    def encoder_in_wall(side="right"):
+        return encoder_type(side) != "none"
+
+    def get_descriptor_name_side(side="right"):
+        name = ""
+        if overrides_name != "":
+            name = f"{overrides_name}_"
+        if polydactyl:
+            name = f"{name}POLYDACTYL_"
+        else:
+            name = f"{name}{nrows}x{ncols}_"
+
+        type = "STANDARD_"
+
+        if all_last_rows:
+            type = "WHOLE_"
+        elif full_last_rows:
+            type = "FULL_"
+
+        name = f"{name}{type}{cluster(side).name()}_"
+
+        if is_oled(side):
+            name = f"{name}{oled_type}_"
+
+        if encoder_in_wall(side):
+            name = f"{name}{encoder_type(side).upper()}_"
+
+        name = f"{name}{side.upper()}"
+
+        return name
+
+
     def get_left_wall_offsets(side="right"):
-        is_track_or_encoder = (trackball_in_wall and is_side(side, ball_side)) or (encoder_in_wall and is_side(side, encoder_side))
+        is_track_or_encoder = (trackball_in_wall and is_side(side, ball_side)) or encoder_in_wall(side)
         wide = 22 if not is_track_or_encoder else tbiw_left_wall_x_offset_override
         short = 8  # if not is_track_or_encoder else tbiw_left_wall_x_offset_override
         offsets = [
@@ -119,7 +157,7 @@ def make_dactyl():
             offsets[nrows - 2] = wide
             offsets[nrows - 1] = wide
 
-        if (encoder_in_wall and is_side(side, encoder_side)):
+        if (encoder_in_wall(side)):
             # if oled_mount_type == None or not is_side(side, oled_side):
             #     short = 8
             # else:
@@ -157,7 +195,7 @@ def make_dactyl():
     right_cluster = None
     left_cluster = None
 
-    left_wall_x_offset = 5
+    left_wall_x_offset = 8
     # left_wall_x_row_offsets = [
     #     8, 8, 8, 8, 8, 8, 8, 8
     # ]
@@ -485,7 +523,7 @@ def make_dactyl():
             socket = translate(socket, [0, 0, plate_thickness + plate_offset])
             plate = union([plate, socket])
 
-        if plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH', 'AMOEBA']:
+        if plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH', 'AMOEBA', 'CHOC']:
             if plate_style in ['UNDERCUT', 'HS_UNDERCUT']:
                 undercut = box(
                     keyswitch_width + 2 * clip_undercut,
@@ -493,7 +531,7 @@ def make_dactyl():
                     mount_thickness
                 )
 
-            if plate_style in ['NOTCH', 'HS_NOTCH', 'AMOEBA']:
+            elif plate_style in ['NOTCH', 'HS_NOTCH', 'AMOEBA']:
                 undercut = box(
                     notch_width,
                     keyswitch_height + 2 * clip_undercut,
@@ -506,8 +544,21 @@ def make_dactyl():
                         mount_thickness
                     )
                 ])
+            elif plate_style == "CHOC":
+                undercut = box(keyswitch_width + 2 * clip_undercut,
+                               keyswitch_height - 2,
+                               mount_thickness / 2
+                )
 
-            undercut = translate(undercut, (0.0, 0.0, -clip_thickness + mount_thickness / 2.0))
+                if top_plate_offset != 0:
+                    plate = difference(plate, [
+                        translate(box(
+                            keyswitch_width + 2,
+                            keyswitch_height + 2,
+                            top_plate_offset
+                    ), (0, 0, mount_thickness - (top_plate_offset / 2) + 0.01))])
+
+            undercut = translate(undercut, (0.0, 0.0, -clip_thickness - top_plate_offset + mount_thickness / 2.0))
 
             if ENGINE == 'cadquery' and undercut_transition > 0:
                 undercut = undercut.faces("+Z").chamfer(undercut_transition, clip_undercut)
@@ -698,6 +749,12 @@ def make_dactyl():
             if bottom_key(c) == nrows - 1:
                 return c
 
+    def skip_key(column, row, side):
+        if skip_keys is not None:
+            for key in skip_keys:
+                if side == key["side"] and column == key["col"] and row == key["row"]:
+                    return True
+        return False
 
     def valid_key(column, row):
         return row <= bottom_key(column)
@@ -757,12 +814,19 @@ def make_dactyl():
         for column in range(ncols):
             for row in range(nrows):
                 if valid_key(column, row):
-                    key = KeyFactory.get_key_by_row_col(row, column)
-                    holes.append(key.render(plate_file, side=side))
+                    if not skip_key(column, row, side):
+                        key = KeyFactory.get_key_by_row_col(row, column)
+                        holes.append(key.render(plate_file, side=side))
+                    else:
+                        holes.append(key_place(key_cover(), column, row))
+
 
         shape = union(holes)
 
         return shape
+
+    def key_cover():
+        return translate(box(mount_width, mount_height, mount_thickness), (0, 0, mount_thickness / 2))
 
     def boxit(w, h, d, key, offset):
         off = key.center(off=offset)
@@ -792,7 +856,8 @@ def make_dactyl():
         process = points.copy()
         process.append(points[0])
         # return tess_hull([_offset(pnt, w=w, h=h, d=d) for pnt in process])
-        return hull_from_points([_offset(pnt, w=w, h=h, d=d, rot=rot) for pnt in process])
+        new_points = [_offset(pnt, w=w, h=h, d=d, rot=rot) for pnt in process]
+        return hull_from_shapes(new_points)
         #     _offset(points[0], w=w, h=h, d=d),
         #     _offset(points[1], w=w, h=h, d=d),
         #     _offset(points[2], w=w, h=h, d=d),
@@ -813,27 +878,27 @@ def make_dactyl():
             if not key.is_none():
                 # col.append(key.render(plate_file))
                 # col.append(_offset_all([key.tr(of), key.tl(of), key.bl(of), key.br(of)]))
-                col.append(_offset_all([key.tr(of2), key.tl(of2), key.tl(of), key.tr(of)]))
-                col.append(_offset_all([key.tr(of2), key.br(of2), key.br(of), key.tr(of)]))
-                col.append(_offset_all([key.tl(of2), key.bl(of2), key.bl(of), key.tl(of)]))
+                col.append(_offset_all([key.tr_wide(of2), key.tl_wide(of2), key.tl_wide(of), key.tr_wide(of)]))
+                col.append(_offset_all([key.tr_wide(of2), key.br_wide(of2), key.br_wide(of), key.tr_wide(of)]))
+                col.append(_offset_all([key.tl_wide(of2), key.bl_wide(of2), key.bl_wide(of), key.tl_wide(of)]))
 
-                col.append(_offset_all([key.tl(of2), key.bl(of2), key.bl(of), key.tl(of)]))
+                col.append(_offset_all([key.tl_wide(of2), key.bl_wide(of2), key.bl_wide(of), key.tl_wide(of)]))
 
                 # rails
-                col.append(_offset_all([key.tr(of2), key.tr(rail1), key.br(rail1), key.br(of2)]))
-                col.append(_offset_all([key.tl(of2), key.tl(rail1), key.bl(rail1), key.bl(of2)]))
+                col.append(_offset_all([key.tr_wide(of2), key.tr_wide(rail1), key.br_wide(rail1), key.br_wide(of2)]))
+                col.append(_offset_all([key.tl_wide(of2), key.tl_wide(rail1), key.bl_wide(rail1), key.bl_wide(of2)]))
 
                 top = key.get_neighbor("t")
 
                 if not top.is_none():
-                    col.append(_offset_all([top.bl(of2), key.tl(of2), key.tr(of2), top.br(of2)]))
-                    col.append(_offset_all([top.bl(of), key.tl(of2), key.tr(of2), top.br(of)]))
+                    col.append(_offset_all([top.bl_wide(of2), key.tl_wide(of2), key.tr_wide(of2), top.br_wide(of2)]))
+                    col.append(_offset_all([top.bl_wide(of), key.tl_wide(of2), key.tr_wide(of2), top.br_wide(of)]))
                 # if not l.is_none():
                 #     col.append(_offset_all([l.tr(of), l.br(of), key.bl(of), key.tl(of)]))
                 #     if not tl.is_none() and not l.is_none() and not top.is_none():
                 #         col.append(_offset_all([top.bl(of), tl.br(of), l.tr(of), key.tl(of)]))
         if not key.is_none():
-            col.append(_offset_all([key.bl(of), key.bl(of2), key.br(of2), key.br(of)]))
+            col.append(_offset_all([key.bl_wide(of), key.bl_wide(of2), key.br_wide(of2), key.br_wide(of)]))
         shape = union(col)
 
         return shape
@@ -888,13 +953,13 @@ def make_dactyl():
                 r = None
                 match wall:
                     case "left":
-                        r = _side_join(key.tl, key.bl, of=of, wof=wof)
+                        r = _side_join(key.tl_wide, key.bl_wide, of=of, wof=wof)
                     case "right":
-                        r = _side_join(key.tr, key.br, of=of, wof=wof)
+                        r = _side_join(key.tr_wide, key.br_wide, of=of, wof=wof)
                     case "top":
-                        r = _side_join(key.tl, key.tr, of=of, wof=wof)
+                        r = _side_join(key.tl_wide, key.tr_wide, of=of, wof=wof)
                     case "bottom":
-                        r = _side_join(key.bl, key.br, of=of, wof=wof)
+                        r = _side_join(key.bl_wide, key.br_wide, of=of, wof=wof)
                     case _:
                         raise Exception("No handler for wall type: " + wall)
                 
@@ -909,36 +974,36 @@ def make_dactyl():
                 match k:
                     case "t":
                         if "left" in n.walls and "left" in key.walls:
-                            j.append(_side_join(key.tl, n.bl, of=of, wof=wof))
+                            j.append(_side_join(key.tl_wide, n.bl_wide, of=of, wof=wof))
                         if "right" in n.walls and "right" in key.walls:
-                            j.append(_side_join(key.tr, n.br, of=of, wof=wof))
+                            j.append(_side_join(key.tr_wide, n.br_wide, of=of, wof=wof))
                     case "tr":
                         if "bottom" in n.walls and "right" in key.walls:
-                            j.append(_side_join(key.tr, n.bl, of=of, wof=wof))
+                            j.append(_side_join(key.tr_wide, n.bl_wide, of=of, wof=wof))
                     case "r":
                         if "top" in n.walls and "top" in key.walls:
-                            j.append(_side_join(key.tr, n.tl, of=of, wof=wof))
+                            j.append(_side_join(key.tr_wide, n.tl_wide, of=of, wof=wof))
                         if "bottom" in n.walls and "bottom" in key.walls:
-                            j.append(_side_join(key.br, n.bl, of=of, wof=wof))
+                            j.append(_side_join(key.br_wide, n.bl_wide, of=of, wof=wof))
                     case "br":
                         if "right" in n.walls and "bottom" in key.walls:
-                            j.append(_side_join(key.br, n.tl, of=of, wof=wof))
+                            j.append(_side_join(key.br_wide, n.tl_wide, of=of, wof=wof))
                     case "b":
                         if "left" in n.walls and "left" in key.walls:
-                            j.append(_side_join(key.bl, n.tl, of=of, wof=wof))
+                            j.append(_side_join(key.bl_wide, n.tl_wide, of=of, wof=wof))
                         if "right" in n.walls and "right" in key.walls:
-                            j.append(_side_join(key.br, n.tr, of=of, wof=wof))
+                            j.append(_side_join(key.br_wide, n.tr_wide, of=of, wof=wof))
                     case "bl":
                         if "left" in n.walls and "bottom" in key.walls:
-                            j.append(_side_join(key.bl, n.tr, of=of, wof=wof))
+                            j.append(_side_join(key.bl_wide, n.tr_wide, of=of, wof=wof))
                     case "l":
                         if "top" in n.walls and "top" in key.walls:
-                            j.append(_side_join(key.tl, n.tr, of=of, wof=wof))
+                            j.append(_side_join(key.tl_wide, n.tr_wide, of=of, wof=wof))
                         if "bottom" in n.walls and "bottom" in key.walls:
-                            j.append(_side_join(key.bl, n.br, of=of, wof=wof))
+                            j.append(_side_join(key.bl_wide, n.br_wide, of=of, wof=wof))
                     case "tl":
                         if "bottom" in n.walls and "left" in key.walls:
-                            j.append(_side_join(key.tl, n.br, of=of, wof=wof))
+                            j.append(_side_join(key.tl_wide, n.br_wide, of=of, wof=wof))
                     case _:
                         raise Exception("Cannot handle neighbor type: " + k)    
 
@@ -1010,11 +1075,11 @@ def make_dactyl():
 
         def key_web_topkey(key):
             top_pof = [pof[0], pof[1] + 3, pof[2]]
-            return smooth(_offset_all([key.tl_off(pof), key.tr_off(pof), key.tr_off(top_pof), key.tl_off(top_pof)], rot=key.rot))
+            return smooth(_offset_all([key.tl(pof), key.tr(pof), key.tr(top_pof), key.tl(top_pof)], rot=key.rot))
 
         def key_web_bottomkey(key):
             bot_pof = [pof[0], pof[1] - 3, pof[2]]
-            return smooth(_offset_all([key.bl_off(bot_pof), key.br_off(bot_pof), key.br_off(pof), key.bl_off(pof)], rot=key.rot))
+            return smooth(_offset_all([key.bl(bot_pof), key.br(bot_pof), key.br(pof), key.bl(pof)], rot=key.rot))
 
         for c in range(ncols):
             column = KeyFactory.get_column(c)
@@ -1034,13 +1099,13 @@ def make_dactyl():
 
                     if not top_key.is_none():
                         grid.append(key_web(key, top_key))
-                    # else:
-                    #     grid.append(key_web_topkey(key))
+                    else:
+                        grid.append(key_web_topkey(key))
 
                     last_key = key
 
-            # if not last_key.is_none():
-            #     grid.append(key_web_bottomkey(last_key))
+            if not last_key.is_none():
+                grid.append(key_web_bottomkey(last_key))
 
         return union(grid)
 
@@ -1060,21 +1125,21 @@ def make_dactyl():
             for row in range(len(column)):
                 key = column[row]
                 if not key.is_none():
-                    col.append(_offset_all([key.tr(of), key.tl(of), key.bl(of), key.br(of)]))
+                    col.append(_offset_all([key.tr_wide(of), key.tl_wide(of), key.bl_wide(of), key.br_wide(of)]))
 
                     tl = key.get_neighbor("tl")
                     l = key.get_neighbor("l")
                     top = key.get_neighbor("t")
 
                     if not top.is_none():
-                        col.append(_offset_all([top.bl(of), key.tl(of), key.tr(of), top.br(of)]))
+                        col.append(_offset_all([top.bl_wide(of), key.tl_wide(of), key.tr_wide(of), top.br_wide(of)]))
 
                     if not l.is_none():
-                        col.append(_offset_all([l.tr(of), l.br(of), key.bl(of), key.tl(of)]))
+                        col.append(_offset_all([l.tr_wide(of), l.br_wide(of), key.bl_wide(of), key.tl_wide(of)]))
                         if not tl.is_none() and not l.is_none() and not top.is_none():
-                            col.append(_offset_all([top.bl(of), tl.br(of), l.tr(of), key.tl(of)]))
+                            col.append(_offset_all([top.bl_wide(of), tl.br_wide(of), l.tr_wide(of), key.tl_wide(of)]))
                     elif not tl.is_none() and not top.is_none():
-                        col.append(_offset_all([top.bl(of), tl.br(of), key.tl(of), key.tl(of)]))
+                        col.append(_offset_all([top.bl_wide(of), tl.br_wide(of), key.tl_wide(of), key.tl_wide(of)]))
 
                 last_row_key = key
 
@@ -1095,7 +1160,7 @@ def make_dactyl():
         return shape
 
 
-    def caps():
+    def caps(side="right"):
         caps = None
         for column in range(ncols):
             size = 1
@@ -1103,7 +1168,7 @@ def make_dactyl():
                 if row >= first_1_5U_row and row <= last_1_5U_row:
                     size = 1.5
             for row in range(nrows):
-                if valid_key(column, row):
+                if valid_key(column, row, side=side):
                     if caps is None:
                         caps = key_place(sa_cap(size), column, row)
                     else:
@@ -1533,33 +1598,33 @@ def make_dactyl():
     store_bottom_pts = False
     bottom_pts = []
 
-    # def case_walls(side="right"):
-    #     wall_layers = []
-    #
-    #     for i in range(len(wall_offsets) - 1):
-    #         start = wall_offsets[i]
-    #         end = wall_offsets[i + 1]
-    #
-    #         wall_layers.append(get_walls(side, of=start, wof=end))
-    #
-    #     return union(wall_layers)
+    def case_walls(side="right"):
+        wall_layers = []
 
-    def case_walls(side='right'):
-        print('case_walls()')
-        nonlocal store_bottom_pts
-        store_bottom_pts = True
-        result = (
-            union([
-                back_wall(),
-                left_wall(side=side),
-                right_wall(),
-                front_wall(),
-                cluster(side=side).walls(side=side),
-                cluster(side=side).connection(side=side),
-            ])
-        )
-        store_bottom_pts = False
-        return result
+        for i in range(len(wall_offsets) - 1):
+            start = wall_offsets[i]
+            end = wall_offsets[i + 1]
+
+            wall_layers.append(union(get_walls(side, of=start, wof=end)))
+
+        return union(wall_layers)
+
+    # def case_walls(side='right'):
+    #     print('case_walls()')
+    #     nonlocal store_bottom_pts
+    #     store_bottom_pts = True
+    #     result = (
+    #         union([
+    #             back_wall(),
+    #             left_wall(side=side),
+    #             right_wall(),
+    #             front_wall(),
+    #             cluster(side=side).walls(side=side),
+    #             cluster(side=side).connection(side=side),
+    #         ])
+    #     )
+    #     store_bottom_pts = False
+    #     return result
 
 
     rj9_start = list(
@@ -1662,61 +1727,78 @@ def make_dactyl():
 
     # todo mounts account for walls or walls account for mounts
     def encoder_wall_mount(shape, side='right'):
-        encoder_row = nrows - 2
+        encoder_row = encoder_wall_row  #  nrows - 3
         # row_position = key_position([0, 0, 0], -1, encoder_row)
         # row_position[1] += 10
         def low_prep_position(sh):
             if side == "right":
-                return translate(rotate(sh, (0, -41, 0)), (2, 5, -17))
+                return translate(rotate(sh, right_encoder_wall_rotation), right_encoder_wall_offset)
 
-            return translate(rotate(sh, (2, -40, 0)), (2, 0, -15))
+            return translate(rotate(sh, left_encoder_wall_rotation), left_encoder_wall_offset)
 
         def high_prep_position(sh):
             return translate(rotate(sh, (-4, -38, 10)), (6, 0, -15))
 
-        ec11_mount_high = high_prep_position(rotate(import_file(path.join(parts_path, "ec11_mount_2")), (0, 0, 90)))
+        if encoder_type(side) == "ec11":
+            # ec11_mount_high = high_prep_position(rotate(import_file(path.join(parts_path, "ec11_mount_2")), (0, 0, 90)))
+            #
+            # ec11_mount_high = key_place(ec11_mount_high, -1, 0)
 
-        ec11_mount_high = key_place(ec11_mount_high, -1, 0)
+            # ec11_mount_low = low_prep_position(rotate(import_file(path.join(parts_path, "ec11_mount_2")), (0, 0, 90)))
+            ec11_mount_low = low_prep_position(rotate(single_plate(side=side), (0, 0, 90)))
 
-        # ec11_mount_low = low_prep_position(rotate(import_file(path.join(parts_path, "ec11_mount_2")), (0, 0, 90)))
-        ec11_mount_low = low_prep_position(rotate(single_plate(side=side), (0, 0, 90)))
+            # ec11_mount_low = key_place(ec11_mount_low, -1, encoder_row)
 
-        ec11_mount_low = key_place(ec11_mount_low, -1, encoder_row)
+            # encoder_cut_high = key_place(high_prep_position(box(12, 13, 20)), -1, 0)
+            encoder_cut_low = low_prep_position(box(keyswitch_width, keyswitch_height, 20))
 
-        encoder_cut_high = key_place(high_prep_position(box(12, 13, 20)), -1, 0)
-        encoder_cut_low = key_place(low_prep_position(box(keyswitch_width, keyswitch_height, 20)), -1, encoder_row)
+            # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
 
-        # hackity hack hack
-        # if side == 'right':
-        #     pos[0] += 5
-        #     pos[1] -= 34
-        #     pos[2] -= 3.5
-        #     rot[0] -= 15
-        #     rot[1] -= 3
-        #     rot[2] += 13
-        # else:
-        #     pos[0] += 1
-        #     pos[1] -= 34
-        #     pos[2] -= 7.5
-        #     rot[0] = 0
-        #     rot[1] -= 3
-        #     # rot[2] = -8
+            # enconder_spot = key_position([-10, -5, 13.5], 0, cornerrow)
+            # ec11_mount_high = import_file(path.join(parts_path, "ec11_mount_2"))
+            # ec11_mount_high = translate(rotate(ec11_mount_high, rot), high)
+            # encoder_cut_high = box(11, 13, 20)
+            # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
+            #
+            # ec11_mount_low = import_file(path.join(parts_path, "ec11_mount_2"))
+            # ec11_mount_low = translate(rotate(ec11_mount_low, rot), low)
+            # encoder_cut_low = box(11, 13, 20)
+            # encoder_cut_low = translate(rotate(encoder_cut_low, rot), [low[0], low[1] + 1, low[2]])
 
-        # enconder_spot = key_position([-10, -5, 13.5], 0, cornerrow)
-        # ec11_mount_high = import_file(path.join(parts_path, "ec11_mount_2"))
-        # ec11_mount_high = translate(rotate(ec11_mount_high, rot), high)
-        # encoder_cut_high = box(11, 13, 20)
-        # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
-        #
-        # ec11_mount_low = import_file(path.join(parts_path, "ec11_mount_2"))
-        # ec11_mount_low = translate(rotate(ec11_mount_low, rot), low)
-        # encoder_cut_low = box(11, 13, 20)
-        # encoder_cut_low = translate(rotate(encoder_cut_low, rot), [low[0], low[1] + 1, low[2]])
+            shape = difference(shape, [encoder_cut_low])
+            shape = union([shape, ec11_mount_low])
+            # encoder_mount = translate(rotate(encoder_mount, (0, 0, 20)), (-27, -4, -15))
+            return shape
+        elif encoder_type(side) == "wheel":
+            wheel_width = 17.3
+            wheel_height = 15
+            wheel_cut_low = box(wheel_width, wheel_height, 8)
+            wheel_mount_low = translate(difference(box(wheel_width + 4, wheel_height + 4, 3), [wheel_cut_low]), (0, 0, -2))
+            # wheel_cut_low = key_place(box(17.2, 13.5, 8), -1, encoder_row)
 
-        shape = difference(shape, [encoder_cut_low])
-        shape = union([shape, ec11_mount_low])
-        # encoder_mount = translate(rotate(encoder_mount, (0, 0, 20)), (-27, -4, -15))
-        return shape
+            wheel_cut_low = low_prep_position(wheel_cut_low)
+            wheel_mount_low = low_prep_position(wheel_mount_low)
+            # encoder_cut_low = key_place(low_prep_position(box(keyswitch_width, keyswitch_height, 20)), -1, encoder_row)
+
+            # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
+
+            # enconder_spot = key_position([-10, -5, 13.5], 0, cornerrow)
+            # ec11_mount_high = import_file(path.join(parts_path, "ec11_mount_2"))
+            # ec11_mount_high = translate(rotate(ec11_mount_high, rot), high)
+            # encoder_cut_high = box(11, 13, 20)
+            # encoder_cut_high = translate(rotate(encoder_cut_high, rot), [high[0], high[1] + 1, high[2]])
+            #
+            # ec11_mount_low = import_file(path.join(parts_path, "ec11_mount_2"))
+            # ec11_mount_low = translate(rotate(ec11_mount_low, rot), low)
+            # encoder_cut_low = box(11, 13, 20)
+            # encoder_cut_low = translate(rotate(encoder_cut_low, rot), [low[0], low[1] + 1, low[2]])
+
+            shape = difference(shape, [wheel_cut_low])
+            shape = union([shape, wheel_mount_low])
+            export_file(shape=wheel_mount_low, fname=path.join(r".", "things", r"wheel_encoder_mount"))
+            # shape = union([shape, ec11_mount_low])
+            # encoder_mount = translate(rotate(encoder_mount, (0, 0, 20)), (-27, -4, -15))
+            return shape
 
     def usb_c_shape(width, height, depth):
         shape = box(width, depth, height)
@@ -1799,7 +1881,7 @@ def make_dactyl():
 
 ########### TRACKBALL GENERATION
     def use_btus(cluster):
-        return (cluster is not None and cluster.has_btus())
+        return has_btus or (cluster is not None and cluster.has_btus())
 
     def trackball_cutout(segments=100, side="right"):
         shape = cylinder(trackball_hole_diameter / 2, trackball_hole_height)
@@ -2495,13 +2577,12 @@ def make_dactyl():
         if debug_exports:
             export_file(shape=walls_shape, fname=path.join(r".", "things", r"debug_walls_shape"))
 
-        # bottom = case_bottom(side)
+        bottom = case_bottom(side)
         pcb_grid = pcb_backer(side)
-        export_file(shape=pcb_grid, fname=path.join(save_path, r_config_name + r"_pcb_grid"))
         s2 = union([walls_shape, bottom])
-
+        export_file(shape=pcb_grid, fname=path.join(save_path, r_config_name + r"_pcb_grid"))
         # cshape = single_column(2)
-        # export_file(shape=bottom, fname=path.join(save_path, r_config_name + r"_case_bottom"))
+        export_file(shape=bottom, fname=path.join(save_path, r_config_name + r"_case_bottom"))
 
         # s2 = union([s2, *screw_insert_outers(side=side)])
         #
@@ -2609,11 +2690,12 @@ def make_dactyl():
         rest = import_file(path.join(parts_path, "dactyl_wrist_rest_v3_" + side))
         rest = rotate(rest, (0, 0, -60))
         rest = translate(rest, (30, -150, 26))
-        rest = union([rest, translate(base, (0, 0, 5)), plate])
+        solid = hull_from_shapes([base])
+        rest = difference(rest, [translate(solid, (0, 0, 5))])
         return rest
 
     # NEEDS TO BE SPECIAL FOR CADQUERY
-    def baseplate(shape, wedge_angle=None, side='right'):
+    def baseplate(walls, wedge_angle=None, side='right'):
         global logo_file
         if ENGINE == 'cadquery':
             # shape = mod_r
@@ -2731,7 +2813,7 @@ def make_dactyl():
         else:
 
             shape = union([
-                case_walls(side=side),
+                walls,
                 *screw_insert_outers(side=side)
             ])
 
@@ -2746,8 +2828,12 @@ def make_dactyl():
 
 
     def run():
+        right_name = get_descriptor_name_side(side="right")
+        left_name = get_descriptor_name_side(side="left")
         mod_r, walls_r = model_side(side="right")
-        export_file(shape=mod_r, fname=path.join(save_path, r_config_name + r"_right"))
+        if resin and ENGINE == "cadquery":
+            mod_r = rotate(mod_r, (333.04, 43.67, 85.00))
+        export_file(shape=mod_r, fname=path.join(save_path, right_name + r"_TOP"))
 
         if right_side_only:
             print(">>>>>  RIGHT SIDE ONLY: Only rendering a the right side.")
@@ -2766,7 +2852,9 @@ def make_dactyl():
         # if symmetry == "asymmetric":
 
         mod_l, walls_l = model_side(side="left")
-        export_file(shape=mod_l, fname=path.join(save_path, l_config_name + r"_left"))
+        if resin and ENGINE == "cadquery":
+            mod_l = rotate(mod_l, (333.04, 317.33, 286.35))
+        export_file(shape=mod_l, fname=path.join(save_path, left_name + r"_TOP"))
 
         # base_l = mirror(baseplate(walls_l, side='left'), 'YZ')
         # export_file(shape=base_l, fname=path.join(save_path, l_config_name + r"_left_plate"))

@@ -45,42 +45,42 @@ class Key(Part):
         offset = rotate_deg(off, self._rot)
         return add_translate(self._pos, offset)
 
-    def tr(self, off=(0, 0, 0)):
+    def tr_wide(self, off=(0, 0, 0)):
         # return self._offset_point(mount_width / 2.0, mount_height / 2.0, off)
         offset = rotate_deg([(mount_width / 2.0) + off[0], (mount_height / 2) + off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
-    def tl(self, off=(0, 0, 0)):
+    def tl_wide(self, off=(0, 0, 0)):
         # return self._offset_point(-mount_width / 2.0, mount_height / 2.0, off)
         offset = rotate_deg([-(mount_width / 2.0) - off[0], (mount_height / 2) + off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
-    def br(self, off=(0, 0, 0)):
+    def br_wide(self, off=(0, 0, 0)):
         # return self._offset_point(mount_width / 2.0, -mount_height / 2.0, off)
         offset = rotate_deg([(mount_width / 2.0) + off[0], -(mount_height / 2) - off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
-    def bl(self, off=(0, 0, 0)):
+    def bl_wide(self, off=(0, 0, 0)):
         # (-mount_width / 2.0, -mount_height / 2.0, off)
         offset = rotate_deg([-(mount_width / 2.0) - off[0], -(mount_height / 2) - off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
-    def tr_off(self, off):
+    def tr(self, off):
         # return self._offset_point(mount_width / 2.0, mount_height / 2.0, off)
         offset = rotate_deg([(mount_width / 2.0) + off[0], (mount_height / 2) + off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
-    def tl_off(self, off):
+    def tl(self, off):
         # return self._offset_point(-mount_width / 2.0, mount_height / 2.0, off)
         offset = rotate_deg([-(mount_width / 2.0) + off[0], (mount_height / 2) + off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
-    def br_off(self, off):
+    def br(self, off):
         # return self._offset_point(mount_width / 2.0, -mount_height / 2.0, off)
         offset = rotate_deg([(mount_width / 2.0) + off[0], -(mount_height / 2) + off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
 
-    def bl_off(self, off):
+    def bl(self, off):
         # (-mount_width / 2.0, -mount_height / 2.0, off)
         offset = rotate_deg([-(mount_width / 2.0) + off[0], -(mount_height / 2) + off[1], off[2]], self._rot)
         return add_translate(self._pos, offset)
@@ -158,16 +158,16 @@ class Key(Part):
         return self._get_neighbors(["bl", "b", "br"])
 
     def top_edge(self):
-        return [self.tl(), self.tr()]
+        return [self.tl_wide(), self.tr_wide()]
 
     def bottom_edge(self):
-        return [self.bl(), self.br()]
+        return [self.bl_wide(), self.br_wide()]
 
     def inner_edge(self, side="right"):
         if side == "right":
-            return [self.tl(), self.bl()]
+            return [self.tl_wide(), self.bl_wide()]
 
-        return [self.tr(), self.br()]
+        return [self.tr_wide(), self.br_wide()]
 
     def outer_edge(self, side="right"):
         if side == "left":
@@ -183,10 +183,10 @@ class Key(Part):
     def closest_corner(self, rel_pos):
         dist = 99999999999.0
         all_dist = [
-            distance(rel_pos, self.tl()),
-            distance(rel_pos, self.tr()),
-            distance(rel_pos, self.bl()),
-            distance(rel_pos, self.br())
+            distance(rel_pos, self.tl_wide()),
+            distance(rel_pos, self.tr_wide()),
+            distance(rel_pos, self.bl_wide()),
+            distance(rel_pos, self.br_wide())
         ]
 
         index = -1
@@ -197,13 +197,13 @@ class Key(Part):
                 dist = all_dist[i]
 
         if index == 0:
-            return self.tl()
+            return self.tl_wide()
         elif index == 1:
-            return self.tr()
+            return self.tr_wide()
         elif index == 2:
-            return self.bl()
+            return self.bl_wide()
 
-        return self.br()
+        return self.br_wide()
 
     def calculate_key_placement(self,
                                 column,
