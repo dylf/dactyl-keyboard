@@ -20,5 +20,7 @@
   "oled_left_wall_lower_y_offset": 12.0,
   "oled_left_wall_lower_z_offset": 5.0,
   "oled_mount_undercut": 1.0,
+  "oled_mount_undercut_height": 4.0,
+  "oled_mount_undercut_height_rim": 6.0,
   "oled_mount_undercut_thickness": 2.0
 }
