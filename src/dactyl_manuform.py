@@ -219,8 +219,8 @@ def make_dactyl():
             wide = tbiw_left_wall_x_offset_override
             short = tbiw_left_wall_x_offset_override  - 5   # HACKI SH
 
-            if not all_last_rows and nrows >= 5:
-                offsets[nrows - 4] = wide
+            # if not all_last_rows and nrows >= 5:
+            #     offsets[nrows - 4] = wide
 
             offsets[nrows - 3] = wide
             offsets[nrows - 2] = wide
@@ -1079,24 +1079,24 @@ def make_dactyl():
             join_offset_y = left_left_wall_y_join_offset
             join_offset_z = left_left_wall_z_join_offset
 
-        # if low_corner:
-        #     if trackball_in_wall and is_side(side, ball_side):
-        #         y_offset = tbiw_left_wall_lower_y_offset
-        #         z_offset = tbiw_left_wall_lower_z_offset
-        #     else:
-        #         y_offset = left_wall_lower_y_offset
-        #         z_offset = left_wall_lower_z_offset
-        #         # RIDICULOUS HACK 1
-        # elif row == nrows-1 or wall_x_offsets[row] != wall_x_offsets[row - 1]:
-        #         # if wall_x_offsets[row] > wall_x_offsets[row - 1]:
-        #     y_offset = join_offset_y
-        #     z_offset += join_offset_z
-        #
-        #     return list(pos - np.array([
-        #         wall_x_offsets[row] + join_offset_x,
-        #         -y_offset,
-        #         left_wall_z_offset + z_offset
-        #     ]))
+        if low_corner:
+            if trackball_in_wall and is_side(side, ball_side):
+                y_offset = tbiw_left_wall_lower_y_offset
+                z_offset = tbiw_left_wall_lower_z_offset
+            else:
+                y_offset = left_wall_lower_y_offset
+                z_offset = left_wall_lower_z_offset
+                # RIDICULOUS HACK 1
+        elif row == nrows-1 or wall_x_offsets[row] != wall_x_offsets[row - 1]:
+                # if wall_x_offsets[row] > wall_x_offsets[row - 1]:
+            y_offset = join_offset_y
+            z_offset += join_offset_z
+
+            return list(pos - np.array([
+                wall_x_offsets[row] + join_offset_x,
+                -y_offset,
+                left_wall_z_offset + z_offset
+            ]))
         # elif row < nrows - 1 and wall_x_offsets[row] != wall_x_offsets[row + 1]:
         #     y_offset = +
         #     return list(pos - np.array([
