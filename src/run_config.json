@@ -74,6 +74,12 @@
   "left_encoder_wall_rotation": [
     -17, -5, 5
   ],
+  "tbiw_encoder_wall_offset": [
+    -81, -27, 45
+  ],
+  "tbiw_encoder_wall_rotation": [
+    -17, -5, 5
+  ],
   "left_left_wall_x_join_offset": 0.35,
   "left_left_wall_y_join_offset": -6,
   "left_left_wall_z_join_offset": 0.6,

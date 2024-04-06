@@ -188,6 +188,9 @@ def make_dactyl():
                 wide, wide, wide, wide, short, short, short, short
             ]
         elif encoder_yes and track_yes:
+            left_wall_x_offset = tbiw_left_wall_x_offset_override
+            wide = tbiw_left_wall_x_offset_override
+            short = tbiw_left_wall_x_offset_override  - 5
             if nrows <= 4:
                 offsets = [wide, wide, wide, wide, wide, wide, wide]
             elif nrows == 5:
@@ -1511,7 +1514,9 @@ def make_dactyl():
         # row_position = key_position([0, 0, 0], -1, encoder_row)
         # row_position[1] += 10
         def low_prep_position(sh):
-            if side == "right":
+            if trackball_is_in_wall(side):
+                return translate(rotate(sh, tbiw_encoder_wall_rotation), tbiw_encoder_wall_offset)
+            elif side == "right":
                 return translate(rotate(sh, right_encoder_wall_rotation), right_encoder_wall_offset)
 
             return translate(rotate(sh, left_encoder_wall_rotation), left_encoder_wall_offset)
