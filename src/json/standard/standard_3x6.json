@@ -1,0 +1,138 @@
+{
+ "ENGINE": "cadquery",
+  "branch": "trackball_in_wall",
+  "nrows": 3,
+  "ncols": 6,
+  "plate_file": "file:switch_holes/notch.json",
+  "material_file": "file:material/fdm.json",
+  "quick_render": false,
+  "centerrow_offset": 2,
+  "thumb_style": "MINITHICC3",
+  "other_thumb": "MINI",
+  "controller_mount_type": "EXTERNAL",
+  "keyboard_z_offset": 12,
+  "block_bottoms": false,
+  "ball_side": "right",
+  "oled_side": "left",
+  "show_caps": false,
+  "encoder_in_wall": true,
+  "encoder_side": "right",
+  "pinky_1_5U": false,
+  "last_1_5U_row": 3,
+  "full_last_rows": true,
+  "default_1U_cluster": true,
+  "oled_file": "file:mounts/oled/sliding.json",
+  "logo_file": "/Users/andrew/OneDrive/Wylderbuilds/small_logo_model",
+  "all_last_rows": true,
+  "tb_socket_translation_offset": [
+    0,
+    0,
+    0
+  ],
+  "tb_socket_rotation_offset": [
+    0,
+    0,
+    10
+  ],
+  "tbiw_translational_offset": [
+    -6,
+    -28,
+    -8
+  ],
+  "tbiw_rotation_offset": [
+    40,
+    20,
+    -25
+  ],
+  "encoder_wall_row": 1,
+  "right_encoder_wall_offset": [
+    2, 3, -15
+  ],
+  "right_encoder_wall_rotation": [
+    0, -38, 0
+  ],
+  "left_encoder_wall_offset": [
+    2, 0, -15
+  ],
+  "left_encoder_wall_rotation": [
+    2, -40, 0
+  ],
+  "left_left_wall_x_join_offset": -0.33,
+  "left_left_wall_y_join_offset": -5,
+  "left_left_wall_z_join_offset": -0.6,
+  "right_left_wall_x_join_offset": -0.35,
+  "right_left_wall_y_join_offset": -4,
+  "right_left_wall_z_join_offset": -0.6,
+  "tbiw_left_wall_x_offset_override": 30.0,
+  "tbiw_left_wall_z_offset_override": 6.0,
+  "tbiw_left_wall_lower_y_offset": -22.0,
+  "tbiw_left_wall_lower_z_offset": 14.0,
+  "oled_left_wall_x_offset_override": 24.0,
+  "oled_left_wall_z_offset_override": 6.0,
+  "oled_left_wall_lower_y_offset": -12.0,
+  "oled_left_wall_lower_z_offset": 14.0,
+  "left_wall_z_offset_override": 6.0,
+  "left_wall_lower_y_offset": -12.0,
+  "left_wall_lower_z_offset": 14.0,
+  "oled_center_row": 0.75,
+  "trackball_in_wall": true,
+  "tbiw_ball_center_row": 0.2,
+  "tbiw_oled_center_row": 0.75,
+      "oled_translation_offset": [
+        -2,
+        -12,
+        -6
+      ],
+      "oled_rotation_offset": [
+        -6,
+        -5,
+        3
+      ],
+  "tbiw_oled_translation_offset": [
+    0,
+    -7,
+    -10
+  ],
+  "tbiw_oled_rotation_offset": [
+    -4,
+    -8,
+    2
+  ],
+  "screw_offsets": [
+    [
+      -1,
+      0,
+      0
+    ],
+    [
+      2,
+      -10,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      -28,
+      5,
+      0
+    ],
+    [
+      1,
+      8,
+      0
+    ],
+    [
+      0,
+      -10,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ]
+  ]
+}

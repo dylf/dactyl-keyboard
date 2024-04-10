@@ -1049,7 +1049,7 @@ def make_dactyl():
 
 
         def key_plate(key):
-            plate = translate(box(flex_width / 3, mount_height + 7, 1.8), (0, 0, 0.9))
+            plate = translate(box(flex_width / 3, mount_height + 7, 1.8), (0, 0, -1.9))
             if is_cq():
                 # plate = plate.edges("|Z").fillet(1)
                 plate = plate.edges(">Z").chamfer(1)
@@ -1074,12 +1074,19 @@ def make_dactyl():
             # return _offset_all([key.tl_off(pof), key.tr_off(pof), top_key.br_off(pof), top_key.bl_off(pof)], rot=rot)
 
         def key_web_topkey(key):
-            top_pof = [pof[0], pof[1] + 3, pof[2]]
-            return smooth(_offset_all([key.tl(pof), key.tr(pof), key.tr(top_pof), key.tl(top_pof)], rot=key.rot))
+            top_pof = [pof[0], pof[1] - 1, pof[2]]
+            strut = smooth(translate(box(mount_width, 2, 1.8), (0, 0, -1.8)))
+            strut = rotate(strut, key.rot)
+            strut = translate(strut, key.center(off=(0, (mount_height / 2) + 3, -2.5)))
+            return strut
 
         def key_web_bottomkey(key):
-            bot_pof = [pof[0], pof[1] - 3, pof[2]]
-            return smooth(_offset_all([key.bl(bot_pof), key.br(bot_pof), key.br(pof), key.bl(pof)], rot=key.rot))
+            bot_pof = [pof[0], pof[1] - 1, pof[2]]
+            strut = smooth(translate(box(mount_width, 2, 1.8), (0, 0, -1.8)))
+            strut = rotate(strut, key.rot)
+            strut = translate(strut, key.center(off=(0, (-mount_height / 2) - 3, -2.5)))
+            return  strut
+            # return smooth(_offset_all([key.bl(bot_pof), key.br(bot_pof), key.br(pof), key.bl(pof)], rot=key.rot))
 
         for c in range(ncols):
             column = KeyFactory.get_column(c)
@@ -1103,7 +1110,7 @@ def make_dactyl():
                         grid.append(key_web_topkey(key))
 
                     last_key = key
-
+            #
             if not last_key.is_none():
                 grid.append(key_web_bottomkey(last_key))
 
