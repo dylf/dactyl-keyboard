@@ -2176,19 +2176,19 @@ def make_dactyl():
 
         shape = rotate(shape, oled_mount_rotation_xyz)
         shape = translate(shape, (
-            oled_mount_location_xyz[0],
-            oled_mount_location_xyz[1],
-            oled_mount_location_xyz[2],
+                oled_mount_location_xyz[0],
+                oled_mount_location_xyz[1],
+                oled_mount_location_xyz[2],
+            )
         )
-                          )
 
         hole = rotate(hole, oled_mount_rotation_xyz)
         hole = translate(hole, (
-            oled_mount_location_xyz[0],
-            oled_mount_location_xyz[1],
-            oled_mount_location_xyz[2],
+                oled_mount_location_xyz[0],
+                oled_mount_location_xyz[1],
+                oled_mount_location_xyz[2],
+            )
         )
-                         )
 
         return hole, shape
 
@@ -2502,17 +2502,17 @@ def make_dactyl():
             if oled_mount_type == "UNDERCUT":
                 hole, frame = oled_undercut_mount_frame(side=side)
                 shape = difference(shape, [hole])
-                shape = union([shape, frame])
+                shape = union([shape, translate(frame, (0, -0.01, 0))])
 
             elif oled_mount_type == "SLIDING":
                 hole, frame = oled_sliding_mount_frame(side=side)
                 shape = difference(shape, [hole])
-                shape = union([shape, frame])
+                shape = union([shape, translate(frame, (0, -0.01, 0))])
 
             elif oled_mount_type == "CLIP":
                 hole, frame = oled_clip_mount_frame(side=side)
                 shape = difference(shape, [hole])
-                shape = union([shape, frame])
+                shape = union([shape, translate(frame, (0, -0.01, 0))])
 
         if encoder_in_wall(side):
             shape = encoder_wall_mount(shape, side)
