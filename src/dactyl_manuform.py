@@ -1112,16 +1112,16 @@ def make_dactyl():
                 y_offset = left_wall_lower_y_offset
                 z_offset = left_wall_lower_z_offset
                 # RIDICULOUS HACK 1
-        elif row == abs(shift_at) and row != 0:
-                # if wall_x_offsets[row] > wall_x_offsets[row - 1]:
-            y_offset = join_offset_y
-            z_offset += join_offset_z
-
-            return list(pos - np.array([
-                wall_x_offsets[row] + join_offset_x,
-                -y_offset,
-                left_wall_z_offset + z_offset
-            ]))
+        # elif row == abs(shift_at) and row != 0:
+        #         # if wall_x_offsets[row] > wall_x_offsets[row - 1]:
+        #     y_offset = join_offset_y
+        #     z_offset += join_offset_z
+        #
+        #     return list(pos - np.array([
+        #         wall_x_offsets[row] + join_offset_x,
+        #         -y_offset,
+        #         left_wall_z_offset + z_offset
+        #     ]))
         # elif row < nrows - 1 and wall_x_offsets[row] != wall_x_offsets[row + 1]:
         #     y_offset = +
         #     return list(pos - np.array([
@@ -2391,7 +2391,7 @@ def make_dactyl():
                 translate(screw_insert(lastcol, -1, bottom_radius, top_radius, height, side=side, hole=hole),
                           (so[4][0] + 1, so[4][1] - 25, so[4][2] + offset)),  # rear right
                 translate(screw_insert(lastcol, lastrow, bottom_radius, top_radius, height, side=side, hole=hole),
-                          (so[5][0] + 3, so[5][1] +2, so[5][2] + offset)),  # front right
+                          (so[5][0] + 3, so[5][1] + 2, so[5][2] + offset)),  # front right
                 translate(screw_insert_thumb(bottom_radius, top_radius, height, side=side, hole=hole),
                           (so[6][0], so[6][1], so[6][2] + offset)),  # thumb cluster
             )

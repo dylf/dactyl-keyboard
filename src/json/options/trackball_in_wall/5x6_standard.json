@@ -7,11 +7,11 @@
   "tb_socket_rotation_offset": [
     0,
     0,
-    10
+    0
   ],
   "tbiw_translational_offset": [
-    -4,
-    -27,
+    -7,
+    -26,
     -8
   ],
   "tbiw_rotation_offset": [
@@ -96,8 +96,8 @@
       0
     ],
     [
-      -28,
-      2,
+      -20,
+      4,
       0
     ],
     [
