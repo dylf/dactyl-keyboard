@@ -181,7 +181,7 @@ def make_dactyl():
             encoder_yes = True
 
         if oled_yes and track_yes:
-            wide = tbiw_left_wall_x_offset_override
+            wide = max(tbiw_left_wall_x_offset_override, oled_left_wall_x_offset_override)
             shift_at = 0
             offsets = [
                 wide, wide, wide, wide, wide, wide, wide, wide
