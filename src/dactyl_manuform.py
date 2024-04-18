@@ -579,8 +579,7 @@ def make_dactyl():
             socket = translate(socket, [0, 0, plate_thickness + plate_offset])
             plate = union([plate, socket])
 
-        if is_cq():
-            plate = plate.edges("<Z").chamfer(plate_chamfer)
+
 
         if style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH', 'AMOEBA', 'CHOC']:
             if style in ['UNDERCUT', 'HS_UNDERCUT']:
@@ -603,6 +602,10 @@ def make_dactyl():
                         mount_thickness
                     )
                 ])
+
+                if style in ['NOTCH'] and is_cq():
+                    plate = plate.edges("<Z").chamfer(plate_chamfer)
+
             elif style == "CHOC":
                 undercut = box(keyswitch_width + 2 * clip_undercut,
                                keyswitch_height - 2,
