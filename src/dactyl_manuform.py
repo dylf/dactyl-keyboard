@@ -245,8 +245,8 @@ def make_dactyl():
             offsets[nrows - 1] = wide
             shift_at = nrows - 4
         elif encoder_yes:
-            left_wall_x_offset = oled_left_wall_x_offset_override - 3
-            wide = oled_left_wall_x_offset_override - 3
+            left_wall_x_offset = encoder_left_wall_x_offset_override
+            wide = encoder_left_wall_x_offset_override
             # if oled_mount_type == None or not is_side(side, oled_side):
             #     short = 8
             # else:
@@ -431,16 +431,28 @@ def make_dactyl():
     oled_row = nrows - 1
     plate_file = None
 
-    # Derived values
-    if plate_style in ['NUB', 'HS_NUB']:
-        keyswitch_height = nub_keyswitch_height
-        keyswitch_width = nub_keyswitch_width
-    elif plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH', 'CHOC']:
-        keyswitch_height = undercut_keyswitch_height
-        keyswitch_width = undercut_keyswitch_width
-    else:
-        keyswitch_height = hole_keyswitch_height
-        keyswitch_width = hole_keyswitch_width
+    def get_switch_values(type=plate_style):
+        # Derived values
+        if type in ['NUB', 'HS_NUB']:
+            switch_height = nub_keyswitch_height
+            switch_width = nub_keyswitch_width
+        elif type in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH']:
+            switch_height = undercut_keyswitch_height
+            switch_width = undercut_keyswitch_width
+        elif type in ['CHOC']:
+            switch_height = choc_keyswitch_height
+            switch_width = choc_keyswitch_width
+        else:
+            switch_height = hole_keyswitch_height
+            switch_width = hole_keyswitch_width
+            # plate_offset = 0.0 # this overwrote the config variable
+
+        m_width = switch_width + 2 * plate_rim
+        m_height = switch_height + 2 * plate_rim
+
+        return switch_height, switch_width, m_height, m_width
+
+    keyswitch_height, keyswitch_width, mount_height, mount_width = get_switch_values(type=plate_style)
 
     if "AMOEBA" in plate_style:
         symmetry = "asymmetric"
@@ -451,22 +463,8 @@ def make_dactyl():
         if plate_file_name is not None:
             pname = plate_file_name
         plate_file = path.join(parts_path, pname)
-        # plate_offset = 0.0 # this overwrote the config variable
 
-    if (trackball_in_wall or ('TRACKBALL' in thumb_style)) and not ball_side == 'both':
-        symmetry = "asymmetric"
-
-    mount_width = keyswitch_width + 2 * plate_rim
-    mount_height = keyswitch_height + 2 * plate_rim
     mount_thickness = plate_thickness
-
-    if default_1U_cluster and thumb_style == 'DEFAULT':
-        double_plate_height = (.7 * sa_double_length - mount_height) / 3
-        # double_plate_height = (.95 * sa_double_length - mount_height) / 3
-    elif thumb_style == 'DEFAULT':
-        double_plate_height = (.90 * sa_double_length - mount_height) / 3
-    else:
-        double_plate_height = (sa_double_length - mount_height) / 3
 
     # wide = 22 if not oled_horizontal else tbiw_left_wall_x_offset_override
     # short = 8 if not oled_horizontal else tbiw_left_wall_x_offset_override
@@ -483,6 +481,17 @@ def make_dactyl():
     #     left_wall_z_offset = oled_left_wall_z_offset_override
     #     left_wall_lower_y_offset = oled_left_wall_lower_y_offset
     #     left_wall_lower_z_offset = oled_left_wall_lower_z_offset
+
+    if default_1U_cluster and thumb_style == 'DEFAULT':
+        double_plate_height = (.7 * sa_double_length - mount_height) / 3
+        # double_plate_height = (.95 * sa_double_length - mount_height) / 3
+    elif thumb_style == 'DEFAULT':
+        double_plate_height = (.90 * sa_double_length - mount_height) / 3
+    else:
+        double_plate_height = (sa_double_length - mount_height) / 3
+
+    if (trackball_in_wall or ('TRACKBALL' in thumb_style)) and not ball_side == 'both':
+        symmetry = "asymmetric"
 
     cap_top_height = plate_thickness + sa_profile_key_height
     row_radius = ((mount_height + extra_height) / 2) / (np.sin(alpha / 2)) + cap_top_height
@@ -530,21 +539,23 @@ def make_dactyl():
 
     def single_plate(cylinder_segments=100, side="right", style=plate_style):
         global exported_plate
-        if style in ['NUB', 'HS_NUB']:
-            tb_border = (mount_height - keyswitch_height) / 2
-            top_wall = box(mount_width, tb_border, plate_thickness)
-            top_wall = translate(top_wall, (0, (tb_border / 2) + (keyswitch_height / 2), plate_thickness / 2))
+        switch_height, switch_width, m_height, m_width = get_switch_values(type=style)
 
-            lr_border = (mount_width - keyswitch_width) / 2
-            left_wall = box(lr_border, mount_height, plate_thickness)
-            left_wall = translate(left_wall, ((lr_border / 2) + (keyswitch_width / 2), 0, plate_thickness / 2))
+        if style in ['NUB', 'HS_NUB']:
+            tb_border = (m_height - switch_height) / 2
+            top_wall = box(m_width, tb_border, plate_thickness)
+            top_wall = translate(top_wall, (0, (tb_border / 2) + (switch_height / 2), plate_thickness / 2))
+
+            lr_border = (m_width - switch_width) / 2
+            left_wall = box(lr_border, m_height, plate_thickness)
+            left_wall = translate(left_wall, ((lr_border / 2) + (switch_width / 2), 0, plate_thickness / 2))
 
             side_nub = cylinder(radius=1, height=2.75)
             side_nub = rotate(side_nub, (90, 0, 0))
-            side_nub = translate(side_nub, (keyswitch_width / 2, 0, 1))
+            side_nub = translate(side_nub, (switch_width / 2, 0, 1))
 
             nub_cube = box(1.5, 2.75, plate_thickness)
-            nub_cube = translate(nub_cube, ((1.5 / 2) + (keyswitch_width / 2), 0, plate_thickness / 2))
+            nub_cube = translate(nub_cube, ((1.5 / 2) + (switch_width / 2), 0, plate_thickness / 2))
 
             side_nub2 = tess_hull(shapes=(side_nub, nub_cube))
             side_nub2 = union([side_nub2, side_nub, nub_cube])
@@ -566,10 +577,10 @@ def make_dactyl():
         #     plate = difference(plate, [shape_cut])
 
         else:  # 'HOLE' or default, square cutout for non-nub designs.
-            plate = box(mount_width, mount_height, mount_thickness)
+            plate = box(mount_width, m_height, mount_thickness)
             plate = translate(plate, (0.0, 0.0, mount_thickness / 2.0))
 
-            shape_cut = box(keyswitch_width, keyswitch_height, mount_thickness * 2 + .02)
+            shape_cut = box(switch_width, switch_height, mount_thickness * 2 + .02)
             shape_cut = translate(shape_cut, (0.0, 0.0, mount_thickness - .01))
 
             plate = difference(plate, [shape_cut])
@@ -579,25 +590,26 @@ def make_dactyl():
             socket = translate(socket, [0, 0, plate_thickness + plate_offset])
             plate = union([plate, socket])
 
-
+        # if is_cq():
+        #     plate = plate.edges("<Z").chamfer(plate_chamfer)
 
         if style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH', 'AMOEBA', 'CHOC']:
             if style in ['UNDERCUT', 'HS_UNDERCUT']:
                 undercut = box(
-                    keyswitch_width + 2 * clip_undercut,
-                    keyswitch_height + 2 * clip_undercut,
+                    switch_width + 2 * clip_undercut,
+                    switch_height + 2 * clip_undercut,
                     mount_thickness
                 )
 
             elif style in ['NOTCH', 'HS_NOTCH', 'AMOEBA']:
                 undercut = box(
                     notch_width,
-                    keyswitch_height + 2 * clip_undercut,
+                    switch_height + 2 * clip_undercut,
                     mount_thickness
                 )
                 undercut = union([undercut,
                     box(
-                        keyswitch_width + 2 * clip_undercut,
+                        switch_width + 2 * clip_undercut,
                         notch_width,
                         mount_thickness
                     )
@@ -607,22 +619,22 @@ def make_dactyl():
                     plate = plate.edges("<Z").chamfer(plate_chamfer)
 
             elif style == "CHOC":
-                undercut = box(keyswitch_width + 2 * clip_undercut,
-                               keyswitch_height - 2,
+                undercut = box(switch_width + 2 * clip_undercut,
+                               switch_height - 2,
                                mount_thickness / 2
                 )
 
                 if top_plate_offset != 0:
                     plate = difference(plate, [
                         translate(box(
-                            keyswitch_width + 2,
-                            keyswitch_height + 2,
+                            switch_width + 2,
+                            switch_height + 2,
                             top_plate_offset
                     ), (0, 0, mount_thickness - (top_plate_offset / 2) + 0.01))])
 
             undercut = translate(undercut, (0.0, 0.0, -clip_thickness - top_plate_offset + mount_thickness / 2.0))
 
-            if ENGINE == 'cadquery' and undercut_transition > 0:
+            if is_cq() and undercut_transition > 0:
                 undercut = undercut.faces("+Z").chamfer(undercut_transition, clip_undercut)
 
             plate = difference(plate, [undercut])

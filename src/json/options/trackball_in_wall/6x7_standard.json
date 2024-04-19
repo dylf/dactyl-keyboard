@@ -30,6 +30,7 @@
   "left_wall_z_offset_override": 6.0,
   "left_wall_lower_y_offset": -12.0,
   "left_wall_lower_z_offset": 14.0,
+  "encoder_left_wall_x_offset_override": 25,
   "encoder_wall_row": 2,
   "right_encoder_wall_offset": [
     -85, -8, 39
@@ -38,10 +39,10 @@
     -3, -5, 1
   ],
   "left_encoder_wall_offset": [
-    -87, -1, 40.2
+    -80, -15, 40
   ],
   "left_encoder_wall_rotation": [
-    -2, -2.5, 1
+    -8, -5, 5
   ],
   "tbiw_encoder_wall_offset": [
     -85, -4, 41
@@ -61,12 +62,12 @@
   "tbiw_ball_center_row": 0.2,
   "tbiw_oled_translation_offset": [
     0,
-    2,
-    1
+    -2,
+    -5
   ],
   "tbiw_oled_rotation_offset": [
-    0,
     -2,
+    0,
     5
   ],
   "oled_translation_offset": [
