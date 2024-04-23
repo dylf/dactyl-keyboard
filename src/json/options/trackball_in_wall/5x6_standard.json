@@ -37,7 +37,7 @@
   "right_left_wall_y_join_offset": -6.0,
   "right_left_wall_z_join_offset": 0.6,
   "oled_translation_offset": [
-    3,
+    0,
     5,
     6
   ],
