@@ -1153,16 +1153,16 @@ def make_dactyl():
                 y_offset = left_wall_lower_y_offset
                 z_offset = left_wall_lower_z_offset
                 # RIDICULOUS HACK 1
-        elif row == abs(shift_at) and row != 0:
-                # if wall_x_offsets[row] > wall_x_offsets[row - 1]:
-            y_offset = join_offset_y
-            z_offset += join_offset_z
-
-            return list(pos - np.array([
-                wall_x_offsets[row] + join_offset_x,
-                -y_offset,
-                left_wall_z_offset + z_offset
-            ]))
+        # elif row == abs(shift_at) and row != 0:
+        #         # if wall_x_offsets[row] > wall_x_offsets[row - 1]:
+        #     y_offset = join_offset_y
+        #     z_offset += join_offset_z
+        #
+        #     return list(pos - np.array([
+        #         wall_x_offsets[row] + join_offset_x,
+        #         -y_offset,
+        #         left_wall_z_offset + z_offset
+        #     ]))
         # elif row < nrows - 1 and wall_x_offsets[row] != wall_x_offsets[row + 1]:
         #     y_offset = +
         #     return list(pos - np.array([
@@ -1315,18 +1315,6 @@ def make_dactyl():
         hulls = [pt1, pt2]
         angle = numpy.atan(10, 10)
         return angle
-
-    def left_wall_cluster_join_location(shape):
-        torow = lastrow
-        if all_last_rows:
-            torow = lastrow + 1
-
-        pos = left_key_position(torow - 1, -1, low_corner=True)
-        # pos = left_key_position(torow - 1, -2, low_corner=True)
-        if shape is not None:
-            return translate(shape, pos)
-        return pos
-
 
     def left_wall(side='right'):
         print('left_wall()')

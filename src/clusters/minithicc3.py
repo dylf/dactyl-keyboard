@@ -161,6 +161,21 @@ class Minithicc3(MinidoxCluster):
                           -((mount_height / 2) + adjustable_plate_size(self.minidox_Usize)) + post_adj, 0]
                          )
 
+    def left_wall_cluster_join_location(self, shape):
+        torow = lastrow
+        if all_last_rows:
+            torow = lastrow + 1
+
+        pos = left_key_position(torow - 1, -1, low_corner=True)
+
+        # TOTAL HACK!
+        pos[0] = pos[0] - 28
+        pos[1] = pos[1] - 12
+        # pos = left_key_position(torow - 1, -2, low_corner=True)
+        if shape is not None:
+            return translate(shape, pos)
+        return pos
+
     def thumb_connectors(self, side="right"):
         print('thumb_connectors()')
         hulls = []
@@ -307,10 +322,10 @@ class Minithicc3(MinidoxCluster):
         shape = union([shape, wall_brace(self.ml_place, -1, 0, self.thumb_post_tl(), self.ml_place, 0, 1, self.thumb_post_tl())])
         # thumb, tweeners
         if trackball_present(side):
-            shape = union([shape, wall_brace(left_wall_cluster_join_location, -1, 0, web_post(), self.ml_place, 0, 1, self.thumb_post_tl())])
+            shape = union([shape, wall_brace(self.left_wall_cluster_join_location, -1, 0, web_post(), self.ml_place, 0, 1, self.thumb_post_tl())])
         else:
             shape = union([shape,wall_brace(self.ml_place, 0, 1, self.thumb_post_tr(), self.ml_place, 0, 1, self.thumb_post_tl())])
-        # shape = union([shape, wall_brace(left_wall_cluster_join_location, -1, 0, web_post(), self.ml_place, 0, 1, self.thumb_post_tl())])
+        # shape = union([shape, wall_brace(self.left_wall_cluster_join_location, -1, 0, web_post(), self.ml_place, 0, 1, self.thumb_post_tl())])
         shape = union([shape, wall_brace(self.tr_place, 0, -1, self.thumb_post_br(), (lambda sh: cluster_key_place(sh, 3, lastrow)), 0, -1, web_post_bl())])
 
         return shape
@@ -335,12 +350,12 @@ class Minithicc3(MinidoxCluster):
             shape = union([shape,
                            hull_from_shapes(
                                [
-                                   left_wall_cluster_join_location(web_post()),
+                                   self.left_wall_cluster_join_location(web_post()),
                                    self.tl_place(self.thumb_post_tl()),
                                    self.ml_place(self.thumb_post_tr()),
                                    self.ml_place(self.thumb_post_tl()),
                                    # left_wall_cluster_join_location(web_post_bl()),
-                                   left_wall_cluster_join_location(web_post()),
+                                   self.left_wall_cluster_join_location(web_post()),
                                    # self.ml_place(translate(self.thumb_post_tr(), wall_locate1(0, 1))),
                                    # self.ml_place(translate(self.thumb_post_tr(), wall_locate2(0, 1))),
                                    # self.ml_place(translate(self.thumb_post_tr(), wall_locate3(0, 1))),
@@ -411,7 +426,7 @@ class Minithicc3(MinidoxCluster):
         ####### CONNECTION TO LEFT WALL AT TOP HERE
         # shape = union([bottom_hull(
         #     [
-        #         # left_wall_cluster_join_location(web_post()),
+        #         # self.left_wall_cluster_join_location(web_post()),
         #         # left_key_place(translate(web_post(), wall_locate2(-1, 0)), lastrow, -1, low_corner=True, side=side),
         #         left_key_place(translate(web_post(), wall_locate3(-1, 0)), lastrow, -1, low_corner=True, side=side),
         #         self.bl_place(translate(self.thumb_post_tr(), wall_locate2(-0.3, -2))),
@@ -461,12 +476,12 @@ class Minithicc3(MinidoxCluster):
         shape = union([shape,
                        hull_from_shapes(
                            [
-                               left_wall_cluster_join_location(web_post()),
+                               self.left_wall_cluster_join_location(web_post()),
                                self.tl_place(self.thumb_post_tl()),
                                self.ml_place(self.thumb_post_tr()),
                                self.ml_place(self.thumb_post_tl()),
-                               # left_wall_cluster_join_location(web_post_bl()),
-                               left_wall_cluster_join_location(web_post()),
+                               # self.left_wall_cluster_join_location(web_post_bl()),
+                               self.left_wall_cluster_join_location(web_post()),
                                # self.ml_place(translate(self.thumb_post_tr(), wall_locate1(0, 1))),
                                # self.ml_place(translate(self.thumb_post_tr(), wall_locate2(0, 1))),
                                # self.ml_place(translate(self.thumb_post_tr(), wall_locate3(0, 1))),
