@@ -452,7 +452,16 @@ def make_dactyl():
 
         return switch_height, switch_width, m_height, m_width
 
-    keyswitch_height, keyswitch_width, mount_height, mount_width = get_switch_values(type=plate_style)
+    if plate_style in ['NUB', 'HS_NUB']:
+        keyswitch_height = nub_keyswitch_height
+        keyswitch_width = nub_keyswitch_width
+    elif plate_style in ['UNDERCUT', 'HS_UNDERCUT', 'NOTCH', 'HS_NOTCH', 'CHOC']:
+        keyswitch_height = undercut_keyswitch_height
+        keyswitch_width = undercut_keyswitch_width
+    else:
+        keyswitch_height = hole_keyswitch_height
+        keyswitch_width = hole_keyswitch_width
+
 
     if "AMOEBA" in plate_style:
         symmetry = "asymmetric"
@@ -463,8 +472,22 @@ def make_dactyl():
         if plate_file_name is not None:
             pname = plate_file_name
         plate_file = path.join(parts_path, pname)
+        # plate_offset = 0.0 # this overwrote the config variable
 
+    if (trackball_in_wall or ('TRACKBALL' in thumb_style)) and not ball_side == 'both':
+        symmetry = "asymmetric"
+
+    mount_width = keyswitch_width + 2 * plate_rim
+    mount_height = keyswitch_height + 2 * plate_rim
     mount_thickness = plate_thickness
+
+    if default_1U_cluster and thumb_style == 'DEFAULT':
+        double_plate_height = (.7 * sa_double_length - mount_height) / 3
+        # double_plate_height = (.95 * sa_double_length - mount_height) / 3
+    elif thumb_style == 'DEFAULT':
+        double_plate_height = (.90 * sa_double_length - mount_height) / 3
+    else:
+        double_plate_height = (sa_double_length - mount_height) / 3
 
     # wide = 22 if not oled_horizontal else tbiw_left_wall_x_offset_override
     # short = 8 if not oled_horizontal else tbiw_left_wall_x_offset_override
