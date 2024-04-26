@@ -157,10 +157,10 @@ def export_dxf(shape, fname):
 def render_samples(override_name, num_cols, dir_path):
     dist = (num_cols * 75)
     x_off = [
-        0, 0, 0, 0, 0, 25, 15, 0
+        0, 0, 0, 0, 0, 25, 15, 0, 0
     ]
     angles = [
-        0, 0, 0, 0, 0, 20, 30, 32
+        0, 0, 0, 0, 0, 20, 30, 32, 34
     ]
 
     for filename in os.listdir(dir_path):
