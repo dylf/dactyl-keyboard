@@ -1372,11 +1372,11 @@ def make_dactyl():
         return (
             union([
                 back_wall(),
-                left_wall(side=side),
+                # left_wall(side=side),
                 right_wall(),
                 front_wall(),
-                cluster(side=side).walls(side=side),
-                cluster(side=side).connection(side=side),
+                # cluster(side=side).walls(side=side),
+                # cluster(side=side).connection(side=side),
             ])
         )
 
@@ -2328,15 +2328,25 @@ def make_dactyl():
         shape = union([shape, connector_shape])
         if debug_exports:
             export_file(shape=shape, fname=path.join(r".", "things", r"debug_connector_shape"))
-        thumb_shape = cluster(side).thumb(side=side)
+
         if debug_exports:
             export_file(shape=thumb_shape, fname=path.join(r".", "things", r"debug_thumb_shape"))
-        shape = union([shape, thumb_shape])
-        thumb_connector_shape = cluster(side).thumb_connectors(side=side)
-        shape = union([shape, thumb_connector_shape])
+        # shape = union([shape, thumb_shape])
+        # thumb_connector_shape = cluster(side).thumb_connectors(side=side)
+        # shape = union([shape, thumb_connector_shape])
         if debug_exports:
             export_file(shape=shape, fname=path.join(r".", "things", r"debug_thumb_connector_shape"))
+
         walls_shape = case_walls(side=side)
+        left_side = left_wall(side=side)
+
+        cluster_shape = union([
+            cluster(side=side).walls(side=side),
+            cluster(side=side).connection(side=side),
+            cluster(side=side).thumb_connectors(side=side),
+            cluster(side).thumb(side=side)
+        ])
+
         if debug_exports:
             export_file(shape=walls_shape, fname=path.join(r".", "things", r"debug_walls_shape"))
         s2 = union([walls_shape])
@@ -2381,73 +2391,75 @@ def make_dactyl():
         if is_oled(side):
             if oled_mount_type == "UNDERCUT":
                 hole, frame = oled_undercut_mount_frame(side=side)
-                shape = difference(shape, [hole])
-                shape = union([shape, frame])
+                left_side = difference(left_side, [hole])
+                left_side = union([left_side, frame])
 
             elif oled_mount_type == "SLIDING":
                 hole, frame = oled_sliding_mount_frame(side=side)
-                shape = difference(shape, [hole])
-                shape = union([shape, frame])
+                left_side = difference(left_side, [hole])
+                left_side = union([left_side, frame])
 
 
             elif oled_mount_type == "CLIP":
                 hole, frame = oled_clip_mount_frame(side=side)
-                shape = difference(shape, [hole])
-                shape = union([shape, frame])
+                left_side = difference(left_side, [hole])
+                left_side = union([left_side, frame])
 
         if encoder_in_wall(side):
-            shape = encoder_wall_mount(shape, side)
+            left_side = encoder_wall_mount(left_side, side)
 
         if not quickly:
             if trackball_is_in_wall(side):
                 tbprecut, tb, tbcutout, sensor, ball = generate_trackball_in_wall()
 
                 if use_btus(cluster()):
-                    shape = difference(shape, [tbcutout])
-                    shape = union([shape, tb])
+                    left_side = difference(left_side, [tbcutout])
+                    left_side = union([left_side, tb])
                 else:
-                    shape = difference(shape, [tbprecut])
+                    left_side = difference(left_side, [tbprecut])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_1"))
-                    shape = union([shape, tb])
+                    left_side = union([left_side, tb])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_2"))
-                    shape = difference(shape, [tbcutout])
+                    left_side = difference(left_side, [tbcutout])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_3a"))
                     # export_file(shape=add([shape, sensor]), fname=path.join(save_path, config_name + r"_test_3b"))
-                    shape = union([shape, sensor])
+                    left_side = union([left_side, sensor])
 
                 if show_caps:
-                    shape = add([shape, ball])
+                    left_side = add([left_side, ball])
 
             elif cluster(side).is_tb:
                 tbprecut, tb, tbcutout, sensor, ball = generate_trackball_in_cluster(cluster(side))
 
-                shape = difference(shape, [tbprecut])
+                cluster_shape = difference(cluster_shape, [tbprecut])
                 if cluster(side).has_btus():
-                    shape = difference(shape, [tbcutout])
-                    shape = union([shape, tb])
+                    cluster_shape = difference(cluster_shape, [tbcutout])
+                    cluster_shape = union([cluster_shape, tb])
                 else:
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_1"))
-                    shape = union([shape, tb])
+                    cluster_shape = union([cluster_shape, tb])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_2"))
-                    shape = difference(shape, [tbcutout])
+                    cluster_shape = difference(cluster_shape, [tbcutout])
                     # export_file(shape=shape, fname=path.join(save_path, config_name + r"_test_3a"))
                     # export_file(shape=add([shape, sensor]), fname=path.join(save_path, config_name + r"_test_3b"))
-                    shape = union([shape, sensor])
+                    cluster_shape = union([cluster_shape, sensor])
 
                 if show_caps:
-                    shape = add([shape, ball])
+                    cluster_shape = add([cluster_shape, ball])
 
         block = translate(box(400, 400, 40), (0, 0, -20))
         shape = difference(shape, [block])
 
         if show_caps:
-            shape = add([shape, cluster(side).thumbcaps(side=side)])
+            cluster_shape = add([cluster_shape, cluster(side).thumbcaps(side=side)])
             shape = add([shape, caps()])
 
         if side == "left":
             shape = mirror(shape, 'YZ')
+            left_side = mirror(left_side, 'YZ')
+            cluster_shape = mirror(cluster_shape, 'YZ')
 
-        return shape, walls_shape
+        return shape, left_side, cluster_shape, walls_shape
 
     def wrist_rest(base, plate, side="right"):
         rest = import_file(path.join(parts_path, "dactyl_wrist_rest_v3_" + side))
@@ -2596,10 +2608,12 @@ def make_dactyl():
     def run():
         right_name = get_descriptor_name_side(side="right")
         left_name = get_descriptor_name_side(side="left")
-        mod_r, walls_r = model_side(side="right")
+        mod_r, left_wall_r, cluster_r, walls_r = model_side(side="right")
         if resin and ENGINE == "cadquery":
             mod_r = rotate(mod_r, (333.04, 43.67, 85.00))
         export_file(shape=mod_r, fname=path.join(save_path, right_name + r"_TOP"))
+        export_file(shape=left_wall_r, fname=path.join(save_path, right_name + r"_WALL"))
+        export_file(shape=cluster_r, fname=path.join(save_path, right_name + r"_CLUSTER"))
 
         # print(f"Right descriptor name: {get_descriptor_name_side(side='right')}")
         # print(f"Left descriptor name: {get_descriptor_name_side(side='left')}")
@@ -2621,10 +2635,13 @@ def make_dactyl():
 
         # if symmetry == "asymmetric":
 
-        mod_l, walls_l = model_side(side="left")
+        mod_l, left_wall_l, cluster_l, walls_l = model_side(side="left")
         if resin and ENGINE == "cadquery":
             mod_l = rotate(mod_l, (333.04, 317.33, 286.35))
+
         export_file(shape=mod_l, fname=path.join(save_path, left_name + r"_TOP"))
+        export_file(shape=left_wall_l, fname=path.join(save_path, left_name + r"_WALL"))
+        export_file(shape=cluster_l, fname=path.join(save_path, left_name + r"_CLUSTER"))
 
         base_l = mirror(baseplate(walls_l, side='left'), 'YZ')
         export_file(shape=base_l, fname=path.join(save_path, left_name + r"_PLATE"))
@@ -2658,7 +2675,7 @@ def make_dactyl():
             # export_file(shape=union((oled_clip_mount_frame()[1], oled_clip())),
             #             fname=path.join(save_path, config_name + r"_oled_clip_assy_test"))
 
-        if ENGINE != "cadquery":
+        if not is_cq() and render_png:
             render_samples(overrides_name, ncols, save_path)
 
     all_merged = locals().copy()
