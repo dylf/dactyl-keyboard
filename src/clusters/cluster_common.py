@@ -1,7 +1,0 @@
-TL = "tl"
-TR = "tr"
-ML = "ml"
-MR = "mr"
-FL = "fl"
-BL = "bl"
-BR = "br"
