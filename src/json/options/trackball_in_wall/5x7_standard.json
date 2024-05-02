@@ -54,6 +54,24 @@
     -1,
     0
   ],
+    "right_encoder_wall_offset": [
+    -85, -6, 42
+  ],
+  "right_encoder_wall_rotation": [
+    -3, -5, -2
+  ],
+  "left_encoder_wall_offset": [
+    -82, -12, 40
+  ],
+  "left_encoder_wall_rotation": [
+    -7, -5, 1
+  ],
+  "tbiw_encoder_wall_offset": [
+    -85, -6, 39.5
+  ],
+  "tbiw_encoder_wall_rotation": [
+    -3, -4, -1
+  ],
   "screw_offsets": [
     [
       0,
