@@ -2764,35 +2764,60 @@ def make_dactyl():
                 shape = union([shape, inner_shape])
 
                 if has_puck:
-                    top_inside_key = key_position([0, 0, 0], 0, 0)
-                    bottom_key_position = key_position([0, 0, 0], ncols - 1, bottom_key(ncols - 1))
-                    offsets, shift_at = get_left_wall_offsets(side)
-                    min_offset = 1000
-                    for offset in offsets:
-                        if min_offset < offset:
-                            min_offset = offset
+                    height = 6.0
+                    mount = (
+                        wp()
+                        .circle(20)
+                        .workplane(offset=height)
+                        .circle(12)
+                        .loft(combine=True)
+                    )
 
-                    y = top_inside_key[1] + 5
+                    screw = cq.importers.importStep(
+                        os.path.abspath(os.path.join(r"src", "parts", "quarter_inch_screw.step"))).translate([0, 0, -9])
 
-                    max_x = bottom_key_position[0] + 6
-                    min_y = bottom_key_position[1] - 16
+                    mid_row = int(np.floor(nrows / 2))
 
-                    m2_positions = []
+                    pos = key_position([0, 0, 0], 0, mid_row)
+                    pos[2] = -base_rim_thickness
+                    pos[0] += (ncols * 3)
+                    mount = translate(mount, pos)
+                    screw = translate(screw, pos)
+                    cut = translate(cylinder(10, 5), pos)
 
-                    while y >= min_y:
-                        x = top_inside_key[0] - min_offset + 6
+                    shape = difference(shape, [cut])
+                    shape = union([shape, mount])
+                    shape = difference(shape, [screw])
 
-                        while x <= max_x:
-                            m2_positions.append([x, y, 0])
-                            x += 19.55
-
-                        y -= 19.55
-
-                    m2_holes = []
-                    for puck_position in m2_positions:
-                        m2_holes.append(wp().cylinder(200, 1.1).translate((puck_position[0], puck_position[1], 0)))
-
-                    shape = difference(shape, m2_holes)
+                    # top_inside_key = key_position([0, 0, 0], 0, 0)
+                    # bottom_key_position = key_position([0, 0, 0], ncols - 1, bottom_key(ncols - 1))
+                    # offsets, shift_at = get_left_wall_offsets(side)
+                    # min_offset = 1000
+                    # for offset in offsets:
+                    #     if min_offset < offset:
+                    #         min_offset = offset
+                    #
+                    # y = top_inside_key[1] + 5
+                    #
+                    # max_x = bottom_key_position[0] + 6
+                    # min_y = bottom_key_position[1] - 16
+                    #
+                    # m2_positions = []
+                    #
+                    # while y >= min_y:
+                    #     x = top_inside_key[0] - min_offset + 6
+                    #
+                    #     while x <= max_x:
+                    #         m2_positions.append([x, y, 0])
+                    #         x += 19.55
+                    #
+                    #     y -= 19.55
+                    #
+                    # m2_holes = []
+                    # for puck_position in m2_positions:
+                    #     m2_holes.append(wp().cylinder(200, 1.1).translate((puck_position[0], puck_position[1], 0)))
+                    #
+                    # shape = difference(shape, m2_holes)
 
                 # if has_puck:
                 #     puck_base = get_puck_base()

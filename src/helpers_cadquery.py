@@ -1,7 +1,7 @@
 import cadquery as cq
 from scipy.spatial import ConvexHull as sphull
 import numpy as np
-
+import os
 
 debug_trace = False
 
@@ -270,6 +270,21 @@ def export_dxf(shape, fname):
     cq.exporters.export(w=shape, fname=fname + ".dxf",
                         exportType='DXF')
 
+def mount_plate():
+    height = 7.0
+    result = (
+        wp()
+        .circle(20)
+        .workplane(offset=height)
+        .circle(12)
+        .loft(combine=True)
+    )
+    os.path.abspath(os.path.join(r"src", "parts"))
+
+    screw = cq.importers.importStep(os.path.abspath(os.path.join(r"src", "parts", "quarter_inch_screw.step"))).translate([0, 0, -8])
+
+    return result.cut(screw)  # .translate([0, 0, height / 2.0])
+
 def blockerize(shape):
     #####
     # Inputs
@@ -461,10 +476,11 @@ def build_holder(pcb):
     wall = wall.cut(inset)
     wall = wall.cut(groove_neg)
     pcb_box = pcb_box.translate([0, 0, -2])
-    posts1 = wp().box(pcb["w"], 3.0, 5.5).cut(wp().box(pcb["w"] - 6, 3.0, 6.0)).translate([0, -pcb["l"] / 2 + 1, -5.8])
-    posts2 = wp().box(pcb["w"], 3.0, 5.5).cut(wp().box(pcb["w"] - 6, 3.0, 6.0)).translate([0, pcb["l"] / 2 - 1, -5.8])
+    posts1 = wp().box(3, pcb["l"], 5.5).translate([-pcb["w"] / 2 + 1, 0, -5.8])
+    posts2 = wp().box(3, pcb["l"], 5.5).translate([pcb["w"] / 2 - 1, 0, -5.8])
+    rear_guard = wp().box(pcb["w"], 3.0, 7.5).translate([0, -pcb["l"] / 2 - 1, -4.8])
     wall = wall.cut(pcb_box)
-    base = base.union(posts1).union(posts2)
+    base = base.union(posts1).union(posts2).union(rear_guard)
     wall = wall.union(base)
 
     return wall
