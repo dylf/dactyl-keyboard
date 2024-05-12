@@ -28,6 +28,7 @@
   "thumb_style": "TRACKBALL_WILD",
   "right_side_only": false,
   "default_1U_cluster": true,
+  "oled_left_wall_x_offset_override": 32.0,
   "trackball_in_wall": false,
   "tbiw_ball_center_row": 0.2,
   "tbiw_translational_offset": [
@@ -114,6 +115,7 @@
     -22.0
   ],
   "has_btus": false,
+  "ceramic": false,
   "tb_btu_socket_rotation_offset": [
     0,
     0,
@@ -351,5 +353,7 @@
     ]
   ],
   "left_screw_offsets": null,
-    "polydactyl": false
+  "layouts": null,
+  "polydactyl": false,
+  "render_png": false
 }

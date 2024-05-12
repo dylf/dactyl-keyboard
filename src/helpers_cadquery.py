@@ -488,3 +488,28 @@ def build_holder(pcb):
 
 def get_holder():
     return build_holder(pcb_v2)
+
+
+def puck_plate():
+    offset = 19.55
+    border = 5
+    border_half = border / 2
+    width = offset * 5
+    height = offset * 4
+
+    # plate = box(width, height, 2)
+
+    plate_bottom = wp().sketch().rect(width, height).edges().fillet(15)
+    plate = plate_bottom.workplane(offset=3).sketch().rect(width / 3, height / 3).fillet(5).loft()
+
+    holes = [
+        [offset, 0, 0],
+        [0, offset, 0],
+        [-offset, 0, 0],
+        [0, -offset, 0]
+    ]
+
+    plate = plate.edges("|Z").fillet(15)
+    # plate = plate.edges(">Y").chamfer(1)
+    plate = plate.faces(">Z").workplane().rect(38.1, 38.1, forConstruction=True).vertices().cboreHole(2.2, 3, 1.5, 3)
+    return plate
